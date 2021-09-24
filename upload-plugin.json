@@ -1,0 +1,13 @@
+{
+  "plugin": {
+    "summary": {
+      "description": "Resize, crop, transcode and downsample images.",
+      "icon": "ImageCrop"
+    },
+    "parameters": {
+      "schema": {},
+      "ui": {}
+    }
+  },
+  "templates": {}
+}

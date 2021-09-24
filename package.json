@@ -1,0 +1,89 @@
+{
+  "name": "upload-image-plugin",
+  "version": "1.0.0",
+  "author": "Upload <hello@upload.io> (https://upload.io)",
+  "description": "Resize, crop, transcode and downsample images.",
+  "license": "MIT",
+  "main": "dist/main.js",
+  "homepage": "https://github.com/upload-io/upload-image-plugin",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/upload-io/upload-image-plugin.git"
+  },
+  "bugs": {
+    "url": "https://github.com/upload-io/upload-image-plugin/issues"
+  },
+  "scripts": {
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
+    "typecheck": "tsc --noEmit",
+    "prepack": "rm -rf dist && webpack",
+    "test": "jest",
+    "generateSchema": "typescript-json-schema 'src/types/**/*' Params --defaultNumberType integer --desctitles --propOrder --required --out .upload/schema.json"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*/**/*.{js,jsx,ts,tsx}": [
+      "eslint"
+    ],
+    "src/types/**/*.{ts,tsx}": [
+      "bash -c \"npm run generateSchema\""
+    ],
+    "*/**/*.{js,jsx,ts,tsx,test}": [
+      "bash -c \"npm run test\""
+    ],
+    "*/**/*.{ts,tsx}": [
+      "bash -c \"tsc --noEmit\""
+    ],
+    "*.{js,jsx,ts,tsx,json,css,html,md,yaml,yml}": [
+      "prettier -c"
+    ]
+  },
+  "dependencies": {
+    "archiver": "5.1.0",
+    "bluebird": "3.7.2",
+    "decompress": "4.2.0",
+    "decompress-bzip2": "4.0.0",
+    "decompress-gz": "0.0.1",
+    "decompress-tar": "4.1.1",
+    "decompress-tarbz2": "4.1.1",
+    "decompress-targz": "4.1.1",
+    "decompress-unzip": "4.0.1",
+    "mime-db": "1.45.0",
+    "upload-plugin-sdk": "2.3.0"
+  },
+  "devDependencies": {
+    "@babel/cli": "7.11.6",
+    "@babel/core": "7.11.6",
+    "@babel/preset-env": "7.11.5",
+    "@types/archiver": "5.1.0",
+    "@types/bluebird": "3.5.33",
+    "@types/decompress": "4.2.4",
+    "@types/jest": "26.0.15",
+    "@types/mime-db": "1.43.0",
+    "@types/node": "14.14.10",
+    "@typescript-eslint/eslint-plugin": "4.8.1",
+    "@typescript-eslint/parser": "4.8.1",
+    "@upload-io/typescript-json-schema": "0.46.0",
+    "babel-loader": "8.2.1",
+    "eslint": "7.13.0",
+    "eslint-config-prettier": "6.15.0",
+    "eslint-config-standard-with-typescript": "19.0.1",
+    "eslint-plugin-import": "2.22.1",
+    "eslint-plugin-node": "11.1.0",
+    "eslint-plugin-promise": "4.2.1",
+    "eslint-plugin-standard": "4.1.0",
+    "husky": "4.3.0",
+    "jest": "26.6.3",
+    "lint-staged": "10.5.1",
+    "prettier": "2.1.2",
+    "ts-jest": "26.4.4",
+    "ts-loader": "8.0.11",
+    "typescript": "4.1.2",
+    "webpack": "5.5.1",
+    "webpack-cli": "4.2.0"
+  }
+}
