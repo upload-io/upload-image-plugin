@@ -1,4 +1,16 @@
-/* eslint @typescript-eslint/member-ordering: 0 */
+import { ImagePipelineStep } from "upload-image-plugin/types/ImagePipelineStep";
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface Params {}
+export interface Params {
+  /**
+   * Output path
+   * @example "/"
+   * @pattern ^/.*$
+   */
+  output: string;
+
+  /**
+   * Steps
+   * @minItems 1
+   */
+  steps: ImagePipelineStep[];
+}

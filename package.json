@@ -18,7 +18,7 @@
     "typecheck": "tsc --noEmit",
     "prepack": "rm -rf dist && webpack",
     "test": "jest",
-    "generateSchema": "typescript-json-schema 'src/types/**/*' Params --defaultNumberType integer --desctitles --propOrder --required --out .upload/schema.json"
+    "generateSchema": "typescript-json-schema tsconfig.json Params --include 'src/types/*' --defaultNumberType integer --desctitles --required --strictNullChecks --refs true --noExtraProps"
   },
   "husky": {
     "hooks": {
@@ -69,7 +69,7 @@
     "@types/node": "14.14.10",
     "@typescript-eslint/eslint-plugin": "4.8.1",
     "@typescript-eslint/parser": "4.8.1",
-    "@upload-io/typescript-json-schema": "0.46.0",
+    "@upload-io/typescript-json-schema": "0.51.0",
     "babel-loader": "8.2.1",
     "eslint": "7.13.0",
     "eslint-config-prettier": "6.15.0",
