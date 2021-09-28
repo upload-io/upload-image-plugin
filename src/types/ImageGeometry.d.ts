@@ -1,7 +1,10 @@
 /**
  * Image size with optional offset.
  */
-export type ImageGeometry = ImageSize | ImageSizeWithOffset;
+export interface ImageGeometry {
+  offset?: ImageOffset;
+  size: ImageSize;
+}
 
 /**
  * Image size.
@@ -18,14 +21,6 @@ export type ImageSize =
   | ImageSizeWidthHeightEnlarge
   | ImageSizeArea
   | ImageSizeAspectRatio;
-
-/**
- * Image size with a pixel offset.
- */
-export interface ImageSizeWithOffset {
-  offset: ImageOffset;
-  size: ImageSize;
-}
 
 /**
  * Pixel offset.

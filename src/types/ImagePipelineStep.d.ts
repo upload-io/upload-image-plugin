@@ -1,8 +1,8 @@
 import { ImageGeometry } from "upload-image-plugin/types/ImageGeometry";
 
-export type ImagePipelineStep = ResizeStep
+export type ImagePipelineStep = ResizeStep;
 
-interface ResizeStep {
-  geometry: ImageGeometry
-  type: "resize",
+export interface ResizeStep {
+  geometry: ImageGeometry;
+  type: "resize";
 }

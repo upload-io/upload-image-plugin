@@ -9,280 +9,12 @@
         "$schema": "http://json-schema.org/draft-07/schema#",
         "additionalProperties": false,
         "definitions": {
-          "ImageOffset": {
-            "additionalProperties": false,
-            "properties": {
-              "x": {
-                "type": "integer"
-              },
-              "y": {
-                "type": "integer"
-              }
-            },
-            "required": [
-              "x",
-              "y"
-            ],
-            "title": "Pixel offset.",
-            "type": "object"
-          },
-          "ImageSizeArea": {
-            "additionalProperties": false,
-            "properties": {
-              "area": {
-                "type": "integer"
-              },
-              "type": {
-                "enum": [
-                  "area@"
-                ],
-                "type": "string"
-              }
-            },
-            "required": [
-              "area",
-              "type"
-            ],
-            "title": "Resize image to have specified area in pixels. Aspect ratio is preserved.",
-            "type": "object"
-          },
-          "ImageSizeAspectRatio": {
-            "additionalProperties": false,
-            "properties": {
-              "area": {
-                "type": "integer"
-              },
-              "type": {
-                "enum": [
-                  "x:y"
-                ],
-                "type": "string"
-              },
-              "x": {
-                "type": "integer"
-              },
-              "y": {
-                "type": "integer"
-              }
-            },
-            "required": [
-              "area",
-              "type",
-              "x",
-              "y"
-            ],
-            "title": "Aspect ratio (e.g. 3:2 = 1.5).",
-            "type": "object"
-          },
-          "ImageSizeHeight": {
-            "additionalProperties": false,
-            "properties": {
-              "height": {
-                "type": "integer"
-              },
-              "type": {
-                "enum": [
-                  "xheight"
-                ],
-                "type": "string"
-              }
-            },
-            "required": [
-              "height",
-              "type"
-            ],
-            "title": "Height given, width automagically selected to preserve aspect ratio.",
-            "type": "object"
-          },
-          "ImageSizeMaxWidthHeight": {
-            "additionalProperties": false,
-            "properties": {
-              "height": {
-                "type": "integer"
-              },
-              "type": {
-                "enum": [
-                  "widthxheight!"
-                ],
-                "type": "string"
-              },
-              "width": {
-                "type": "integer"
-              }
-            },
-            "required": [
-              "height",
-              "type",
-              "width"
-            ],
-            "title": "Maximum values of height and width given, aspect ratio preserved.",
-            "type": "object"
-          },
-          "ImageSizeMinWidthHeight": {
-            "additionalProperties": false,
-            "properties": {
-              "height": {
-                "type": "integer"
-              },
-              "type": {
-                "enum": [
-                  "widthxheight^"
-                ],
-                "type": "string"
-              },
-              "width": {
-                "type": "integer"
-              }
-            },
-            "required": [
-              "height",
-              "type",
-              "width"
-            ],
-            "title": "Minimum values of width and height given, aspect ratio preserved.",
-            "type": "object"
-          },
-          "ImageSizeScale": {
-            "additionalProperties": false,
-            "properties": {
-              "scale": {
-                "type": "integer"
-              },
-              "type": {
-                "enum": [
-                  "scale%"
-                ],
-                "type": "string"
-              }
-            },
-            "required": [
-              "scale",
-              "type"
-            ],
-            "title": "Height and width both scaled by specified percentage.",
-            "type": "object"
-          },
-          "ImageSizeScaleXY": {
-            "additionalProperties": false,
-            "properties": {
-              "scaleX": {
-                "type": "integer"
-              },
-              "scaleY": {
-                "type": "integer"
-              },
-              "type": {
-                "enum": [
-                  "scale-x%xscale-y%"
-                ],
-                "type": "string"
-              }
-            },
-            "required": [
-              "scaleX",
-              "scaleY",
-              "type"
-            ],
-            "title": "Height and width individually scaled by specified percentages.",
-            "type": "object"
-          },
-          "ImageSizeWidth": {
-            "additionalProperties": false,
-            "properties": {
-              "type": {
-                "enum": [
-                  "width"
-                ],
-                "type": "string"
-              },
-              "width": {
-                "type": "integer"
-              }
-            },
-            "required": [
-              "type",
-              "width"
-            ],
-            "title": "Width given, height automagically selected to preserve aspect ratio.",
-            "type": "object"
-          },
-          "ImageSizeWidthHeight": {
-            "additionalProperties": false,
-            "properties": {
-              "height": {
-                "type": "integer"
-              },
-              "type": {
-                "enum": [
-                  "widthxheight"
-                ],
-                "type": "string"
-              },
-              "width": {
-                "type": "integer"
-              }
-            },
-            "required": [
-              "height",
-              "type",
-              "width"
-            ],
-            "title": "Width and height emphatically given, original aspect ratio ignored.",
-            "type": "object"
-          },
-          "ImageSizeWidthHeightEnlarge": {
-            "additionalProperties": false,
-            "properties": {
-              "height": {
-                "type": "integer"
-              },
-              "type": {
-                "enum": [
-                  "widthxheight<"
-                ],
-                "type": "string"
-              },
-              "width": {
-                "type": "integer"
-              }
-            },
-            "required": [
-              "height",
-              "type",
-              "width"
-            ],
-            "title": "Enlarges an image with dimension(s) smaller than the corresponding width and/or height argument(s).",
-            "type": "object"
-          },
-          "ImageSizeWidthHeightShrink": {
-            "additionalProperties": false,
-            "properties": {
-              "height": {
-                "type": "integer"
-              },
-              "type": {
-                "enum": [
-                  "widthxheight>"
-                ],
-                "type": "string"
-              },
-              "width": {
-                "type": "integer"
-              }
-            },
-            "required": [
-              "height",
-              "type",
-              "width"
-            ],
-            "title": "Shrinks an image with dimension(s) larger than the corresponding width and/or height argument(s).",
-            "type": "object"
-          },
-          "ImageSizeWithOffset": {
+          "ImageGeometry": {
             "additionalProperties": false,
             "properties": {
               "offset": {
-                "$ref": "#/definitions/ImageOffset"
+                "$ref": "#/definitions/ImageOffset",
+                "title": "Pixel offset."
               },
               "size": {
                 "anyOf": [
@@ -323,74 +55,236 @@
                 "title": "Image size."
               }
             },
-            "required": [
-              "offset",
-              "size"
-            ],
-            "title": "Image size with a pixel offset.",
+            "required": ["size"],
+            "title": "Image size with optional offset.",
+            "type": "object"
+          },
+          "ImageOffset": {
+            "additionalProperties": false,
+            "properties": {
+              "x": {
+                "type": "integer"
+              },
+              "y": {
+                "type": "integer"
+              }
+            },
+            "required": ["x", "y"],
+            "title": "Pixel offset.",
+            "type": "object"
+          },
+          "ImageSizeArea": {
+            "additionalProperties": false,
+            "properties": {
+              "area": {
+                "type": "integer"
+              },
+              "type": {
+                "enum": ["area@"],
+                "type": "string"
+              }
+            },
+            "required": ["area", "type"],
+            "title": "Resize image to have specified area in pixels. Aspect ratio is preserved.",
+            "type": "object"
+          },
+          "ImageSizeAspectRatio": {
+            "additionalProperties": false,
+            "properties": {
+              "area": {
+                "type": "integer"
+              },
+              "type": {
+                "enum": ["x:y"],
+                "type": "string"
+              },
+              "x": {
+                "type": "integer"
+              },
+              "y": {
+                "type": "integer"
+              }
+            },
+            "required": ["area", "type", "x", "y"],
+            "title": "Aspect ratio (e.g. 3:2 = 1.5).",
+            "type": "object"
+          },
+          "ImageSizeHeight": {
+            "additionalProperties": false,
+            "properties": {
+              "height": {
+                "type": "integer"
+              },
+              "type": {
+                "enum": ["xheight"],
+                "type": "string"
+              }
+            },
+            "required": ["height", "type"],
+            "title": "Height given, width automagically selected to preserve aspect ratio.",
+            "type": "object"
+          },
+          "ImageSizeMaxWidthHeight": {
+            "additionalProperties": false,
+            "properties": {
+              "height": {
+                "type": "integer"
+              },
+              "type": {
+                "enum": ["widthxheight!"],
+                "type": "string"
+              },
+              "width": {
+                "type": "integer"
+              }
+            },
+            "required": ["height", "type", "width"],
+            "title": "Maximum values of height and width given, aspect ratio preserved.",
+            "type": "object"
+          },
+          "ImageSizeMinWidthHeight": {
+            "additionalProperties": false,
+            "properties": {
+              "height": {
+                "type": "integer"
+              },
+              "type": {
+                "enum": ["widthxheight^"],
+                "type": "string"
+              },
+              "width": {
+                "type": "integer"
+              }
+            },
+            "required": ["height", "type", "width"],
+            "title": "Minimum values of width and height given, aspect ratio preserved.",
+            "type": "object"
+          },
+          "ImageSizeScale": {
+            "additionalProperties": false,
+            "properties": {
+              "scale": {
+                "type": "integer"
+              },
+              "type": {
+                "enum": ["scale%"],
+                "type": "string"
+              }
+            },
+            "required": ["scale", "type"],
+            "title": "Height and width both scaled by specified percentage.",
+            "type": "object"
+          },
+          "ImageSizeScaleXY": {
+            "additionalProperties": false,
+            "properties": {
+              "scaleX": {
+                "type": "integer"
+              },
+              "scaleY": {
+                "type": "integer"
+              },
+              "type": {
+                "enum": ["scale-x%xscale-y%"],
+                "type": "string"
+              }
+            },
+            "required": ["scaleX", "scaleY", "type"],
+            "title": "Height and width individually scaled by specified percentages.",
+            "type": "object"
+          },
+          "ImageSizeWidth": {
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "enum": ["width"],
+                "type": "string"
+              },
+              "width": {
+                "type": "integer"
+              }
+            },
+            "required": ["type", "width"],
+            "title": "Width given, height automagically selected to preserve aspect ratio.",
+            "type": "object"
+          },
+          "ImageSizeWidthHeight": {
+            "additionalProperties": false,
+            "properties": {
+              "height": {
+                "type": "integer"
+              },
+              "type": {
+                "enum": ["widthxheight"],
+                "type": "string"
+              },
+              "width": {
+                "type": "integer"
+              }
+            },
+            "required": ["height", "type", "width"],
+            "title": "Width and height emphatically given, original aspect ratio ignored.",
+            "type": "object"
+          },
+          "ImageSizeWidthHeightEnlarge": {
+            "additionalProperties": false,
+            "properties": {
+              "height": {
+                "type": "integer"
+              },
+              "type": {
+                "enum": ["widthxheight<"],
+                "type": "string"
+              },
+              "width": {
+                "type": "integer"
+              }
+            },
+            "required": ["height", "type", "width"],
+            "title": "Enlarges an image with dimension(s) smaller than the corresponding width and/or height argument(s).",
+            "type": "object"
+          },
+          "ImageSizeWidthHeightShrink": {
+            "additionalProperties": false,
+            "properties": {
+              "height": {
+                "type": "integer"
+              },
+              "type": {
+                "enum": ["widthxheight>"],
+                "type": "string"
+              },
+              "width": {
+                "type": "integer"
+              }
+            },
+            "required": ["height", "type", "width"],
+            "title": "Shrinks an image with dimension(s) larger than the corresponding width and/or height argument(s).",
             "type": "object"
           },
           "ResizeStep": {
             "additionalProperties": false,
             "properties": {
               "geometry": {
-                "anyOf": [
-                  {
-                    "$ref": "#/definitions/ImageSizeScale"
-                  },
-                  {
-                    "$ref": "#/definitions/ImageSizeScaleXY"
-                  },
-                  {
-                    "$ref": "#/definitions/ImageSizeWidth"
-                  },
-                  {
-                    "$ref": "#/definitions/ImageSizeHeight"
-                  },
-                  {
-                    "$ref": "#/definitions/ImageSizeWidthHeight"
-                  },
-                  {
-                    "$ref": "#/definitions/ImageSizeMinWidthHeight"
-                  },
-                  {
-                    "$ref": "#/definitions/ImageSizeMaxWidthHeight"
-                  },
-                  {
-                    "$ref": "#/definitions/ImageSizeWidthHeightShrink"
-                  },
-                  {
-                    "$ref": "#/definitions/ImageSizeWidthHeightEnlarge"
-                  },
-                  {
-                    "$ref": "#/definitions/ImageSizeArea"
-                  },
-                  {
-                    "$ref": "#/definitions/ImageSizeAspectRatio"
-                  },
-                  {
-                    "$ref": "#/definitions/ImageSizeWithOffset"
-                  }
-                ],
-                "title": "Image size with optional offset."
+                "$ref": "#/definitions/ImageGeometry"
               },
               "type": {
-                "enum": [
-                  "resize"
-                ],
+                "enum": ["resize"],
                 "type": "string"
               }
             },
-            "required": [
-              "geometry",
-              "type"
-            ],
+            "required": ["geometry", "type"],
             "type": "object"
           }
         },
         "properties": {
+          "input": {
+            "pattern": "^/(?:((?!\\.*[/\\\\]).)((?![/\\\\]\\.*[/\\\\]).)*)?$",
+            "title": "Input path",
+            "type": "string"
+          },
           "output": {
-            "pattern": "^/.*$",
+            "pattern": "^/(?:((?!\\.*[/\\\\]).)((?![/\\\\]\\.*[/\\\\]).)*)?$",
             "title": "Output path",
             "type": "string"
           },
@@ -403,10 +297,7 @@
             "type": "array"
           }
         },
-        "required": [
-          "output",
-          "steps"
-        ],
+        "required": ["input", "output", "steps"],
         "type": "object"
       },
       "ui": {}
