@@ -11,11 +11,6 @@ MOUNTS = -v $(PROJECT_ROOT):/var/task \
 
 DOCKER = docker run -it --rm -w=/var/task/build
 
-bin/magick: result/bin/magick bin
-	cp result/bin/magick bin/magick
-
-result/bin/magick: all
-
 all: docker-build result
 	$(DOCKER) $(MOUNTS) --entrypoint /usr/bin/make -t $(DOCKER_IMAGE) TARGET_DIR=$(TARGET) -f ../Makefile_ImageMagick $@
 

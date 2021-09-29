@@ -9,12 +9,13 @@ import path from "path";
 
 export class Transformer {
   private readonly imageMagickPath: string;
+  private readonly imageMagicHomeDir: string;
 
   constructor() {
     const isMacOS = os.platform() === "darwin";
-    this.imageMagickPath = isMacOS
-      ? "/usr/local/bin/magick"
-      : path.resolve(__dirname, "../.bin/image-magick/bin/magick");
+    const homeDir = path.resolve(__dirname, "../.bin/image-magick/result/");
+    this.imageMagickPath = isMacOS ? "/usr/local/bin/magick" : path.resolve(homeDir, "bin/magick");
+    this.imageMagicHomeDir = isMacOS ? "" : homeDir;
   }
 
   async run(
@@ -25,17 +26,22 @@ export class Transformer {
   ): Promise<void> {
     await new Promise<void>((resolve, reject) => {
       log("Transforming image...");
-      execFile(this.imageMagickPath, this.makeArgs(params, resolvePath), (error, stdout, stderr) => {
-        console.log(stdout);
-        console.error(stderr);
-        if (error !== null) {
-          log("Failed to transform image.");
-          reject(error);
-        } else {
-          log("Image transformed.");
-          resolve();
+      execFile(
+        this.imageMagickPath,
+        this.makeArgs(params, resolvePath),
+        { env: { MAGICK_HOME: this.imageMagicHomeDir } },
+        (error, stdout, stderr) => {
+          console.log(stdout);
+          console.error(stderr);
+          if (error !== null) {
+            log("Failed to transform image.");
+            reject(error);
+          } else {
+            log("Image transformed.");
+            resolve();
+          }
         }
-      });
+      );
     });
   }
 

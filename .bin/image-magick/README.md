@@ -1,7 +1,14 @@
 # ImageMagick Manual Build
 
-This folder builds an ImageMagick binary that runs on Amazon Linux 2. The only dependencies on shared libraries are
-those that come preinstalled on Amazon Linux 2: the rest are statically built into the binary.
+Creates an "uninstalled" and "static" build of ImageMagick:
+
+- uninstalled builds do not have their location hard-coded or set by an installer, and instead rely on the `MAGICK_HOME`
+  environment variable to inform ImageMagick where it's currently running.
+
+- static builds have all "delegate libraries" built into them, rather than requiring them as shared libraries provided
+  by the operating system.
+
+We build against Amazon Linux 2.
 
 ## Instructions
 

@@ -32,7 +32,6 @@ dist/
 
 # ImageMagick Build
 .bin/image-magick/build
-.bin/image-magick/result
 
 # Webpack directories
 .webpack

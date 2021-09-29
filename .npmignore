@@ -2,4 +2,3 @@ tests/assets
 .tmp/
 .github
 .bin/image-magick/build
-.bin/image-magick/result
