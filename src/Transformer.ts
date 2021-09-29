@@ -12,7 +12,9 @@ export class Transformer {
 
   constructor() {
     const isMacOS = os.platform() === "darwin";
-    this.imageMagickPath = isMacOS ? "/usr/local/bin/magick" : path.resolve(__dirname, "../.bin/magick");
+    this.imageMagickPath = isMacOS
+      ? "/usr/local/bin/magick"
+      : path.resolve(__dirname, "../.bin/image-magick/bin/magick");
   }
 
   async run(

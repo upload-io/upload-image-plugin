@@ -1,4 +1,4 @@
 # syntax=docker/dockerfile:1
-FROM lambci/lambda-base-2:build
+FROM amazonlinux:2
 
-RUN yum -y install dos2unix
+RUN yum -y install dos2unix wget tar gzip xz gcc gcc-c++ cmake make automake libtool
