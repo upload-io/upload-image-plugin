@@ -46,7 +46,15 @@ export class Transformer {
   }
 
   private makeArgs(params: Params, resolve: LocalFileResolver): string[] {
-    return [resolve(params.input), ...this.makeTransformationArgs(params.steps), resolve(params.output)];
+    return [
+      resolve(params.input),
+      ...this.makeTransformationArgs(params.steps),
+      `${this.makeOutputFormat(params)}${resolve(params.output)}`
+    ];
+  }
+
+  private makeOutputFormat(params: Params): string {
+    return params.outputFormat === undefined ? "" : `${params.outputFormat}:`;
   }
 
   private makeTransformationArgs(steps: ImagePipelineStep[]): string[] {

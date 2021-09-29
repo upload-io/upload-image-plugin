@@ -1,5 +1,6 @@
 import { ImagePipelineStep } from "upload-image-plugin/types/ImagePipelineStep";
 import { TransformationArtifactPath } from "upload-image-plugin/types/TransformationArtifactPath";
+import { OutputImageFormat } from "upload-image-plugin/types/OutputImageFormat";
 
 export interface Params {
   /**
@@ -13,6 +14,11 @@ export interface Params {
    * @example "/"
    */
   output: TransformationArtifactPath;
+
+  /**
+   * Output format
+   */
+  outputFormat: OutputImageFormat;
 
   /**
    * Steps
