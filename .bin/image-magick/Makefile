@@ -3,25 +3,20 @@
 #
 PROJECT_ROOT = $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 
-DOCKER_IMAGE ?= uploadio/upload-image-plugin-magick-builder:latest
-TARGET ?=/opt/
+DOCKER_IMAGE = uploadio/upload-image-plugin-magick-builder:latest
 
-MOUNTS = -v $(PROJECT_ROOT):/var/task \
-	-v $(PROJECT_ROOT)result:$(TARGET)
+MOUNTS = -v $(PROJECT_ROOT):/var/task
 
 DOCKER = docker run -it --rm -w=/var/task/build
 
-all: docker-build result
-	$(DOCKER) $(MOUNTS) --entrypoint /usr/bin/make -t $(DOCKER_IMAGE) TARGET_DIR=$(TARGET) -f ../Makefile_ImageMagick $@
+all: docker-build
+	$(DOCKER) $(MOUNTS) --entrypoint /usr/bin/make -t $(DOCKER_IMAGE) -f ../Makefile_ImageMagick $@
 
-bash: docker-build result
+bash: docker-build
 	$(DOCKER) $(MOUNTS) --entrypoint /bin/bash -t $(DOCKER_IMAGE)
 
 docker-build:
 	docker build -t $(DOCKER_IMAGE) .
 
-build result bin:
-	mkdir $@
-
 clean:
-	rm -rf build result bin
+	rm -rf build result

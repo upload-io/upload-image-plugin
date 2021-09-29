@@ -1,8 +1,8 @@
-prefix=/opt
+prefix=/var/task/result
 exec_prefix=${prefix}
 libdir=${exec_prefix}/lib
 includedir=${prefix}/include/ImageMagick-7
-includearchdir=/opt/include/ImageMagick-7
+includearchdir=/var/task/result/include/ImageMagick-7
 libname=MagickCore-7.Q16HDRI
 moduledir=${exec_prefix}/lib/ImageMagick-7.0.8/modules-Q16HDRI
  
@@ -12,4 +12,4 @@ URL: https://github.com/ImageMagick
 Version: 7.0.8
 Cflags: -I${includearchdir} -I${includedir} -DMAGICKCORE_HDRI_ENABLE=1 -DMAGICKCORE_QUANTUM_DEPTH=16
 Libs: -L${libdir} -l${libname}
-Libs.private: -L${libdir} -l${libname}    -ltiff   -ljpeg                    -lbz2             -lm      -lm
+Libs.private: -L${libdir} -l${libname}    -ltiff   -ljpeg   -L/var/task/build/cache/lib -lpng16 -lz           -L/var/task/build/cache/lib -lwebp          -lbz2  -L/var/task/build/cache/lib -lopenjp2        -lz       -lm      -lm

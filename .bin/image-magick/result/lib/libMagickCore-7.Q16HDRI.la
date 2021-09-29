@@ -17,7 +17,7 @@ old_library='libMagickCore-7.Q16HDRI.a'
 inherited_linker_flags=' -pthread'
 
 # Libraries that this one depends upon.
-dependency_libs=' -L/var/task/build/cache/lib /var/task/build/cache/lib/libtiff.la /var/task/build/cache/lib/libjpeg.la -lbz2 -lm'
+dependency_libs=' -L/var/task/build/cache/lib /var/task/build/cache/lib/libtiff.la /var/task/build/cache/lib/libjpeg.la /var/task/build/cache/lib/libpng16.la /var/task/build/cache/lib/libwebp.la -lbz2 -lopenjp2 -lz -lm'
 
 # Names of additional weak libraries provided by this library
 weak_library_names=''
@@ -38,4 +38,4 @@ dlopen=''
 dlpreopen=''
 
 # Directory that this library needs to be installed in:
-libdir='/opt/lib'
+libdir='/var/task/result/lib'

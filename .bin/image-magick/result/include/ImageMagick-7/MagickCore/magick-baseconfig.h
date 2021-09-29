@@ -37,7 +37,7 @@
 
 /* Directory where architecture-dependent configuration files live. */
 #ifndef MAGICKCORE_CONFIGURE_PATH
-#define MAGICKCORE_CONFIGURE_PATH "/opt/etc/ImageMagick-7/"
+#define MAGICKCORE_CONFIGURE_PATH "/var/task/result/etc/ImageMagick-7/"
 #endif
 
 /* Subdirectory of lib where architecture-dependent configuration files live.
@@ -51,7 +51,7 @@
 
 /* Directory where ImageMagick documents live. */
 #ifndef MAGICKCORE_DOCUMENTATION_PATH
-#define MAGICKCORE_DOCUMENTATION_PATH "/opt/share/doc/ImageMagick-7/"
+#define MAGICKCORE_DOCUMENTATION_PATH "/var/task/result/share/doc/ImageMagick-7/"
 #endif
 
 /* Define if you have Display Postscript */
@@ -62,7 +62,7 @@
 
 /* Directory where executables are installed. */
 #ifndef MAGICKCORE_EXECUTABLE_PATH
-#define MAGICKCORE_EXECUTABLE_PATH "/opt/bin/"
+#define MAGICKCORE_EXECUTABLE_PATH "/var/task/result/bin/"
 #endif
 
 /* Define if you have FFTW library */
@@ -1086,12 +1086,12 @@
 
 /* Directory where ImageMagick architecture headers live. */
 #ifndef MAGICKCORE_INCLUDEARCH_PATH
-#define MAGICKCORE_INCLUDEARCH_PATH "/opt/include/ImageMagick-7/"
+#define MAGICKCORE_INCLUDEARCH_PATH "/var/task/result/include/ImageMagick-7/"
 #endif
 
 /* Directory where ImageMagick headers live. */
 #ifndef MAGICKCORE_INCLUDE_PATH
-#define MAGICKCORE_INCLUDE_PATH "/opt/include/ImageMagick-7/"
+#define MAGICKCORE_INCLUDE_PATH "/var/task/result/include/ImageMagick-7/"
 #endif
 
 /* ImageMagick is formally installed under prefix */
@@ -1109,11 +1109,13 @@
 /* #undef LCMS_DELEGATE */
 
 /* Define if you have OPENJP2 library */
-/* #undef LIBOPENJP2_DELEGATE */
+#ifndef MAGICKCORE_LIBOPENJP2_DELEGATE
+#define MAGICKCORE_LIBOPENJP2_DELEGATE 1
+#endif
 
 /* Directory where architecture-dependent files live. */
 #ifndef MAGICKCORE_LIBRARY_PATH
-#define MAGICKCORE_LIBRARY_PATH "/opt/lib/ImageMagick-7.0.8/"
+#define MAGICKCORE_LIBRARY_PATH "/var/task/result/lib/ImageMagick-7.0.8/"
 #endif
 
 /* Subdirectory of lib where ImageMagick architecture dependent files are
@@ -1229,7 +1231,9 @@
 /* #undef PIPES_SUPPORT */
 
 /* Define if you have PNG library */
-/* #undef PNG_DELEGATE */
+#ifndef MAGICKCORE_PNG_DELEGATE
+#define MAGICKCORE_PNG_DELEGATE 1
+#endif
 
 /* Define to necessary symbol if this constant uses a non-standard name on
    your system. */
@@ -1282,7 +1286,7 @@
 
 /* Directory where architecture-independent configuration files live. */
 #ifndef MAGICKCORE_SHARE_PATH
-#define MAGICKCORE_SHARE_PATH "/opt/share/ImageMagick-7/"
+#define MAGICKCORE_SHARE_PATH "/var/task/result/share/ImageMagick-7/"
 #endif
 
 /* Subdirectory of lib where architecture-independent configuration files
@@ -1438,7 +1442,9 @@
 /* #undef WEBPMUX_DELEGATE */
 
 /* Define if you have WEBP library */
-/* #undef WEBP_DELEGATE */
+#ifndef MAGICKCORE_WEBP_DELEGATE
+#define MAGICKCORE_WEBP_DELEGATE 1
+#endif
 
 /* Define to use the Windows GDI32 library */
 /* #undef WINGDI32_DELEGATE */
@@ -1481,7 +1487,9 @@
 /* #undef ZERO_CONFIGURATION_SUPPORT */
 
 /* Define if you have ZLIB library */
-/* #undef ZLIB_DELEGATE */
+#ifndef MAGICKCORE_ZLIB_DELEGATE
+#define MAGICKCORE_ZLIB_DELEGATE 1
+#endif
 
 /* Define if you have ZSTD library */
 /* #undef ZSTD_DELEGATE */

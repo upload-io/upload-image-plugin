@@ -4,7 +4,7 @@
 # required to use the MagickCore library.
 #
 
-prefix=/opt
+prefix=/var/task/result
 exec_prefix=${prefix}
 
 usage="\
@@ -38,25 +38,25 @@ while test $# -gt 0; do
       echo '7.0.8 Q16 HDRI'
       ;;
     --cflags)
-       --cflags MagickCore
+      /usr/bin/pkg-config --cflags MagickCore
       ;;
     --cxxflags)
-       --cflags MagickCore
+      /usr/bin/pkg-config --cflags MagickCore
       ;;
     --cppflags)
-       --cflags MagickCore
+      /usr/bin/pkg-config --cflags MagickCore
       ;;
     --ldflags)
-       --libs MagickCore
+      /usr/bin/pkg-config --libs MagickCore
       ;;
     --libs)
-       --libs MagickCore
+      /usr/bin/pkg-config --libs MagickCore
       ;;
     --coder-path)
-      echo "/opt/lib/ImageMagick-7.0.8/modules-Q16HDRI/coders"
+      echo "/var/task/result/lib/ImageMagick-7.0.8/modules-Q16HDRI/coders"
       ;;
     --filter-path)
-      echo "/opt/lib/ImageMagick-7.0.8/modules-Q16HDRI/filters"
+      echo "/var/task/result/lib/ImageMagick-7.0.8/modules-Q16HDRI/filters"
       ;;
     *)
       echo "${usage}" 1>&2

@@ -4,7 +4,7 @@
 # required to use the MagickWand library.
 #
 
-prefix=/opt
+prefix=/var/task/result
 exec_prefix=${prefix}
 
 usage="\
@@ -38,19 +38,19 @@ while test $# -gt 0; do
       echo '7.0.8 Q16 HDRI'
       ;;
     --cflags)
-       --cflags MagickWand
+      /usr/bin/pkg-config --cflags MagickWand
       ;;
     --cxxflags)
-       --cflags MagickWand
+      /usr/bin/pkg-config --cflags MagickWand
       ;;
     --cppflags)
-       --cflags MagickWand
+      /usr/bin/pkg-config --cflags MagickWand
       ;;
     --ldflags)
-       --libs MagickWand
+      /usr/bin/pkg-config --libs MagickWand
       ;;
     --libs)
-       --libs MagickWand
+      /usr/bin/pkg-config --libs MagickWand
       ;;
     *)
       echo "${usage}" 1>&2
