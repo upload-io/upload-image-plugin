@@ -24,22 +24,26 @@ CONFIGURE = PKG_CONFIG_PATH=$(CACHE_DIR)/lib/pkgconfig \
 		--enable-static \
 		--prefix=$(CACHE_DIR)
 
-## libjpg
+# libjpg
 
-LIBJPG_SOURCE=jpegsrc.v$(LIBJPG_VERSION).tar.gz
+LIBJPG_SOURCE=libjpeg-$(LIBJPG_VERSION).tar.gz
 
 $(LIBJPG_SOURCE):
-	curl -LO http://ijg.org/files/$(LIBJPG_SOURCE)
+	curl -LO https://github.com/winlibs/libjpeg/archive/refs/tags/$(LIBJPG_SOURCE)
 
 $(CACHE_DIR)/lib/libjpeg.a: $(LIBJPG_SOURCE)
 	tar xf $<
-	cd jpeg*
+	cd libjpeg-libjpeg-$(LIBJPG_VERSION)
+	dos2unix *
+	dos2unix -f configure
+	chmod +x configure
 	$(CONFIGURE)
+	dos2unix -f libtool
 	make
 	make install
 
 
-## libpng
+# libpng
 
 LIBPNG_SOURCE=libpng-$(LIBPNG_VERSION).tar.xz
 
@@ -95,7 +99,7 @@ $(CACHE_DIR)/lib/libwebp.a: $(LIBWEBP_SOURCE)
 	make
 	make install
 
-## libopenjp2
+# libopenjp2
 
 OPENJP2_SOURCE=openjp2-$(OPENJP2_VERSION).tar.gz
 
@@ -117,7 +121,7 @@ $(CACHE_DIR)/lib/libopenjp2.a: $(OPENJP2_SOURCE) $(CACHE_DIR)/lib/libpng.a $(CAC
 	make install
 
 
-## ImageMagick
+# ImageMagick
 
 IMAGE_MAGICK_SOURCE=ImageMagick-$(IMAGEMAGICK_VERSION).tar.gz
 
