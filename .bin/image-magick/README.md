@@ -19,7 +19,7 @@ To rebuild the `result/bin/magick` binary:
 make
 ```
 
-(Note: it takes about 10 minutes!)
+(Note: it takes about 15 minutes!)
 
 ## Credit
 
