@@ -1,18 +1,18 @@
 # ImageMagick Manual Build
 
-Creates an "uninstalled" and "static" build of ImageMagick:
+Creates a build of ImageMagick that is both "uninstalled" and "static":
 
-- uninstalled builds do not have their location hard-coded or set by an installer, and instead rely on the `MAGICK_HOME`
-  environment variable to inform ImageMagick where it's currently running.
+- Uninstalled builds resolve all external files at runtime using the `MAGICK_HOME` environment variable, rather than
+  having paths hardcoded into the binaries. (See: https://imagemagick.org/script/resources.php)
 
-- static builds have all "delegate libraries" built into them, rather than requiring them as shared libraries provided
+- Static builds have all "delegate libraries" built into them, rather than requiring them as shared libraries provided
   by the operating system.
 
-We build against Amazon Linux 2.
+This binary is built against Amazon Linux 2.
 
 ## Instructions
 
-To rebuild the `bin/magick` binary:
+To rebuild the `result/bin/magick` binary:
 
 ```shell
 make
