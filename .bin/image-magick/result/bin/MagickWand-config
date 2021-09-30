@@ -38,19 +38,19 @@ while test $# -gt 0; do
       echo '7.0.8 Q16 HDRI'
       ;;
     --cflags)
-      /usr/bin/pkg-config --cflags MagickWand
+      /usr/bin//pkg-config --cflags MagickWand
       ;;
     --cxxflags)
-      /usr/bin/pkg-config --cflags MagickWand
+      /usr/bin//pkg-config --cflags MagickWand
       ;;
     --cppflags)
-      /usr/bin/pkg-config --cflags MagickWand
+      /usr/bin//pkg-config --cflags MagickWand
       ;;
     --ldflags)
-      /usr/bin/pkg-config --libs MagickWand
+      /usr/bin//pkg-config --libs MagickWand
       ;;
     --libs)
-      /usr/bin/pkg-config --libs MagickWand
+      /usr/bin//pkg-config --libs MagickWand
       ;;
     *)
       echo "${usage}" 1>&2

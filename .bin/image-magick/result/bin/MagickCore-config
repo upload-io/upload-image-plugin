@@ -38,19 +38,19 @@ while test $# -gt 0; do
       echo '7.0.8 Q16 HDRI'
       ;;
     --cflags)
-      /usr/bin/pkg-config --cflags MagickCore
+      /usr/bin//pkg-config --cflags MagickCore
       ;;
     --cxxflags)
-      /usr/bin/pkg-config --cflags MagickCore
+      /usr/bin//pkg-config --cflags MagickCore
       ;;
     --cppflags)
-      /usr/bin/pkg-config --cflags MagickCore
+      /usr/bin//pkg-config --cflags MagickCore
       ;;
     --ldflags)
-      /usr/bin/pkg-config --libs MagickCore
+      /usr/bin//pkg-config --libs MagickCore
       ;;
     --libs)
-      /usr/bin/pkg-config --libs MagickCore
+      /usr/bin//pkg-config --libs MagickCore
       ;;
     --coder-path)
       echo "/var/task/result/lib/ImageMagick-7.0.8/modules-Q16HDRI/coders"

@@ -11,7 +11,7 @@
 -->
 <configuremap>
   <configure name="CC" value="gcc"/>
-  <configure name="CFLAGS" value="-I/var/task/build/cache/include   -I/var/task/build/cache/include/libpng16   -I/var/task/build/cache/include/openjpeg-2.3   -I/var/task/build/cache/include   -I/var/task/build/cache/include       -g -O2 -Wall -mtune=core2 -fexceptions -pthread -DMAGICKCORE_HDRI_ENABLE=1 -DMAGICKCORE_QUANTUM_DEPTH=16"/>
+  <configure name="CFLAGS" value="-I/var/task/build/cache/include   -I/var/task/build/cache/include   -I/var/task/build/cache/include/libpng16   -I/var/task/build/cache/include/openjpeg-2.4   -I/var/task/build/cache/include   -I/var/task/build/cache/include       -g -O2 -Wall -fexceptions -pthread -DMAGICKCORE_HDRI_ENABLE=1 -DMAGICKCORE_QUANTUM_DEPTH=16"/>
   <configure name="CODER_PATH" value="/var/task/result/lib/ImageMagick-7.0.8/modules-Q16HDRI/coders"/>
   <configure name="CONFIGURE_PATH" value="/var/task/result/etc/ImageMagick-7/"/>
   <configure name="CONFIGURE" value="./configure  'CPPFLAGS=-I/var/task/build/cache/include' 'LDFLAGS=-L/var/task/build/cache/lib -lstdc++' '--disable-dependency-tracking' '--disable-shared' '--enable-static' '--prefix=/var/task/result' '--enable-delegate-build' '--disable-installed' '--without-modules' '--disable-docs' '--without-magick-plus-plus' '--without-perl' '--without-x' '--disable-openmp' 'PKG_CONFIG_PATH=/var/task/build/cache/lib/pkgconfig'"/>
@@ -28,23 +28,23 @@
   <configure name="FEATURES" value="DPC HDRI Cipher"/>
   <configure name="FILTER_PATH" value="/var/task/result/lib/ImageMagick-7.0.8/modules-Q16HDRI/filters"/>
   <configure name="GIT_REVISION" value="15608:eea7cf511:20190505" />
-  <configure name="HOST" value="x86_64-pc-linux-gnu"/>
+  <configure name="HOST" value="aarch64-unknown-linux-gnu"/>
   <configure name="INCLUDE_PATH" value="/var/task/result/include/ImageMagick-7"/>
   <configure name="LDFLAGS" value="-L/var/task/result/lib -L/var/task/build/cache/lib -lstdc++"/>
   <configure name="LIBRARY_PATH" value="/var/task/result/lib/ImageMagick-7.0.8"/>
-  <configure name="LIBS" value="  -L/var/task/build/cache/lib -llcms2   -ltiff   -ljpeg   -L/var/task/build/cache/lib -lpng16 -lz         -L/var/task/build/cache/lib -lheif    -L/var/task/build/cache/lib -lwebp          -lbz2  -L/var/task/build/cache/lib -lopenjp2        -lz       -lm     "/>
+  <configure name="LIBS" value="  -L/var/task/build/cache/lib -llcms2   -ltiff   -ljpeg   -L/var/task/build/cache/lib -lpng16 -lz         -L/var/task/build/cache/lib -lheif   -L/var/task/build/cache/lib -lwebpmux -lwebp   -L/var/task/build/cache/lib -lwebp          -lbz2  -L/var/task/build/cache/lib -lopenjp2        -lz       -lm     "/>
   <configure name="LIB_VERSION_NUMBER" value="7,0,8,45"/>
   <configure name="LIB_VERSION" value="0x708"/>
   <configure name="NAME" value="ImageMagick"/>
   <configure name="PCFLAGS" value="-DMAGICKCORE_HDRI_ENABLE=1 -DMAGICKCORE_QUANTUM_DEPTH=16"/>
   <configure name="PREFIX" value="/var/task/result"/>
   <configure name="QuantumDepth" value="16"/>
-  <configure name="RELEASE_DATE" value="2021-09-29"/>
+  <configure name="RELEASE_DATE" value="2021-09-30"/>
   <configure name="SHAREARCH_PATH" value="/var/task/result/lib/ImageMagick-7.0.8/config-Q16HDRI"/>
   <configure name="SHARE_PATH" value="/var/task/result/share/ImageMagick-7"/>
-  <configure name="TARGET_CPU" value="x86_64"/>
+  <configure name="TARGET_CPU" value="aarch64"/>
   <configure name="TARGET_OS" value="linux-gnu"/>
-  <configure name="TARGET_VENDOR" value="pc"/>
+  <configure name="TARGET_VENDOR" value="unknown"/>
   <configure name="VERSION" value="7.0.8"/>
   <configure name="WEBSITE" value="https://imagemagick.org"/>
 </configuremap>

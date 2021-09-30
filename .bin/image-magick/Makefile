@@ -7,7 +7,10 @@ DOCKER_IMAGE = uploadio/upload-image-plugin-magick-builder:latest
 
 MOUNTS = -v $(PROJECT_ROOT):/var/task
 
-DOCKER = docker run -it --rm -w=/var/task/build
+# Must match the AMI we're using (Amazon Linux 2 ARM)
+PLATFORM = linux/arm64/v8
+
+DOCKER = docker run -it --rm --platform $(PLATFORM) -w=/var/task/build
 
 all: docker-build
 	$(DOCKER) $(MOUNTS) --entrypoint /usr/bin/make -t $(DOCKER_IMAGE) -f ../Makefile_ImageMagick $@
@@ -16,7 +19,7 @@ bash: docker-build
 	$(DOCKER) $(MOUNTS) --entrypoint /bin/bash -t $(DOCKER_IMAGE)
 
 docker-build:
-	docker build -t $(DOCKER_IMAGE) .
+	docker build --platform $(PLATFORM) -t $(DOCKER_IMAGE) .
 
 clean:
 	rm -rf build result

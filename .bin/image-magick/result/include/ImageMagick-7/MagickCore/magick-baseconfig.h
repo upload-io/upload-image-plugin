@@ -1159,7 +1159,7 @@
 
 /* Target Host CPU */
 #ifndef MAGICKCORE_MAGICK_TARGET_CPU
-#define MAGICKCORE_MAGICK_TARGET_CPU x86_64
+#define MAGICKCORE_MAGICK_TARGET_CPU aarch64
 #endif
 
 /* Target Host OS */
@@ -1169,7 +1169,7 @@
 
 /* Target Host Vendor */
 #ifndef MAGICKCORE_MAGICK_TARGET_VENDOR
-#define MAGICKCORE_MAGICK_TARGET_VENDOR pc
+#define MAGICKCORE_MAGICK_TARGET_VENDOR unknown
 #endif
 
 /* Module directory name without ABI part. */
@@ -1445,7 +1445,9 @@
 #endif
 
 /* Define if you have WEBPMUX library */
-/* #undef WEBPMUX_DELEGATE */
+#ifndef MAGICKCORE_WEBPMUX_DELEGATE
+#define MAGICKCORE_WEBPMUX_DELEGATE 1
+#endif
 
 /* Define if you have WEBP library */
 #ifndef MAGICKCORE_WEBP_DELEGATE

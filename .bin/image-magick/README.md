@@ -9,7 +9,7 @@ Creates a build of ImageMagick that is both "uninstalled" and "static":
 - Static builds have all "delegate libraries" built into them, rather than requiring them as shared libraries provided
   by the operating system.
 
-This binary is built against Amazon Linux 2.
+This binary is built against Amazon Linux 2, 64-bit (ARM).
 
 ## Instructions
 
@@ -19,7 +19,7 @@ To rebuild the `result/bin/magick` binary:
 make
 ```
 
-(Note: it takes about 15 minutes!)
+(Note: it takes about ~~15 minutes~~ 70 minutes since adding `--platform linux/arm64/v8`!)
 
 ## Credit
 

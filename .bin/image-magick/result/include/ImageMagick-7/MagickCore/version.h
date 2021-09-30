@@ -40,14 +40,14 @@ extern "C" {
 #    define MagickPlatform "x86"
 #  endif
 #else
-#define MagickPlatform  "x86_64"
+#define MagickPlatform  "aarch64"
 #endif
 #define MagickppLibVersionText  "7.0.8"
 #define MagickppLibVersionNumber  4:0:0
 #define MagickppLibAddendum  "-45"
 #define MagickppLibInterface  4
 #define MagickppLibMinInterface  4
-#define MagickReleaseDate  "2021-09-29"
+#define MagickReleaseDate  "2021-09-30"
 #define MagickAuthoritativeLicense  \
   "https://imagemagick.org/script/license.php"
 #define MagickAuthoritativeURL  "https://imagemagick.org"
