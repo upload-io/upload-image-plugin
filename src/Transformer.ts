@@ -6,16 +6,20 @@ import { assertUnreachable } from "upload-image-plugin/common/TypeUtils";
 import { execFile } from "child_process";
 import * as os from "os";
 import path from "path";
+import * as v8 from "v8";
 
 export class Transformer {
   private readonly imageMagickPath: string;
   private readonly imageMagicHomeDir: string;
+  private readonly imageMagickBaseArgs: string[];
 
   constructor() {
     const isMacOS = os.platform() === "darwin";
     const homeDir = path.resolve(__dirname, "../.bin/image-magick/result/");
     this.imageMagickPath = isMacOS ? "/usr/local/bin/magick" : path.resolve(homeDir, "bin/magick");
     this.imageMagicHomeDir = isMacOS ? "" : homeDir;
+    const maxHeapSizeKB = Math.ceil(v8.getHeapStatistics().heap_size_limit / 1024);
+    this.imageMagickBaseArgs = `-limit memory ${maxHeapSizeKB}KiB`.split(" ");
   }
 
   async run(
@@ -57,6 +61,7 @@ export class Transformer {
 
   private makeArgs(params: Params, resolve: LocalFileResolver): string[] {
     return [
+      ...this.imageMagickBaseArgs,
       resolve(params.input),
       ...this.makeTransformationArgs(params.steps),
       `${this.makeOutputFormat(params)}${resolve(params.output)}`
