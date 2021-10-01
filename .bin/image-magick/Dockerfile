@@ -8,14 +8,12 @@ FROM amazonlinux:2
 #
 # Originally we based these packages off an EC2 instance running 'ami-029c64b3c205e6cce' (Amazon Linux 2, 64-bit, Arm).
 # However, it lacked many of the build tools required (e.g. automake, zlib-devel, etc.), so we instead base the packages
-# off the found basing the 'lambci/lambda-base-2:build' docker image. We simply bash into it, then run the following:
+# off the 'lambci/lambda-base-2:build' docker image. We simply bash into it, then run the following to produce the list:
 #
 #    yum list installed | awk '{print $1" \\"}' | sed 's/\..* / /'
 #
-# This produces the list you see below.
-#
-# (Why not just use 'lambci/lambda-base-2:build'? Because it doesn't include an 'linux/arm64/v8' build, which we
-# require, since our EC2 instances run on ARM architectures, so ImageMagick needs to built against as such.)
+# (Q: Why not just use 'lambci/lambda-base-2:build'? A: Because it doesn't include an 'linux/arm64/v8' build, which we
+# need since our EC2 instances run on ARM architectures, so ImageMagick needs to built against as such.)
 
 #
 # Standard dependencies (see above).

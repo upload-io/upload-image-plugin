@@ -31,11 +31,19 @@ export class Transformer {
         this.makeArgs(params, resolvePath),
         { env: { MAGICK_HOME: this.imageMagicHomeDir } },
         (error, stdout, stderr) => {
-          console.log(stdout);
-          console.error(stderr);
+          if (stdout.length > 0) {
+            console.log(stdout);
+          }
+          if (stderr.length > 0) {
+            console.error(stderr);
+          }
           if (error !== null) {
-            log("Failed to transform image.");
-            reject(error);
+            log(
+              `Failed to transform image. Exit code = ${error.code ?? "?"}. Signal = ${error.signal ?? "?"}. Reason = ${
+                error.message
+              }`
+            );
+            reject(new Error(`ImageMagick failed. Exit code = ${error.code ?? "?"}. Signal = ${error.signal ?? "?"}`));
           } else {
             log("Image transformed.");
             resolve();
