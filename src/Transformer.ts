@@ -11,15 +11,15 @@ import * as v8 from "v8";
 export class Transformer {
   private readonly imageMagickPath: string;
   private readonly imageMagicHomeDir: string;
-  private readonly imageMagickBaseArgs: string[];
+  private readonly maxHeapSizeKB: number;
+  private readonly minImageMagickMemoryKB = 1024 * 10; // 10MB
 
   constructor() {
     const isMacOS = os.platform() === "darwin";
     const homeDir = path.resolve(__dirname, "../.bin/image-magick/result/");
     this.imageMagickPath = isMacOS ? "/usr/local/bin/magick" : path.resolve(homeDir, "bin/magick");
     this.imageMagicHomeDir = isMacOS ? "" : homeDir;
-    const maxHeapSizeKB = Math.ceil(v8.getHeapStatistics().heap_size_limit / 1024);
-    this.imageMagickBaseArgs = `-limit memory ${maxHeapSizeKB}KiB`.split(" ");
+    this.maxHeapSizeKB = Math.ceil(v8.getHeapStatistics().heap_size_limit / 1024);
   }
 
   async run(
@@ -28,10 +28,36 @@ export class Transformer {
     resolvePath: LocalFileResolver,
     log: Logger
   ): Promise<void> {
-    await new Promise<void>((resolve, reject) => {
-      log("Transforming image...");
+    log("Transforming image...");
+    await this.runToleratingOOM(params, resolvePath, log);
+  }
 
-      const args = this.makeArgs(params, resolvePath);
+  private async runToleratingOOM(params: Params, resolvePath: LocalFileResolver, log: Logger): Promise<void> {
+    let memory = this.maxHeapSizeKB;
+    let success = false;
+    while (!success && memory >= this.minImageMagickMemoryKB) {
+      const result = await this.tryRun(params, resolvePath, log, memory);
+      if (result === "OOM") {
+        memory = Math.ceil(memory * 0.7);
+        log(`Failed due to OOM. Retrying with ${memory}KB of memory...`);
+      } else {
+        success = true;
+      }
+    }
+
+    if (!success) {
+      throw new Error(`ImageMagick was killed, likely by the Linux OOM Killer.`);
+    }
+  }
+
+  private async tryRun(
+    params: Params,
+    resolvePath: LocalFileResolver,
+    log: Logger,
+    maxMemoryKB: number
+  ): Promise<"OOM" | undefined> {
+    return await new Promise<"OOM" | undefined>((resolve, reject) => {
+      const args = this.makeArgs(params, resolvePath, maxMemoryKB);
       log(`Using command: ${this.imageMagickPath} ${args.join(" ")}`);
 
       execFile(
@@ -47,29 +73,33 @@ export class Transformer {
           }
           if (error !== null) {
             log("Image transformation failed.");
-            reject(
-              new Error(
-                error.signal === "SIGKILL"
-                  ? `ImageMagick was killed, likely by the Linux OOM Killer.`
-                  : `ImageMagick failed. Exit code = ${error.code ?? "?"}. Signal = ${error.signal ?? "?"}.`
-              )
-            );
+            if (error.signal === "SIGKILL") {
+              resolve("OOM");
+            } else {
+              reject(
+                new Error(`ImageMagick failed. Exit code = ${error.code ?? "?"}. Signal = ${error.signal ?? "?"}.`)
+              );
+            }
           } else {
             log("Image transformed.");
-            resolve();
+            resolve(undefined);
           }
         }
       );
     });
   }
 
-  private makeArgs(params: Params, resolve: LocalFileResolver): string[] {
+  private makeArgs(params: Params, resolve: LocalFileResolver, maxMemoryKB: number): string[] {
     return [
-      ...this.imageMagickBaseArgs,
+      ...this.makeMemoryArg(maxMemoryKB),
       resolve(params.input),
       ...this.makeTransformationArgs(params.steps),
       `${this.makeOutputFormat(params)}${resolve(params.output)}`
     ];
+  }
+
+  private makeMemoryArg(maxMemoryKB: number): string[] {
+    return `-limit memory ${maxMemoryKB}KiB`.split(" ");
   }
 
   private makeOutputFormat(params: Params): string {
