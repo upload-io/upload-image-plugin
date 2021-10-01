@@ -38,12 +38,14 @@ export class Transformer {
             console.error(stderr);
           }
           if (error !== null) {
-            log(
-              `Failed to transform image. Exit code = ${error.code ?? "?"}. Signal = ${error.signal ?? "?"}. Reason = ${
-                error.message
-              }`
+            log("Image transformation failed.");
+            reject(
+              new Error(
+                error.signal === "SIGKILL"
+                  ? `ImageMagick was killed, likely by the Linux OOM Killer.`
+                  : `ImageMagick failed. Exit code = ${error.code ?? "?"}. Signal = ${error.signal ?? "?"}.`
+              )
             );
-            reject(new Error(`ImageMagick failed. Exit code = ${error.code ?? "?"}. Signal = ${error.signal ?? "?"}`));
           } else {
             log("Image transformed.");
             resolve();
