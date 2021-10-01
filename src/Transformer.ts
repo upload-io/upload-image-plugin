@@ -30,9 +30,13 @@ export class Transformer {
   ): Promise<void> {
     await new Promise<void>((resolve, reject) => {
       log("Transforming image...");
+
+      const args = this.makeArgs(params, resolvePath);
+      log(`Using command: ${this.imageMagickPath} ${args.join(" ")}`);
+
       execFile(
         this.imageMagickPath,
-        this.makeArgs(params, resolvePath),
+        args,
         { env: { MAGICK_HOME: this.imageMagicHomeDir } },
         (error, stdout, stderr) => {
           if (stdout.length > 0) {
