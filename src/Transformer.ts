@@ -3,7 +3,7 @@ import { Params } from "upload-image-plugin/types/Params";
 import { ImagePipelineStep } from "upload-image-plugin/types/ImagePipelineStep";
 import { ImageGeometry, ImageOffset, ImageSize } from "upload-image-plugin/types/ImageGeometry";
 import { assertUnreachable } from "upload-image-plugin/common/TypeUtils";
-import { spawn } from "child_process";
+import { execFile } from "child_process";
 import * as os from "os";
 import path from "path";
 import * as v8 from "v8";
@@ -58,29 +58,34 @@ export class Transformer {
   ): Promise<"OOM" | undefined> {
     return await new Promise<"OOM" | undefined>((resolve, reject) => {
       const args = this.makeArgs(params, resolvePath, maxMemoryKB);
-      const onExitEvent = "exit";
-      const onExit = (code: number | null, signal: NodeJS.Signals | null): void => {
-        if (code === 0) {
-          resolve(undefined);
-        } else if (signal === "SIGKILL") {
-          // SIGKILL is most-likely due to the Linux OOM Killer killing the process.
-          resolve("OOM");
-        } else {
-          reject(new Error(`ImageMagick failed. Exit code = ${code ?? "?"}. Signal = ${signal ?? "?"}.`));
-        }
-      };
-
       log(`Using command: ${this.imageMagickPath} ${args.join(" ")}`);
 
-      const proc = spawn(this.imageMagickPath, args, { env: { MAGICK_HOME: this.imageMagicHomeDir } });
-      proc.stdout.on("data", x => console.log(x.toString()));
-      proc.stderr.on("data", x => console.error(x.toString()));
-      proc.on("error", e => {
-        reject(e);
-        proc.kill();
-        proc.removeListener(onExitEvent, onExit);
-      });
-      proc.on(onExitEvent, onExit);
+      execFile(
+        this.imageMagickPath,
+        args,
+        { env: { MAGICK_HOME: this.imageMagicHomeDir } },
+        (error, stdout, stderr) => {
+          if (stdout.length > 0) {
+            console.log(stdout);
+          }
+          if (stderr.length > 0) {
+            console.error(stderr);
+          }
+          if (error !== null) {
+            log("Image transformation failed.");
+            if (error.signal === "SIGKILL") {
+              resolve("OOM");
+            } else {
+              reject(
+                new Error(`ImageMagick failed. Exit code = ${error.code ?? "?"}. Signal = ${error.signal ?? "?"}.`)
+              );
+            }
+          } else {
+            log("Image transformed.");
+            resolve(undefined);
+          }
+        }
+      );
     });
   }
 
