@@ -19,7 +19,8 @@ export class Transformer {
     this.imageMagickPath = isMacOS ? "/usr/local/bin/magick" : path.resolve(homeDir, "bin/magick");
     this.imageMagicHomeDir = isMacOS ? "" : homeDir;
     const maxHeapSizeKB = Math.ceil(v8.getHeapStatistics().heap_size_limit / 1024);
-    this.imageMagickBaseArgs = `-limit memory ${maxHeapSizeKB}KiB`.split(" ");
+    const imageMagickMemory = maxHeapSizeKB / 5;
+    this.imageMagickBaseArgs = `-limit memory ${imageMagickMemory}KiB`.split(" ");
   }
 
   async run(
