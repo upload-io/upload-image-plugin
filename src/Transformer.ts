@@ -13,14 +13,39 @@ export class Transformer {
   private readonly imageMagicHomeDir: string;
   private readonly imageMagickBaseArgs: string[];
 
+  /**
+   * ImageMagickMemory:V8HeapMemory Ratio.
+   *
+   * Memory for the V8 heap and ImageMagick is allocated very differently: memory allocated for the V8 heap can be
+   * fragmented, whereas ImageMagick is contiguous (so the memory is harder for the OS to find). Also, V8 heap uses mmap
+   * not malloc. ImageMagic uses malloc up to the 'memory' limit and mmap up to the 'map' limit. All this is to say: the
+   * ratio we infer as a safe amount of memory to grant ImageMagick w/o triggering the OOM killer needs to be
+   * substantially less than what's been granted for the V8 heap: the virgin (i.e. never-before-used) portion of the V8
+   * heap is far from being a proxy for the amount of contiguous memory that's available for malloc'ing by ImageMagick.
+   *
+   * Also: ideally we'd reserve part of our memory usage for ImageMagick, and part for V8 heap usage. However, we can't
+   * currently, and right now we must assume our process chain's memory is limited via cgroup to an amount equal to the
+   * V8 heap, so to ensure garbage doesn't slowly consume the entire V8 heap (thus leaving no memory left in the cgroup
+   * for ImageMagick) we GC the Node.js process after every ImageMagick call. In future, we'll allow plugins to define
+   * how much of the cgroup memory quota should be allocated to V8 heap (and consequently how much is left for
+   * ImageMagick, Buffer allocations, etc.)
+   */
+  private readonly imageMagickMemoryRatio = 0.2;
+
   constructor() {
     const isMacOS = os.platform() === "darwin";
     const homeDir = path.resolve(__dirname, "../.bin/image-magick/result/");
     this.imageMagickPath = isMacOS ? "/usr/local/bin/magick" : path.resolve(homeDir, "bin/magick");
     this.imageMagicHomeDir = isMacOS ? "" : homeDir;
-    const maxHeapSizeKB = Math.ceil(v8.getHeapStatistics().heap_size_limit / 1024);
-    const imageMagickMemory = maxHeapSizeKB / 5;
-    this.imageMagickBaseArgs = `-limit memory ${imageMagickMemory}KiB`.split(" ");
+    const kb = (bytes: number): string => `${Math.ceil(bytes / 1024)}KB`;
+    const v8HeapSizeLimitBytes = v8.getHeapStatistics().heap_size_limit;
+
+    // It's common for 'map' to be a factor (larger) than 'memory'. 'map' is memory-mapped files: the same as what
+    // the V8 heap uses (except ImageMagick will more-aggressively require contiguous memory than tolerating fragments).
+    const imMemoryBytes = v8HeapSizeLimitBytes * this.imageMagickMemoryRatio;
+    const imMemoryMapBytes = imMemoryBytes * 2;
+
+    this.imageMagickBaseArgs = `-limit memory ${kb(imMemoryBytes)} -limit map ${kb(imMemoryMapBytes)}`.split(" ");
   }
 
   async run(
@@ -29,6 +54,14 @@ export class Transformer {
     resolvePath: LocalFileResolver,
     log: Logger
   ): Promise<void> {
+    // Ensure garbage doesn't creep over our internal heap limit. We'll remove this in future (see large comment above).
+    global.gc();
+
+    // Call ImageMagick last, after the GC has been run, to better-ensure memory is available.
+    await this.runImageTransformation(params, resolvePath, log);
+  }
+
+  private async runImageTransformation(params: Params, resolvePath: LocalFileResolver, log: Logger): Promise<void> {
     await new Promise<void>((resolve, reject) => {
       log("Transforming image...");
 
