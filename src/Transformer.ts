@@ -64,16 +64,13 @@ export class Transformer {
           }
           if (error !== null) {
             log("Image transformation failed.");
-
-            if (error.signal === "SIGKILL") {
-              // Causes Upload to restart the process with lower heap, which we then use to limit ImageMagick's memory usage.
-              console.error("ImageMagick was killed by the Linux OOM Killer.");
-              process.exit(137);
-            } else {
-              reject(
-                new Error(`ImageMagick failed. Exit code = ${error.code ?? "?"}. Signal = ${error.signal ?? "?"}.`)
-              );
-            }
+            reject(
+              new Error(
+                error.signal === "SIGKILL"
+                  ? "ImageMagick was killed with SIGKILL (likely by the Linux OOM Killer)."
+                  : `ImageMagick failed. Exit code = ${error.code ?? "?"}. Signal = ${error.signal ?? "?"}.`
+              )
+            );
           } else {
             log("Image transformed.");
             resolve();
