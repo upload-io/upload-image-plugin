@@ -4,6 +4,14 @@ import { Transformer } from "upload-image-plugin/Transformer";
 
 const transformer = new Transformer();
 
-export default transform<Params>(async ({ params, transformation, resolve, log, paths }) => {
-  await transformer.run(transformation, params, resolve, log);
+export default transform<Params>({
+  estimate: async ({ params, transformation, resolve }) => await transformer.estimate(transformation, params, resolve),
+  run: async ({ params, transformation, resolve, log, estimation }) => {
+    if (estimation === undefined) {
+      throw new Error(
+        "Transformation was given an undefined estimation, despite it returning one in the estimation phase."
+      );
+    }
+    await transformer.run(transformation, estimation, params, resolve, log);
+  }
 });
