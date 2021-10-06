@@ -10,7 +10,7 @@ To release a new version:
 
 4.  Set `x.y.z` into `README.md`
 
-5.  Set `x.y.z` into `upload-plugin.json` (find/replace old version)
+5.  Set `x.y.z` into `upload.config.json` (find/replace old version)
 
 6.  Set `x.y.z` into `OfficialPlugins.ts` (in `upload` repository)
 
