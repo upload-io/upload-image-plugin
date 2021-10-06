@@ -32,9 +32,9 @@ export class Transformer {
     // Todo: use 'identity' to estimate the size of the input image. Then look at resized size, and estimate them both together.
     const input = resolvePath(params.input);
     const fileSizeMB = (await fsAsync.stat(input)).size / (1024 * 1024);
-    const poormansMemoryEstimate = fileSizeMB * 33; // e.g. 6MB JPEG requires 198MB. This is just a temporary estimate: we'll use 'identity' to determine this more accurately in future.
+    const poorMansMemoryEstimate = fileSizeMB * 33; // e.g. 6MB JPEG requires 198MB. This is just a temporary estimate: we'll use 'identity' to determine this more accurately in future.
     return {
-      physicalMemoryMB: Math.ceil(poormansMemoryEstimate * this.imageMagickDrift)
+      physicalMemoryMB: Math.ceil(poorMansMemoryEstimate * this.imageMagickDrift)
     };
   }
 
