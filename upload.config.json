@@ -690,6 +690,7 @@
               "default": 1050
             }
           },
+          "propertyOrder": ["format", "maxSizeKB", "resizeMode", "width", "height"],
           "required": ["resizeMode", "maxSizeKB"]
         },
         "ui": {}
