@@ -690,10 +690,11 @@
               "default": 1050
             }
           },
-          "propertyOrder": ["format", "maxSizeKB", "resizeMode", "width", "height"],
           "required": ["resizeMode", "maxSizeKB"]
         },
-        "ui": {}
+        "ui": {
+          "ui:order": ["format", "maxSizeKB", "resizeMode", "width", "height"]
+        }
       }
     }
   }
