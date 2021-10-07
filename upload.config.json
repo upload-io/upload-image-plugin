@@ -450,7 +450,6 @@
             "items": {
               "$ref": "#/definitions/ResizeStep"
             },
-            "minItems": 1,
             "title": "Steps",
             "type": "array"
           }

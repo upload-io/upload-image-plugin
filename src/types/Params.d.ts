@@ -22,7 +22,6 @@ export interface Params {
 
   /**
    * Steps
-   * @minItems 1
    */
   steps: ImagePipelineStep[];
 }
