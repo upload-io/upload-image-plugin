@@ -472,7 +472,7 @@
       },
       "transformation": {
         "description": {
-          "ref": "join('', ['Transform image: output=', format || 'original_format', ', width', ((resizeMode == 'Exact' || height == null || width == null) && '=') || (resizeMode == 'Minimum' && '>=') || (resizeMode == 'Maximum' && '<='), to_string(width || 'ANY'), ', height', ((resizeMode == 'Exact' || height == null || width == null) && '=') || (resizeMode == 'Minimum' && '>=') || (resizeMode == 'Maximum' && '<='), to_string(height || 'ANY'), ', size=', to_string(maxSizeKB), 'KB.'])"
+          "ref": "[{if: format != null && (width != null || height != null), then: join('', ['Converts images to \"', to_string(format), '\" and resizes to ', to_string(width || 'ANY'), 'x', to_string(height || 'ANY'), '.'])}, {if: format != null, then: join('', ['Converts images to \"', to_string(format), '\".'])}, {if: width != null || height != null, then: join('', ['Resizes images to ', to_string(width || 'ANY'), 'x', to_string(height || 'ANY'), '.'])}, {if: `true`, then: join('', ['Resizes images to ', to_string(maxSizeKB), 'KB.'])}][?if]|[0].then"
         },
         "scope": {
           "mime": ["*"],
