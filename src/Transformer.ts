@@ -11,6 +11,8 @@ import { promises as fsAsync } from "fs";
 export class Transformer {
   private readonly imageMagickPath: string;
   private readonly imageMagicHomeDir: string;
+  // private readonly channels: 3; // RGB
+  // private readonly pixelSize: 2; // 16-bit (Quantum Depth of 16)
 
   /**
    * We add a drift to account for ImageMagick using more memory than it's been told to.
@@ -29,8 +31,9 @@ export class Transformer {
     params: Params,
     resolvePath: LocalFileResolver
   ): Promise<TransformationEstimation> {
-    // Todo: use 'identity' to estimate the size of the input image. Then look at resized size, and estimate them both together.
     const input = resolvePath(params.input);
+    // Todo: use 'identity' to estimate the size of the input image. Then look at resized size, and estimate them both together.
+    // const { stdout } = await this.runMagick(["identify", resolvePath(params.input)]);
     const fileSizeMB = (await fsAsync.stat(input)).size / (1024 * 1024);
     const poorMansMemoryEstimate = fileSizeMB * 33; // e.g. 6MB JPEG requires 198MB. This is just a temporary estimate: we'll use 'identity' to determine this more accurately in future.
     return {
@@ -50,12 +53,12 @@ export class Transformer {
     const args = this.makeArgs(params, resolvePath, estimation);
     log(`Using command: ${this.imageMagickPath} ${args.join(" ")}`);
 
-    await this.runMagick(log, args);
+    await this.runMagick(args);
 
     log("Image transformed.");
   }
 
-  private async runMagick(log: Logger, args: string[]): Promise<{ stderr: string; stdout: string }> {
+  private async runMagick(args: string[]): Promise<{ stderr: string; stdout: string }> {
     return await new Promise((resolve, reject) => {
       execFile(
         this.imageMagickPath,
@@ -65,7 +68,6 @@ export class Transformer {
           if (error !== null) {
             console.log(stdout);
             console.log(stderr);
-            log("ImageMagick failed.");
             reject(
               new Error(
                 error.signal === "SIGKILL"
@@ -73,6 +75,9 @@ export class Transformer {
                   : `ImageMagick failed. Exit code = ${error.code ?? "?"}. Signal = ${error.signal ?? "?"}.`
               )
             );
+            // Have upload-transformer handle this process as if it requested too much memory from the OS (137),
+            // because by extension, it did.
+            process.exit(137);
           } else {
             resolve({ stdout, stderr });
           }
