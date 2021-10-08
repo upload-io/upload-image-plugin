@@ -45,25 +45,27 @@ export class Transformer {
     resolvePath: LocalFileResolver,
     log: Logger
   ): Promise<void> {
-    await new Promise<void>((resolve, reject) => {
-      log("Transforming image...");
+    log("Transforming image...");
 
-      const args = this.makeArgs(params, resolvePath, estimation);
-      log(`Using command: ${this.imageMagickPath} ${args.join(" ")}`);
+    const args = this.makeArgs(params, resolvePath, estimation);
+    log(`Using command: ${this.imageMagickPath} ${args.join(" ")}`);
 
+    await this.runMagick(log, args);
+
+    log("Image transformed.");
+  }
+
+  private async runMagick(log: Logger, args: string[]): Promise<{ stderr: string; stdout: string }> {
+    return await new Promise((resolve, reject) => {
       execFile(
         this.imageMagickPath,
         args,
         { env: { MAGICK_HOME: this.imageMagicHomeDir } },
         (error, stdout, stderr) => {
-          if (stdout.length > 0) {
-            console.log(stdout);
-          }
-          if (stderr.length > 0) {
-            console.error(stderr);
-          }
           if (error !== null) {
-            log("Image transformation failed.");
+            console.log(stdout);
+            console.log(stderr);
+            log("ImageMagick failed.");
             reject(
               new Error(
                 error.signal === "SIGKILL"
@@ -72,8 +74,7 @@ export class Transformer {
               )
             );
           } else {
-            log("Image transformed.");
-            resolve();
+            resolve({ stdout, stderr });
           }
         }
       );
