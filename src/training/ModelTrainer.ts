@@ -15,7 +15,9 @@ import { ModelParameterRanges } from "upload-image-plugin/training/ModelParamete
 import os from "os";
 import { ImageWidthHeight } from "upload-image-plugin/types/ImageWidthHeight";
 /**
- * Used to generate values for 'MemoryEstimationModel.modelParameters' from a set of training data.
+ * The `samples-*.json` files must be generated on a PROD-like instance in EC2.
+ *
+ * From there, you can copy those files and tweak/run the model locally to generate optimal model parameters.
  */
 export class ModelTrainer {
   /**
@@ -103,6 +105,12 @@ export class ModelTrainer {
   }
 
   private async generateInputsIfNotExists(format: OutputImageFormat, dimensions: ImageWidthHeight[]): Promise<void> {
+    const samplesPath = this.getSamplesPath(format);
+    if (await this.exists(samplesPath)) {
+      this.log(`Skipping input generation, samples already exist: ${samplesPath}`);
+      return;
+    }
+
     // Run in serial, since parallelism already occurring outside this method.
     await Bluebird.mapSeries(dimensions, async x => await this.generateInputIfNotExists(format, x));
   }
@@ -279,7 +287,12 @@ export class ModelTrainer {
               shareConstant
             };
             const results = trainingData.map((x): { freeSpace: number; overestimationFactor: number } => {
-              const estimate = MemoryEstimationModel.getEstimateInKB(x.inputPixels, x.outputPixels, modelParameters);
+              const estimate = MemoryEstimationModel.getEstimateInKB(
+                x.inputPixels,
+                x.outputPixels,
+                modelParameters,
+                modelParameters
+              );
               return {
                 overestimationFactor: estimate / x.actualUsedKB - 1,
                 freeSpace: estimate - x.actualUsedKB

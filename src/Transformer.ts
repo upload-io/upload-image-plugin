@@ -24,14 +24,19 @@ export class Transformer {
     resolvePath: LocalFileResolver,
     log: Logger
   ): Promise<TransformationEstimation> {
-    const [inputDimensions, format] = await this.getInputDimensionsAndFormat(resolvePath(params.input));
+    const [inputDimensions, inputFormat] = await this.getInputDimensionsAndFormat(resolvePath(params.input));
     const outputDimensions = this.getOutputDimensions(inputDimensions, params);
     log(`Input dimensions: ${JSON.stringify(inputDimensions)}`);
     log(`Output dimensions: ${JSON.stringify(outputDimensions)}`);
 
     const inputPixels = this.countPixels(inputDimensions);
     const outputPixels = this.countPixels(this.getOutputDimensions(inputDimensions, params));
-    const estimateKB = MemoryEstimationModel.getEstimateInKBForFormat(inputPixels, outputPixels, format);
+    const estimateKB = MemoryEstimationModel.getEstimateInKBForFormat(
+      inputPixels,
+      outputPixels,
+      inputFormat,
+      params.outputFormat ?? inputFormat
+    );
     log(`Estimated RAM upperbound: ${estimateKB} KB`);
 
     return {

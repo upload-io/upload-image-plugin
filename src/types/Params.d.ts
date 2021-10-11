@@ -18,7 +18,7 @@ export interface Params {
   /**
    * Output format
    */
-  outputFormat: OutputImageFormat;
+  outputFormat: OutputImageFormat | undefined;
 
   /**
    * Steps
