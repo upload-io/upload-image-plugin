@@ -471,7 +471,7 @@
       },
       "transformation": {
         "description": {
-          "ref": "[{if: format != null && (width != null || height != null), then: join('', ['Converts images to \"', to_string(format), '\" and resizes to ', to_string(width || 'ANY'), 'x', to_string(height || 'ANY'), '.'])}, {if: format != null, then: join('', ['Converts images to \"', to_string(format), '\".'])}, {if: width != null || height != null, then: join('', ['Resizes images to ', to_string(width || 'ANY'), 'x', to_string(height || 'ANY'), '.'])}, {if: `true`, then: join('', ['Sets image quality to ', to_string(quality), '.'])}][?if]|[0].then"
+          "ref": "[{if: format != null && (width != null || height != null), then: join('', ['Converts images to \"', to_string(format), '\" and resizes to ', to_string(width || 'ANY'), 'x', to_string(height || 'ANY'), '.'])}, {if: format != null, then: join('', ['Converts images to \"', to_string(format), '\".'])}, {if: width != null || height != null, then: join('', ['Resizes images to ', to_string(width || 'ANY'), 'x', to_string(height || 'ANY'), '.'])}, {if: `true`, then: join('', ['Returns the original image.'])}][?if]|[0].then"
         },
         "scope": {
           "mime": ["*"],
@@ -661,13 +661,6 @@
               ],
               "default": "jpg"
             },
-            "quality": {
-              "maximum": 9,
-              "minimum": 0,
-              "title": "Quality",
-              "type": "integer",
-              "default": 5
-            },
             "resizeMode": {
               "title": "Dimensions",
               "type": "string",
@@ -689,10 +682,10 @@
               "default": 1050
             }
           },
-          "required": ["resizeMode", "quality"]
+          "required": ["resizeMode"]
         },
         "ui": {
-          "ui:order": ["format", "quality", "resizeMode", "width", "height"]
+          "ui:order": ["format", "resizeMode", "width", "height"]
         }
       }
     }
