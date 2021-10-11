@@ -6,18 +6,13 @@ import { assertUnreachable } from "upload-image-plugin/common/TypeUtils";
 import { execFile } from "child_process";
 import * as os from "os";
 import path from "path";
-import { promises as fsAsync } from "fs";
+import { MemoryEstimationModel } from "upload-image-plugin/MemoryEstimationModel";
+import { ImageWidthHeight } from "upload-image-plugin/types/ImageWidthHeight";
+import { reverse } from "ramda";
 
 export class Transformer {
   private readonly imageMagickPath: string;
   private readonly imageMagicHomeDir: string;
-  // private readonly channels: 3; // RGB
-  // private readonly pixelSize: 2; // 16-bit (Quantum Depth of 16)
-
-  /**
-   * We add a drift to account for ImageMagick using more memory than it's been told to.
-   */
-  private readonly imageMagickDrift = 1.1;
 
   constructor() {
     const isMacOS = os.platform() === "darwin";
@@ -26,18 +21,27 @@ export class Transformer {
     this.imageMagicHomeDir = isMacOS ? "" : homeDir;
   }
 
+  /**
+   * See README.md for a full explanation on how we calculate and limit ImageMagick's memory usage.
+   */
   async estimate(
     transformation: Transformation,
     params: Params,
-    resolvePath: LocalFileResolver
+    resolvePath: LocalFileResolver,
+    log: Logger
   ): Promise<TransformationEstimation> {
-    const input = resolvePath(params.input);
-    // Todo: use 'identity' to estimate the size of the input image. Then look at resized size, and estimate them both together.
-    // const { stdout } = await this.runMagick(["identify", resolvePath(params.input)]);
-    const fileSizeMB = (await fsAsync.stat(input)).size / (1024 * 1024);
-    const poorMansMemoryEstimate = fileSizeMB * 33; // e.g. 6MB JPEG requires 198MB. This is just a temporary estimate: we'll use 'identity' to determine this more accurately in future.
+    const inputDimensions = await this.getInputDimensions(resolvePath(params.input));
+    const outputDimensions = this.getOutputDimensions(inputDimensions, params);
+    log(`Input dimensions: ${JSON.stringify(inputDimensions)}`);
+    log(`Output dimensions: ${JSON.stringify(outputDimensions)}`);
+
+    const inputPixels = this.countPixels(inputDimensions);
+    const outputPixels = this.countPixels(this.getOutputDimensions(inputDimensions, params));
+    const estimateKB = MemoryEstimationModel.getEstimateInKB(inputPixels, outputPixels);
+    log(`Estimated RAM upperbound: ${estimateKB} KB`);
+
     return {
-      physicalMemoryMB: Math.ceil(poorMansMemoryEstimate * this.imageMagickDrift)
+      physicalMemoryMB: Math.ceil(estimateKB / 1024)
     };
   }
 
@@ -50,12 +54,129 @@ export class Transformer {
   ): Promise<void> {
     log("Transforming image...");
 
-    const args = this.makeArgs(params, resolvePath, estimation);
+    const args = this.makeArgs(params, resolvePath);
     log(`Using command: ${this.imageMagickPath} ${args.join(" ")}`);
 
     await this.runMagick(args);
 
     log("Image transformed.");
+  }
+
+  private async getInputDimensions(imagePath: string): Promise<ImageWidthHeight> {
+    const { stdout } = await this.runMagick(["identify", imagePath]);
+    const firstLine: string = stdout.split("\n")[0];
+    if (firstLine === undefined) {
+      throw new Error("Unexpected error: firstLine was undefined.");
+    }
+
+    // e.g. "images_jpf/09356268.jpf JP2 3532x2649 3532x2649+0+0 8-bit sRGB 0.000u 0:00.000"
+    const widthHeight = firstLine.split(" ")[2];
+    if (widthHeight === undefined) {
+      throw new Error(`Unexpected error: widthHeight was undefined: '${firstLine}'`);
+    }
+
+    const assertInt = (value: string | undefined): number => {
+      if (value === undefined) {
+        throw new Error(`An axis from ImageMagick 'identify' is a undefined: ${widthHeight}`);
+      }
+      const int = parseFloat(value);
+      if (isNaN(int)) {
+        throw new Error(`An axis from ImageMagick 'identify' is a NaN: ${widthHeight}`);
+      }
+      if (!Number.isInteger(int)) {
+        throw new Error(`An axis from ImageMagick 'identify' is a float: ${widthHeight}`);
+      }
+      return int;
+    };
+    const [widthStr, heightStr] = widthHeight.split("x");
+    return {
+      height: assertInt(heightStr),
+      width: assertInt(widthStr)
+    };
+  }
+
+  private getOutputDimensions(inputImage: ImageWidthHeight, params: Params): ImageWidthHeight {
+    const resizeSteps = reverse(params.steps)
+      .flatMap(x => (x.type === "resize" ? [x] : []))
+      .map(x => x.geometry.size);
+    if (resizeSteps.length === 0) {
+      return inputImage;
+    }
+    const resize = resizeSteps[0];
+
+    const dimsFromAspectRatio = (ratio: ImageWidthHeight, area: number): ImageWidthHeight => ({
+      width: Math.ceil(Math.sqrt(area / (ratio.height / ratio.width))),
+      height: Math.ceil(Math.sqrt(area / (ratio.width / ratio.height)))
+    });
+    const boundingBox = (isMaximum: boolean, box: ImageWidthHeight): ImageWidthHeight => {
+      const boxRatio = box.width / box.height;
+      const imageRatio = inputImage.width / inputImage.height;
+      if (isMaximum ? imageRatio > boxRatio : imageRatio < boxRatio) {
+        // Image must be bound by width.
+        return {
+          width: box.width,
+          height: Math.ceil(inputImage.height * (box.width / inputImage.width))
+        };
+      }
+
+      // Image must be bound by height, or ratio is equal in which case it doesn't matter which we bound by.
+      return {
+        width: Math.ceil(inputImage.width * (box.height / inputImage.height)),
+        height: box.height
+      };
+    };
+
+    switch (resize.type) {
+      case "area@":
+        return dimsFromAspectRatio(inputImage, resize.area);
+      case "scale%":
+        return {
+          width: Math.ceil(inputImage.width * (resize.scale / 100)),
+          height: Math.ceil(inputImage.height * (resize.scale / 100))
+        };
+      case "scale-x%xscale-y%":
+        return {
+          width: Math.ceil(inputImage.width * (resize.scaleX / 100)),
+          height: Math.ceil(inputImage.height * (resize.scaleY / 100))
+        };
+      case "x:y":
+        return dimsFromAspectRatio({ width: resize.x, height: resize.y }, this.countPixels(inputImage));
+      case "xheight":
+        return {
+          width: Math.ceil(resize.height * (inputImage.width / inputImage.height)),
+          height: resize.height
+        };
+      case "width":
+        return {
+          width: resize.width,
+          height: Math.ceil(resize.width * (inputImage.height / inputImage.width))
+        };
+      case "widthxheight":
+        return boundingBox(true, resize);
+      case "widthxheight^":
+        return boundingBox(false, resize);
+      case "widthxheight!":
+        return {
+          width: resize.width,
+          height: resize.height
+        };
+      case "widthxheight<":
+        if (inputImage.width >= resize.width && inputImage.height >= resize.height) {
+          return inputImage;
+        }
+        return boundingBox(false, resize);
+      case "widthxheight>":
+        if (inputImage.width <= resize.width && inputImage.height <= resize.height) {
+          return inputImage;
+        }
+        return boundingBox(true, resize);
+      default:
+        assertUnreachable(resize);
+    }
+  }
+
+  private countPixels({ width, height }: ImageWidthHeight): number {
+    return width * height;
   }
 
   private async runMagick(args: string[]): Promise<{ stderr: string; stdout: string }> {
@@ -86,9 +207,8 @@ export class Transformer {
     });
   }
 
-  private makeArgs(params: Params, resolve: LocalFileResolver, estimation: TransformationEstimation): string[] {
+  private makeArgs(params: Params, resolve: LocalFileResolver): string[] {
     return [
-      ...this.makeMemoryArgs(estimation),
       resolve(params.input),
       ...this.makeTransformationArgs(params.steps),
       `${this.makeOutputFormat(params)}${resolve(params.output)}`
@@ -97,12 +217,6 @@ export class Transformer {
 
   private makeOutputFormat(params: Params): string {
     return params.outputFormat === undefined ? "" : `${params.outputFormat}:`;
-  }
-
-  private makeMemoryArgs(estimation: TransformationEstimation): string[] {
-    // We remove the margin so that's available to the OS when ImageMagick drifts.
-    const mb = `${Math.ceil(estimation.physicalMemoryMB / this.imageMagickDrift)}MiB`;
-    return ["-limit", "memory", mb, "-limit", "map", mb];
   }
 
   private makeTransformationArgs(steps: ImagePipelineStep[]): string[] {

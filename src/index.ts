@@ -5,7 +5,8 @@ import { Transformer } from "upload-image-plugin/Transformer";
 const transformer = new Transformer();
 
 export default transform<Params>({
-  estimate: async ({ params, transformation, resolve }) => await transformer.estimate(transformation, params, resolve),
+  estimate: async ({ params, transformation, resolve, log }) =>
+    await transformer.estimate(transformation, params, resolve, log),
   run: async ({ params, transformation, resolve, log, estimation }) => {
     if (estimation === undefined) {
       throw new Error(

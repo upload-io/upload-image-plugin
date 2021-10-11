@@ -2,3 +2,4 @@ tests/assets
 .tmp/
 .github
 .bin/image-magick/build
+dist-trainer/

@@ -34,7 +34,7 @@ export interface ImageOffset {
  * Height and width both scaled by specified percentage.
  */
 export interface ImageSizeScale {
-  scale: number;
+  scale: number; // Percentage, i.e. 100 is 100%
   type: "scale%";
 }
 
@@ -42,7 +42,7 @@ export interface ImageSizeScale {
  * Height and width individually scaled by specified percentages.
  */
 export interface ImageSizeScaleXY {
-  scaleX: number;
+  scaleX: number; // Percentage, i.e. 100 is 100%
   scaleY: number;
   type: "scale-x%xscale-y%";
 }
@@ -64,7 +64,7 @@ export interface ImageSizeHeight {
 }
 
 /**
- * Width and height emphatically given, original aspect ratio ignored.
+ * Maximum values of height and width given, aspect ratio preserved.
  */
 export interface ImageSizeWidthHeight {
   height: number;
@@ -82,7 +82,7 @@ export interface ImageSizeMinWidthHeight {
 }
 
 /**
- * Maximum values of height and width given, aspect ratio preserved.
+ * Width and height emphatically given, original aspect ratio ignored.
  */
 export interface ImageSizeMaxWidthHeight {
   height: number;
@@ -120,7 +120,6 @@ export interface ImageSizeArea {
  * Aspect ratio (e.g. 3:2 = 1.5).
  */
 export interface ImageSizeAspectRatio {
-  area: number;
   type: "x:y";
   x: number;
   y: number;
