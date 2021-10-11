@@ -106,7 +106,7 @@ export class ModelTrainer {
 
   private async generateInputsIfNotExists(format: OutputImageFormat, dimensions: ImageWidthHeight[]): Promise<void> {
     const samplesPath = this.getSamplesPath(format);
-    if (await this.exists(samplesPath)) {
+    if (process.env.FORCE_GENERATE !== "true" && (await this.exists(samplesPath))) {
       this.log(`Skipping input generation, samples already exist: ${samplesPath}`);
       return;
     }
