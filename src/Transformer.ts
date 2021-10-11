@@ -9,6 +9,7 @@ import path from "path";
 import { MemoryEstimationModel } from "upload-image-plugin/MemoryEstimationModel";
 import { ImageWidthHeight } from "upload-image-plugin/types/ImageWidthHeight";
 import { reverse } from "ramda";
+import { ImageMagickError } from "upload-image-plugin/types/Errors";
 
 export class Transformer {
   private readonly imageMagickPath: string;
@@ -63,7 +64,13 @@ export class Transformer {
   }
 
   private async getInputDimensions(imagePath: string): Promise<ImageWidthHeight> {
-    const { stdout } = await this.runMagick(["identify", imagePath]);
+    let stdout: string;
+    try {
+      stdout = (await this.runMagick(["identify", imagePath])).stdout;
+    } catch (e) {
+      throw new Error("Invalid image format.");
+    }
+
     const firstLine: string = stdout.split("\n")[0];
     if (firstLine === undefined) {
       throw new Error("Unexpected error: firstLine was undefined.");
@@ -90,8 +97,8 @@ export class Transformer {
     };
     const [widthStr, heightStr] = widthHeight.split("x");
     return {
-      height: assertInt(heightStr),
-      width: assertInt(widthStr)
+      width: assertInt(widthStr),
+      height: assertInt(heightStr)
     };
   }
 
@@ -189,16 +196,14 @@ export class Transformer {
           if (error !== null) {
             console.log(stdout);
             console.log(stderr);
-            reject(
-              new Error(
-                error.signal === "SIGKILL"
-                  ? "ImageMagick was killed with SIGKILL (likely by the Linux OOM Killer)."
-                  : `ImageMagick failed. Exit code = ${error.code ?? "?"}. Signal = ${error.signal ?? "?"}.`
-              )
-            );
-            // Have upload-transformer handle this process as if it requested too much memory from the OS (137),
-            // because by extension, it did.
-            process.exit(137);
+            if (error.signal === "SIGKILL") {
+              // Have upload-transformer handle this process as if it requested too much memory from the OS (137),
+              // because by extension, it did.
+              console.error("ImageMagick was killed with SIGKILL (likely by the Linux OOM Killer).");
+              process.exit(137);
+            } else {
+              reject(new ImageMagickError(stdout, stderr, error.code, error.signal));
+            }
           } else {
             resolve({ stdout, stderr });
           }
