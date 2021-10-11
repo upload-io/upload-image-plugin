@@ -11,8 +11,11 @@ import { ImageMagickError } from "upload-image-plugin/types/Errors";
 import { MagickInfo } from "upload-image-plugin/magick/MagickInfo";
 import { GeometryUtils } from "upload-image-plugin/common/GeometryUtils";
 import { OutputImageFormat } from "upload-image-plugin/types/OutputImageFormat";
+import os from "os";
 
 export class Transformer {
+  private readonly timePath = os.platform() === "darwin" ? "/usr/local/bin/gtime" : "/usr/bin/time";
+
   constructor(private readonly magickInfo: MagickInfo) {}
 
   /**
@@ -56,7 +59,12 @@ export class Transformer {
     const args = this.makeArgs(params, resolvePath);
     log(`Using command: ${this.magickInfo.binaryPath} ${args.join(" ")}`);
 
-    await this.runMagick(args);
+    const { stderr } = await this.runMagick(this.timePath, ["-f", "%M", this.magickInfo.binaryPath, ...args]);
+    const actualUsedKB = parseInt(stderr.trim());
+    if (!Number.isInteger(actualUsedKB)) {
+      throw new Error(`Expected integer: '${stderr}'`);
+    }
+    log(`Actual memory usage: ${Math.round((actualUsedKB / 1024) * 100) / 100} MB`);
 
     log("Image transformed.");
   }
@@ -64,7 +72,7 @@ export class Transformer {
   private async getInputDimensionsAndFormat(imagePath: string): Promise<[ImageWidthHeight, OutputImageFormat]> {
     let stdout: string;
     try {
-      stdout = (await this.runMagick(["identify", imagePath])).stdout;
+      stdout = (await this.runMagick(this.magickInfo.binaryPath, ["identify", imagePath])).stdout;
     } catch (e) {
       throw new Error("Invalid image format.");
     }
@@ -190,9 +198,9 @@ export class Transformer {
     return width * height;
   }
 
-  private async runMagick(args: string[]): Promise<{ stderr: string; stdout: string }> {
+  private async runMagick(path: string, args: string[]): Promise<{ stderr: string; stdout: string }> {
     return await new Promise((resolve, reject) => {
-      execFile(this.magickInfo.binaryPath, args, { env: this.magickInfo.environment }, (error, stdout, stderr) => {
+      execFile(path, args, { env: this.magickInfo.environment }, (error, stdout, stderr) => {
         if (error !== null) {
           console.log(stdout);
           console.log(stderr);
