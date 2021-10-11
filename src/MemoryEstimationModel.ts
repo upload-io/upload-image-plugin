@@ -43,45 +43,42 @@ export class MemoryEstimationModel {
   }
 
   static getEstimateInKB(
-    inputPixelCount: number,
-    outputPixelCount: number,
-    inputParameters: MemoryEstimationModelParameters,
-    outputParameters: MemoryEstimationModelParameters
+    inputPixels: number,
+    outputPixels: number,
+    inputParams: MemoryEstimationModelParameters,
+    outputParams: MemoryEstimationModelParameters
   ): number {
-    const spaceRequiredForPixelsKB = (pixelCount: number, p: MemoryEstimationModelParameters): number =>
+    const spaceRequiredKB = (pixelCount: number, p: MemoryEstimationModelParameters): number =>
       p.spaceCoefficient * pixelCount + p.spaceConstant;
 
-    const spaceForInput = spaceRequiredForPixelsKB(inputPixelCount, inputParameters);
-    const spaceForOutput = spaceRequiredForPixelsKB(outputPixelCount, outputParameters);
+    const inputSpace = spaceRequiredKB(inputPixels, inputParams);
+    const outputSpace = spaceRequiredKB(outputPixels, outputParams);
 
-    let largeImage: number;
-    let largeImageParams: MemoryEstimationModelParameters;
-    let smallImage: number;
-    let smallImageParams: MemoryEstimationModelParameters;
-    let spaceRequiredForLargeImageKB: number;
+    let largePixels: number;
+    let largeParams: MemoryEstimationModelParameters;
+    let smallPixels: number;
+    let smallParams: MemoryEstimationModelParameters;
+    let largeSpaceKB: number;
 
-    if (spaceForInput > spaceForOutput) {
-      spaceRequiredForLargeImageKB = spaceForInput;
-      largeImage = inputPixelCount;
-      largeImageParams = inputParameters;
+    if (inputSpace > outputSpace) {
+      largeSpaceKB = inputSpace;
+      largePixels = inputPixels;
+      largeParams = inputParams;
 
-      smallImage = outputPixelCount;
-      smallImageParams = outputParameters;
+      smallPixels = outputPixels;
+      smallParams = outputParams;
     } else {
-      spaceRequiredForLargeImageKB = spaceForOutput;
-      largeImage = outputPixelCount;
-      largeImageParams = outputParameters;
+      largeSpaceKB = outputSpace;
+      largePixels = outputPixels;
+      largeParams = outputParams;
 
-      smallImage = inputPixelCount;
-      smallImageParams = inputParameters;
+      smallPixels = inputPixels;
+      smallParams = inputParams;
     }
 
-    const pixelsReusedFromLargeImage = largeImageParams.shareCoefficient * largeImage + largeImageParams.shareConstant;
-    const spaceRequiredForSmallImageKB = Math.max(
-      0,
-      spaceRequiredForPixelsKB(smallImage - pixelsReusedFromLargeImage, smallImageParams)
-    );
-    return Math.ceil(spaceRequiredForLargeImageKB + spaceRequiredForSmallImageKB);
+    const pixelsReusedFromLargeImage = largeParams.shareCoefficient * largePixels + largeParams.shareConstant;
+    const smallSpaceKB = Math.max(0, spaceRequiredKB(smallPixels - pixelsReusedFromLargeImage, smallParams));
+    return Math.ceil(largeSpaceKB + smallSpaceKB);
   }
 
   private static getModelParamsForFormat(format: OutputImageFormat): MemoryEstimationModelParameters {
