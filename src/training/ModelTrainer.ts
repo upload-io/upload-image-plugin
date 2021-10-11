@@ -212,9 +212,20 @@ export class ModelTrainer {
 
     const { width, height } = dimensions;
 
+    let bloatingArg = "";
+    if (format === "jpeg" || format === "jpg") {
+      bloatingArg = "-interlace Plane"; // Makes a progressive JPEG, which require more space to process.
+    } else if (format === "gif" || format === "png") {
+      bloatingArg = "-interlace Line"; // Makes an interlaced PNG, which require more space to process.
+    }
+
+    if (bloatingArg.length > 0) {
+      bloatingArg += " ";
+    }
+
     await this.execAsync(
       this.magickInfo.binaryPath,
-      `${this.largeNoisyImage} -resize ${width}x${height}! ${format}:${imagePath}`.split(" ")
+      `${this.largeNoisyImage} -resize ${width}x${height}! ${bloatingArg}${format}:${imagePath}`.split(" ")
     );
   }
 
