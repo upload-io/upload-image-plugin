@@ -4,23 +4,16 @@ import { ImagePipelineStep } from "upload-image-plugin/types/ImagePipelineStep";
 import { ImageGeometry, ImageOffset, ImageSize } from "upload-image-plugin/types/ImageGeometry";
 import { assertUnreachable } from "upload-image-plugin/common/TypeUtils";
 import { execFile } from "child_process";
-import * as os from "os";
-import path from "path";
 import { MemoryEstimationModel } from "upload-image-plugin/MemoryEstimationModel";
 import { ImageWidthHeight } from "upload-image-plugin/types/ImageWidthHeight";
 import { reverse } from "ramda";
 import { ImageMagickError } from "upload-image-plugin/types/Errors";
+import { MagickInfo } from "upload-image-plugin/magick/MagickInfo";
+import { GeometryUtils } from "upload-image-plugin/common/GeometryUtils";
+import { OutputImageFormat } from "upload-image-plugin/types/OutputImageFormat";
 
 export class Transformer {
-  private readonly imageMagickPath: string;
-  private readonly imageMagicHomeDir: string;
-
-  constructor() {
-    const isMacOS = os.platform() === "darwin";
-    const homeDir = path.resolve(__dirname, "../.bin/image-magick/result/");
-    this.imageMagickPath = isMacOS ? "/usr/local/bin/magick" : path.resolve(homeDir, "bin/magick");
-    this.imageMagicHomeDir = isMacOS ? "" : homeDir;
-  }
+  constructor(private readonly magickInfo: MagickInfo) {}
 
   /**
    * See README.md for a full explanation on how we calculate and limit ImageMagick's memory usage.
@@ -31,14 +24,14 @@ export class Transformer {
     resolvePath: LocalFileResolver,
     log: Logger
   ): Promise<TransformationEstimation> {
-    const inputDimensions = await this.getInputDimensions(resolvePath(params.input));
+    const [inputDimensions, format] = await this.getInputDimensionsAndFormat(resolvePath(params.input));
     const outputDimensions = this.getOutputDimensions(inputDimensions, params);
     log(`Input dimensions: ${JSON.stringify(inputDimensions)}`);
     log(`Output dimensions: ${JSON.stringify(outputDimensions)}`);
 
     const inputPixels = this.countPixels(inputDimensions);
     const outputPixels = this.countPixels(this.getOutputDimensions(inputDimensions, params));
-    const estimateKB = MemoryEstimationModel.getEstimateInKB(inputPixels, outputPixels);
+    const estimateKB = MemoryEstimationModel.getEstimateInKBForFormat(inputPixels, outputPixels, format);
     log(`Estimated RAM upperbound: ${estimateKB} KB`);
 
     return {
@@ -56,14 +49,14 @@ export class Transformer {
     log("Transforming image...");
 
     const args = this.makeArgs(params, resolvePath);
-    log(`Using command: ${this.imageMagickPath} ${args.join(" ")}`);
+    log(`Using command: ${this.magickInfo.binaryPath} ${args.join(" ")}`);
 
     await this.runMagick(args);
 
     log("Image transformed.");
   }
 
-  private async getInputDimensions(imagePath: string): Promise<ImageWidthHeight> {
+  private async getInputDimensionsAndFormat(imagePath: string): Promise<[ImageWidthHeight, OutputImageFormat]> {
     let stdout: string;
     try {
       stdout = (await this.runMagick(["identify", imagePath])).stdout;
@@ -77,7 +70,14 @@ export class Transformer {
     }
 
     // e.g. "images_jpf/09356268.jpf JP2 3532x2649 3532x2649+0+0 8-bit sRGB 0.000u 0:00.000"
-    const widthHeight = firstLine.split(" ")[2];
+    const lineParts = firstLine.split(" ");
+
+    const format = lineParts[1]?.toLowerCase() as OutputImageFormat;
+    if (format === undefined) {
+      throw new Error(`Unexpected error: format was undefined: '${firstLine}'`);
+    }
+
+    const widthHeight = lineParts[2];
     if (widthHeight === undefined) {
       throw new Error(`Unexpected error: widthHeight was undefined: '${firstLine}'`);
     }
@@ -96,10 +96,13 @@ export class Transformer {
       return int;
     };
     const [widthStr, heightStr] = widthHeight.split("x");
-    return {
-      width: assertInt(widthStr),
-      height: assertInt(heightStr)
-    };
+    return [
+      {
+        width: assertInt(widthStr),
+        height: assertInt(heightStr)
+      },
+      format
+    ];
   }
 
   private getOutputDimensions(inputImage: ImageWidthHeight, params: Params): ImageWidthHeight {
@@ -111,10 +114,6 @@ export class Transformer {
     }
     const resize = resizeSteps[0];
 
-    const dimsFromAspectRatio = (ratio: ImageWidthHeight, area: number): ImageWidthHeight => ({
-      width: Math.ceil(Math.sqrt(area / (ratio.height / ratio.width))),
-      height: Math.ceil(Math.sqrt(area / (ratio.width / ratio.height)))
-    });
     const boundingBox = (isMaximum: boolean, box: ImageWidthHeight): ImageWidthHeight => {
       const boxRatio = box.width / box.height;
       const imageRatio = inputImage.width / inputImage.height;
@@ -135,7 +134,7 @@ export class Transformer {
 
     switch (resize.type) {
       case "area@":
-        return dimsFromAspectRatio(inputImage, resize.area);
+        return GeometryUtils.dimsFromAspectRatio(inputImage, resize.area);
       case "scale%":
         return {
           width: Math.ceil(inputImage.width * (resize.scale / 100)),
@@ -147,7 +146,7 @@ export class Transformer {
           height: Math.ceil(inputImage.height * (resize.scaleY / 100))
         };
       case "x:y":
-        return dimsFromAspectRatio({ width: resize.x, height: resize.y }, this.countPixels(inputImage));
+        return GeometryUtils.dimsFromAspectRatio({ width: resize.x, height: resize.y }, this.countPixels(inputImage));
       case "xheight":
         return {
           width: Math.ceil(resize.height * (inputImage.width / inputImage.height)),
@@ -188,27 +187,22 @@ export class Transformer {
 
   private async runMagick(args: string[]): Promise<{ stderr: string; stdout: string }> {
     return await new Promise((resolve, reject) => {
-      execFile(
-        this.imageMagickPath,
-        args,
-        { env: { MAGICK_HOME: this.imageMagicHomeDir } },
-        (error, stdout, stderr) => {
-          if (error !== null) {
-            console.log(stdout);
-            console.log(stderr);
-            if (error.signal === "SIGKILL") {
-              // Have upload-transformer handle this process as if it requested too much memory from the OS (137),
-              // because by extension, it did.
-              console.error("ImageMagick was killed with SIGKILL (likely by the Linux OOM Killer).");
-              process.exit(137);
-            } else {
-              reject(new ImageMagickError(stdout, stderr, error.code, error.signal));
-            }
+      execFile(this.magickInfo.binaryPath, args, { env: this.magickInfo.environment }, (error, stdout, stderr) => {
+        if (error !== null) {
+          console.log(stdout);
+          console.log(stderr);
+          if (error.signal === "SIGKILL") {
+            // Have upload-transformer handle this process as if it requested too much memory from the OS (137),
+            // because by extension, it did.
+            console.error("ImageMagick was killed with SIGKILL (likely by the Linux OOM Killer).");
+            process.exit(137);
           } else {
-            resolve({ stdout, stderr });
+            reject(new ImageMagickError(stdout, stderr, error.code, error.signal));
           }
+        } else {
+          resolve({ stdout, stderr });
         }
-      );
+      });
     });
   }
 

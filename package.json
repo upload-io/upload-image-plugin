@@ -19,7 +19,7 @@
     "prepack": "rm -rf dist && webpack --config webpack.config.js",
     "test": "jest",
     "train": "npm run buildTrainer && npm run runTrainer",
-    "buildTrainer": "rm -rf dist-trainer && webpack --config webpack.config.trainer.js",
+    "buildTrainer": "webpack --config webpack.config.trainer.js",
     "runTrainer": "node ./dist-trainer/Trainer.js",
     "generateSchema": "typescript-json-schema tsconfig.json Params --include 'src/types/*' --defaultNumberType integer --desctitles --required --strictNullChecks --refs true --noExtraProps"
   },

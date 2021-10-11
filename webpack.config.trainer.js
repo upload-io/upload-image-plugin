@@ -2,7 +2,7 @@
 const path = require("path");
 
 module.exports = {
-  entry: "./src/MemoryEstimationModelTrainer.ts",
+  entry: "./src/training/index.ts",
   output: {
     libraryTarget: "commonjs2",
     path: path.resolve(__dirname, "dist-trainer"),
