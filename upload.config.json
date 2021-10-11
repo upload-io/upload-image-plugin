@@ -672,14 +672,14 @@
               "minimum": 1,
               "title": "Width",
               "type": "integer",
-              "default": 1400
+              "default": 800
             },
             "height": {
               "maximum": 10000,
               "minimum": 1,
               "title": "Height",
               "type": "integer",
-              "default": 1050
+              "default": 600
             }
           },
           "required": ["resizeMode"]
