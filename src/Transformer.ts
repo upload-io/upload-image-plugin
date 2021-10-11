@@ -40,10 +40,13 @@ export class Transformer {
       inputFormat,
       params.outputFormat ?? inputFormat
     );
-    log(`Estimated RAM upperbound: ${estimateKB} KB`);
+
+    const physicalMemoryMB = Math.ceil(estimateKB / 1024);
+
+    log(`Estimated memory: ${physicalMemoryMB} MB`);
 
     return {
-      physicalMemoryMB: Math.ceil(estimateKB / 1024)
+      physicalMemoryMB
     };
   }
 
@@ -64,7 +67,7 @@ export class Transformer {
     if (!Number.isInteger(actualUsedKB)) {
       throw new Error(`Expected integer: '${stderr}'`);
     }
-    log(`Actual memory usage: ${Math.round((actualUsedKB / 1024) * 100) / 100} MB`);
+    log(`Actual memory usage: ${Math.ceil(actualUsedKB / 1024)} MB`);
 
     log("Image transformed.");
   }
