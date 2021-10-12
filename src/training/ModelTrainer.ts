@@ -88,10 +88,7 @@ export class ModelTrainer {
     const formats = this.quickMode ? this.popularFormats.slice(0, 2) : this.popularFormats;
     const inputDimensions = this.getInputDimensions();
     const outputDimensions = this.getOutputDimensions();
-    const sampleSpecs = this.getSampleSpecs(
-      inputDimensions.map(x => this.pixels(x)),
-      outputDimensions.map(x => this.pixels(x))
-    );
+    const sampleSpecs = this.getSampleSpecs(inputDimensions, outputDimensions);
 
     // Limit concurrency to avoid OOM.
     await Bluebird.map(formats, async x => await this.generateInputsIfNotExists(x, inputDimensions), {
@@ -129,13 +126,18 @@ export class ModelTrainer {
     await this.writeSamples(format, samples);
   }
 
-  private async calculateSample(format: OutputImageFormat, { inputPixels, outputPixels }: SampleSpec): Promise<Sample> {
+  private async calculateSample(
+    format: OutputImageFormat,
+    { inputPixels, outputPixels, outputDimensions }: SampleSpec
+  ): Promise<Sample> {
     this.log(`Calculating sample: ${format} ${inputPixels} > ${outputPixels}`);
 
     const imagePath = this.getInputPath(format, inputPixels);
     const { stderr } = await this.execAsync(
       os.platform() === "darwin" ? "/usr/local/bin/gtime" : "/usr/bin/time",
-      `-f %M ${this.magickInfo.binaryPath} ${imagePath} -resize ${outputPixels}@ ${format}:output`.split(" ")
+      `-f %M ${this.magickInfo.binaryPath} ${imagePath} -resize ${outputDimensions.width}x${outputDimensions.height}! ${format}:output`.split(
+        " "
+      )
     );
     const actualUsedKB = parseInt(stderr.trim());
     if (!Number.isInteger(actualUsedKB)) {
@@ -145,13 +147,20 @@ export class ModelTrainer {
     return {
       actualUsedKB,
       inputPixels,
-      outputPixels
+      outputPixels,
+      outputDimensions
     };
   }
 
-  private getSampleSpecs(inputPixelCounts: number[], outputPixelCounts: number[]): SampleSpec[] {
-    return inputPixelCounts.flatMap(inputPixels =>
-      outputPixelCounts.map((outputPixels): SampleSpec => ({ inputPixels, outputPixels }))
+  private getSampleSpecs(inputPixelCounts: ImageWidthHeight[], outputPixelCounts: ImageWidthHeight[]): SampleSpec[] {
+    return inputPixelCounts.flatMap(inputDimensions =>
+      outputPixelCounts.map(
+        (outputDimensions): SampleSpec => ({
+          inputPixels: this.pixels(inputDimensions),
+          outputPixels: this.pixels(outputDimensions),
+          outputDimensions
+        })
+      )
     );
   }
 
@@ -168,7 +177,21 @@ export class ModelTrainer {
   }
 
   private getOutputDimensions(): ImageWidthHeight[] {
-    return this.getInputDimensions(); // Just do the same for now.
+    // We make slightly smaller/larger images for the following reasons:
+    // - More samples generally (i.e. to cater for memory differences between runs)
+    // - More samples for the  "share" constants and coefficients for the model, as this part of the model caters for
+    //   the extra memory required for the working buffer when the input/out image are close in size.
+    // - Tests resizing to a different aspect ratio (this may more may not be a factor that affects memory).
+    return this.getInputDimensions().flatMap(dims =>
+      [-10, 0, 10]
+        .flatMap(x => [x, x, x]) // Run each transformation 3 times.
+        .map(
+          (shrink): ImageWidthHeight => ({
+            width: dims.width + shrink,
+            height: dims.height + shrink
+          })
+        )
+    );
   }
 
   private makeSteps(start: number, end: number, stepCount: number): number[] {
