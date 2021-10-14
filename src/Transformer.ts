@@ -208,10 +208,10 @@ export class Transformer {
           console.log(stdout);
           console.log(stderr);
           if (error.signal === "SIGKILL") {
-            // Have upload-transformer handle this process as if it requested too much memory from the OS (137),
-            // because by extension, it did.
-            console.error("ImageMagick was killed with SIGKILL (likely by the Linux OOM Killer).");
-            process.exit(137);
+            reject(new Error("ImageMagick was killed with SIGKILL (likely by the Linux OOM Killer)."));
+            // Do not kill process to unify with other OOM errors: this will terminate all other transformations too.
+            // We got lucky this time, so let's just keep on going and leave the other image transformations to run!
+            // process.exit(137);
           } else {
             reject(new ImageMagickError(stdout, stderr, error.code, error.signal));
           }
