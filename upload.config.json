@@ -1,8 +1,8 @@
 {
   "plugin": {
     "summary": {
-      "description": "Resize, crop, transcode and downsample images.",
-      "icon": "ImageCrop"
+      "description": "Transcode and resize images.",
+      "icon": "ImageResize"
     },
     "parameters": {
       "schema": {
