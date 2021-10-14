@@ -464,7 +464,7 @@
     "transform": {
       "summary": {
         "name": "Transform an image",
-        "description": "Transforms the image into consistent size and format.",
+        "description": "Transforms the image into a consistent size and format.",
         "category": "image",
         "icon": "ImageConvert",
         "promoted": true
