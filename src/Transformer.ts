@@ -1,4 +1,10 @@
-import { LocalFileResolver, Logger, Transformation, TransformationEstimation } from "upload-plugin-sdk";
+import {
+  FileMetadataSetter,
+  LocalFileResolver,
+  Logger,
+  Transformation,
+  TransformationEstimation
+} from "upload-plugin-sdk";
 import { Params } from "upload-image-plugin/types/Params";
 import { ImagePipelineStep } from "upload-image-plugin/types/ImagePipelineStep";
 import { ImageGeometry, ImageOffset, ImageSize } from "upload-image-plugin/types/ImageGeometry";
@@ -12,6 +18,7 @@ import { MagickInfo } from "upload-image-plugin/magick/MagickInfo";
 import { GeometryUtils } from "upload-image-plugin/common/GeometryUtils";
 import { OutputImageFormat } from "upload-image-plugin/types/OutputImageFormat";
 import os from "os";
+import mime from "mime";
 
 export class Transformer {
   private readonly timePath = os.platform() === "darwin" ? "/usr/local/bin/gtime" : "/usr/bin/time";
@@ -52,13 +59,19 @@ export class Transformer {
 
   async run(
     transformation: Transformation,
-    estimation: TransformationEstimation,
     params: Params,
     resolvePath: LocalFileResolver,
+    setMetadata: FileMetadataSetter,
     log: Logger
   ): Promise<void> {
     log("Transforming image...");
+    await this.transformImage(params, resolvePath, log);
+    await this.setContentType(transformation, params, setMetadata);
 
+    log("Image transformed.");
+  }
+
+  private async transformImage(params: Params, resolvePath: LocalFileResolver, log: Logger): Promise<void> {
     const args = this.makeArgs(params, resolvePath);
     log(`Using command: ${this.magickInfo.binaryPath} ${args.join(" ")}`);
 
@@ -68,8 +81,15 @@ export class Transformer {
       throw new Error(`Expected integer: '${stderr}'`);
     }
     log(`Actual memory usage: ${Math.ceil(actualUsedKB / 1024)} MB`);
+  }
 
-    log("Image transformed.");
+  private async setContentType(
+    transformation: Transformation,
+    params: Params,
+    setMetadata: FileMetadataSetter
+  ): Promise<void> {
+    const mimeType = params.outputFormat === undefined ? transformation.file.mime : mime.getType(params.outputFormat);
+    await setMetadata(params.output, { contentType: mimeType ?? undefined });
   }
 
   private async getInputDimensionsAndFormat(imagePath: string): Promise<[ImageWidthHeight, OutputImageFormat]> {
