@@ -495,8 +495,7 @@
               "steps": {
                 "ref": "[{if: width == null && height == null, then: `[]`}, {if: width != null && height == null, then: to_array({type:'resize',geometry:{size:{type:'width',width:width}}})}, {if: width == null && height != null, then: to_array({type:'resize',geometry:{size:{type:'xheight',height:height}}})}, {if: resizeMode=='Maximum', then:to_array({type:'resize',geometry:{size:{type:'widthxheight',width:width,height:height}}})}, {if: resizeMode=='Minimum', then:to_array({type:'resize',geometry:{size:{type:'widthxheight^',width:width,height:height}}})}, {if: resizeMode=='Exact', then:to_array({type:'resize',geometry:{size:{type:'widthxheight!',width:width,height:height}}})}][?if]|[0].then"
               }
-            },
-            "isAsync": false
+            }
           }
         ]
       },
