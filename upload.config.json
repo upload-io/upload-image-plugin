@@ -553,7 +553,7 @@
           {
             "plugin": {
               "packageName": "upload-image-plugin",
-              "packageVersion": "1.26.1"
+              "packageVersion": "1.27.0"
             },
             "params": {
               "input": "/",
