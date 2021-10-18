@@ -1,6 +1,6 @@
-import { ImagePipelineStep } from "upload-image-plugin/types/ImagePipelineStep";
 import { TransformationArtifactPath } from "upload-image-plugin/types/TransformationArtifactPath";
-import { OutputImageFormat } from "upload-image-plugin/types/OutputImageFormat";
+import { ImagePipeline } from "upload-image-plugin/types/ImagePipeline";
+import { ImagePipelineMergeBehaviour } from "upload-image-plugin/types/ImagePipelineMergeBehaviour";
 
 export interface Params {
   /**
@@ -15,13 +15,7 @@ export interface Params {
    */
   output: TransformationArtifactPath;
 
-  /**
-   * Output format
-   */
-  outputFormat: OutputImageFormat | undefined;
+  pipeline: ImagePipeline;
 
-  /**
-   * Steps
-   */
-  steps: ImagePipelineStep[];
+  pipelineMergeBehaviour: ImagePipelineMergeBehaviour | undefined;
 }

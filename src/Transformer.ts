@@ -1,10 +1,4 @@
-import {
-  FileMetadataSetter,
-  LocalFileResolver,
-  Logger,
-  Transformation,
-  TransformationEstimation
-} from "upload-plugin-sdk";
+import { FileMetadataGetter, FileMetadataSetter, LocalFileResolver, Logger } from "upload-plugin-sdk";
 import { Params } from "upload-image-plugin/types/Params";
 import { ImagePipelineStep } from "upload-image-plugin/types/ImagePipelineStep";
 import { ImageGeometry, ImageOffset, ImageSize } from "upload-image-plugin/types/ImageGeometry";
@@ -12,13 +6,22 @@ import { assertUnreachable } from "upload-image-plugin/common/TypeUtils";
 import { execFile } from "child_process";
 import { MemoryEstimationModel } from "upload-image-plugin/MemoryEstimationModel";
 import { ImageWidthHeight } from "upload-image-plugin/types/ImageWidthHeight";
-import { reverse } from "ramda";
+import { reverse, uniqBy } from "ramda";
 import { ImageMagickError } from "upload-image-plugin/types/Errors";
 import { MagickInfo } from "upload-image-plugin/magick/MagickInfo";
 import { GeometryUtils } from "upload-image-plugin/common/GeometryUtils";
 import { OutputImageFormat } from "upload-image-plugin/types/OutputImageFormat";
 import os from "os";
 import mime from "mime";
+import { promises as fsAsync } from "fs";
+import { InputImage } from "upload-image-plugin/types/InputImage";
+import { EstimationResult } from "upload-image-plugin/types/EstimationResult";
+import { FileDownloader } from "upload-plugin-sdk/dist/types/transform/FileDownloader";
+import { ParamsFromFile } from "upload-image-plugin/types/ParamsFromFile";
+import { ImagePipeline } from "upload-image-plugin/types/ImagePipeline";
+import { TransformationArtifactPath } from "upload-image-plugin/types/TransformationArtifactPath";
+import { DownloadRequest } from "upload-plugin-sdk/dist/types/transform/DownloadRequest";
+import { ImagePipelineMergeBehaviour } from "upload-image-plugin/types/ImagePipelineMergeBehaviour";
 
 export class Transformer {
   private readonly timePath = os.platform() === "darwin" ? "/usr/local/bin/gtime" : "/usr/bin/time";
@@ -29,23 +32,25 @@ export class Transformer {
    * See README.md for a full explanation on how we calculate and limit ImageMagick's memory usage.
    */
   async estimate(
-    transformation: Transformation,
     params: Params,
     resolvePath: LocalFileResolver,
+    download: FileDownloader,
+    getMetadata: FileMetadataGetter,
     log: Logger
-  ): Promise<TransformationEstimation> {
-    const [inputDimensions, inputFormat] = await this.getInputDimensionsAndFormat(resolvePath(params.input));
-    const outputDimensions = this.getOutputDimensions(inputDimensions, params);
+  ): Promise<EstimationResult> {
+    const inputImage = await this.getInputImage(params, resolvePath, download, getMetadata);
+    const [inputDimensions, inputFormat] = await this.getInputDimensionsAndFormat(inputImage.path);
+    const outputDimensions = this.getOutputDimensions(inputDimensions, inputImage.pipeline);
     log(`Input dimensions: ${JSON.stringify(inputDimensions)}`);
     log(`Output dimensions: ${JSON.stringify(outputDimensions)}`);
 
     const inputPixels = this.countPixels(inputDimensions);
-    const outputPixels = this.countPixels(this.getOutputDimensions(inputDimensions, params));
+    const outputPixels = this.countPixels(this.getOutputDimensions(inputDimensions, inputImage.pipeline));
     const estimateKB = MemoryEstimationModel.getEstimateInKBForFormat(
       inputPixels,
       outputPixels,
       inputFormat,
-      params.outputFormat ?? inputFormat
+      inputImage.pipeline.outputFormat ?? inputFormat
     );
 
     const physicalMemoryMB = Math.ceil(estimateKB / 1024);
@@ -53,26 +58,137 @@ export class Transformer {
     log(`Estimated memory: ${physicalMemoryMB} MB`);
 
     return {
-      physicalMemoryMB
+      inputImage,
+      estimation: {
+        physicalMemoryMB
+      }
     };
   }
 
   async run(
-    transformation: Transformation,
-    params: Params,
+    { output }: Params,
     resolvePath: LocalFileResolver,
     setMetadata: FileMetadataSetter,
+    { inputImage }: EstimationResult,
     log: Logger
   ): Promise<void> {
     log("Transforming image...");
-    await this.transformImage(params, resolvePath, log);
-    await this.setContentType(transformation, params, setMetadata);
-
+    await this.transformImage(inputImage, output, resolvePath, log);
+    await this.setContentType(inputImage, output, setMetadata);
     log("Image transformed.");
   }
 
-  private async transformImage(params: Params, resolvePath: LocalFileResolver, log: Logger): Promise<void> {
-    const args = this.makeArgs(params, resolvePath);
+  private async getInputImage(
+    params: Params,
+    resolvePath: LocalFileResolver,
+    download: FileDownloader,
+    getMetadata: FileMetadataGetter
+  ): Promise<InputImage> {
+    const inputPath = resolvePath(params.input);
+    const metadata = await getMetadata(params.input);
+    if (metadata.contentType !== "application/json") {
+      return {
+        path: inputPath,
+        contentType: metadata.contentType,
+        pipeline: params.pipeline
+      };
+    }
+
+    const paramsFromFile: ParamsFromFile = JSON.parse((await fsAsync.readFile(inputPath)).toString());
+    const fileIdOrUrl = paramsFromFile.input;
+    const destinationFilePath = inputPath;
+    const isUrl = fileIdOrUrl.startsWith("http://") || fileIdOrUrl.startsWith("https://");
+    const request: DownloadRequest = isUrl
+      ? { destinationFilePath, url: fileIdOrUrl }
+      : { destinationFilePath, fileId: fileIdOrUrl };
+    const response = await download({ file: request });
+
+    if (response.file.isError) {
+      throw new Error(`Failed to download file for cropping: ${paramsFromFile.input}`);
+    }
+
+    return {
+      path: request.destinationFilePath,
+      contentType: response.file.headers["content-type"],
+      pipeline: this.mergePipelines(paramsFromFile, params)
+    };
+  }
+
+  private mergePipelines(file: ParamsFromFile, master: Params): ImagePipeline {
+    const behaviour = master.pipelineMergeBehaviour ?? ImagePipelineMergeBehaviour.defaultValue;
+    return {
+      outputFormat: this.mergeOutputFormat(file.pipeline, master.pipeline, behaviour),
+      steps: this.mergeSteps(file.pipeline, master.pipeline, behaviour)
+    };
+  }
+
+  private mergeOutputFormat(
+    file: ImagePipeline,
+    master: ImagePipeline,
+    behaviour: ImagePipelineMergeBehaviour
+  ): OutputImageFormat | undefined {
+    switch (behaviour.outputFormat) {
+      case "master":
+        return master.outputFormat;
+      case "file":
+        return file.outputFormat;
+      case "fileThenMaster":
+        return file.outputFormat ?? master.outputFormat;
+      default:
+        assertUnreachable(behaviour.outputFormat);
+    }
+  }
+
+  private mergeSteps(
+    file: ImagePipeline,
+    master: ImagePipeline,
+    behaviour: ImagePipelineMergeBehaviour
+  ): ImagePipelineStep[] {
+    if (behaviour.steps.mergeBehaviour === "master") {
+      return master.steps;
+    }
+
+    const whitelist = behaviour.steps.fileWhitelist;
+    const fileSteps = file.steps.filter(x => whitelist.includes(x.type));
+    if (behaviour.steps.mergeBehaviour === "file") {
+      return fileSteps;
+    }
+
+    let steps: ImagePipelineStep[];
+    switch (behaviour.steps.mergeBehaviour.startWith) {
+      case "master":
+        steps = [...master.steps, ...file.steps];
+        break;
+      case "file":
+        steps = [...file.steps, ...master.steps];
+        break;
+      default:
+        assertUnreachable(behaviour.steps.mergeBehaviour.startWith);
+    }
+
+    switch (behaviour.steps.mergeBehaviour.removeDuplicates) {
+      case "start":
+        steps = uniqBy(x => x.type, steps);
+        break;
+      case "end":
+        steps = reverse(uniqBy(x => x.type, reverse(steps)));
+        break;
+      case false:
+        break;
+      default:
+        assertUnreachable(behaviour.steps.mergeBehaviour.removeDuplicates);
+    }
+
+    return steps;
+  }
+
+  private async transformImage(
+    inputImage: InputImage,
+    output: TransformationArtifactPath,
+    resolvePath: LocalFileResolver,
+    log: Logger
+  ): Promise<void> {
+    const args = this.makeArgs(inputImage, output, resolvePath);
     log(`Using command: ${this.magickInfo.binaryPath} ${args.join(" ")}`);
 
     const { stderr } = await this.runMagick(this.timePath, ["-f", "%M", this.magickInfo.binaryPath, ...args]);
@@ -84,12 +200,13 @@ export class Transformer {
   }
 
   private async setContentType(
-    transformation: Transformation,
-    params: Params,
+    inputImage: InputImage,
+    output: TransformationArtifactPath,
     setMetadata: FileMetadataSetter
   ): Promise<void> {
-    const mimeType = params.outputFormat === undefined ? transformation.file.mime : mime.getType(params.outputFormat);
-    await setMetadata(params.output, { contentType: mimeType ?? undefined });
+    const outputFormat = inputImage.pipeline.outputFormat;
+    const mimeType = outputFormat === undefined ? inputImage.contentType : mime.getType(outputFormat);
+    await setMetadata(output, { contentType: mimeType ?? undefined });
   }
 
   private async getInputDimensionsAndFormat(imagePath: string): Promise<[ImageWidthHeight, OutputImageFormat]> {
@@ -141,8 +258,8 @@ export class Transformer {
     ];
   }
 
-  private getOutputDimensions(inputImage: ImageWidthHeight, params: Params): ImageWidthHeight {
-    const resizeSteps = reverse(params.steps)
+  private getOutputDimensions(inputImage: ImageWidthHeight, pipeline: ImagePipeline): ImageWidthHeight {
+    const resizeSteps = reverse(pipeline.steps)
       .flatMap(x => (x.type === "resize" ? [x] : []))
       .map(x => x.geometry.size);
     if (resizeSteps.length === 0) {
@@ -242,15 +359,19 @@ export class Transformer {
     });
   }
 
-  private makeArgs(params: Params, resolve: LocalFileResolver): string[] {
+  private makeArgs(
+    inputImage: InputImage,
+    outputPath: TransformationArtifactPath,
+    resolve: LocalFileResolver
+  ): string[] {
     return [
-      resolve(params.input),
-      ...this.makeTransformationArgs(params.steps),
-      `${this.makeOutputFormat(params)}${resolve(params.output)}`
+      inputImage.path,
+      ...this.makeTransformationArgs(inputImage.pipeline.steps),
+      `${this.makeOutputFormat(inputImage.pipeline)}${resolve(outputPath)}`
     ];
   }
 
-  private makeOutputFormat(params: Params): string {
+  private makeOutputFormat(params: ImagePipeline): string {
     return params.outputFormat === undefined ? "" : `${params.outputFormat}:`;
   }
 

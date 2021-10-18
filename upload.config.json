@@ -73,6 +73,237 @@
             "title": "Pixel offset.",
             "type": "object"
           },
+          "ImagePipeline": {
+            "additionalProperties": false,
+            "properties": {
+              "outputFormat": {
+                "enum": [
+                  "a",
+                  "aai",
+                  "ai",
+                  "art",
+                  "avs",
+                  "b",
+                  "bgr",
+                  "bgra",
+                  "bgro",
+                  "bmp",
+                  "bmp2",
+                  "bmp3",
+                  "c",
+                  "cal",
+                  "cals",
+                  "cin",
+                  "clip",
+                  "cmyk",
+                  "cmyka",
+                  "cur",
+                  "data",
+                  "dcx",
+                  "dds",
+                  "dpx",
+                  "dxt1",
+                  "dxt5",
+                  "epdf",
+                  "epi",
+                  "eps",
+                  "epsf",
+                  "epsi",
+                  "ept",
+                  "ept2",
+                  "ept3",
+                  "fax",
+                  "fits",
+                  "flv",
+                  "fts",
+                  "g",
+                  "g3",
+                  "g4",
+                  "gif",
+                  "gif87",
+                  "gray",
+                  "graya",
+                  "group4",
+                  "hdr",
+                  "heic",
+                  "hrz",
+                  "icb",
+                  "ico",
+                  "icon",
+                  "inline",
+                  "ipl",
+                  "j2c",
+                  "j2k",
+                  "jng",
+                  "jp2",
+                  "jpc",
+                  "jpe",
+                  "jpeg",
+                  "jpg",
+                  "jpm",
+                  "jps",
+                  "jpt",
+                  "k",
+                  "m",
+                  "m2v",
+                  "m4v",
+                  "map",
+                  "mask",
+                  "mat",
+                  "miff",
+                  "mkv",
+                  "mng",
+                  "mono",
+                  "mov",
+                  "mp4",
+                  "mpc",
+                  "mpeg",
+                  "mpg",
+                  "mtv",
+                  "mvg",
+                  "null",
+                  "o",
+                  "otb",
+                  "pal",
+                  "palm",
+                  "pam",
+                  "pbm",
+                  "pcd",
+                  "pcds",
+                  "pcl",
+                  "pct",
+                  "pcx",
+                  "pdb",
+                  "pdf",
+                  "pdfa",
+                  "pfm",
+                  "pgm",
+                  "pgx",
+                  "picon",
+                  "pict",
+                  "pjpeg",
+                  "png",
+                  "png00",
+                  "png24",
+                  "png32",
+                  "png48",
+                  "png64",
+                  "png8",
+                  "pnm",
+                  "ppm",
+                  "ps",
+                  "psb",
+                  "psd",
+                  "ptif",
+                  "r",
+                  "ras",
+                  "rgb",
+                  "rgba",
+                  "rgbo",
+                  "rgf",
+                  "sgi",
+                  "six",
+                  "sixel",
+                  "sun",
+                  "svg",
+                  "tga",
+                  "tiff",
+                  "tiff64",
+                  "txt",
+                  "uyvy",
+                  "vda",
+                  "vicar",
+                  "vid",
+                  "viff",
+                  "vips",
+                  "vst",
+                  "wbmp",
+                  "webp",
+                  "wmv",
+                  "xbm",
+                  "xpm",
+                  "xv",
+                  "y",
+                  "ycbcr",
+                  "ycbcra",
+                  "yuv"
+                ],
+                "title": "Output format",
+                "type": "string"
+              },
+              "steps": {
+                "items": {
+                  "$ref": "#/definitions/ResizeStep"
+                },
+                "title": "Steps",
+                "type": "array"
+              }
+            },
+            "required": ["steps"],
+            "type": "object"
+          },
+          "ImagePipelineMergeBehaviour": {
+            "additionalProperties": false,
+            "properties": {
+              "outputFormat": {
+                "enum": ["file", "fileThenMaster", "master"],
+                "type": "string"
+              },
+              "steps": {
+                "anyOf": [
+                  {
+                    "additionalProperties": false,
+                    "properties": {
+                      "mergeBehaviour": {
+                        "enum": ["master"],
+                        "type": "string"
+                      }
+                    },
+                    "required": ["mergeBehaviour"],
+                    "type": "object"
+                  },
+                  {
+                    "additionalProperties": false,
+                    "properties": {
+                      "fileWhitelist": {
+                        "items": {
+                          "enum": ["resize"],
+                          "type": "string"
+                        },
+                        "type": "array"
+                      },
+                      "mergeBehaviour": {
+                        "anyOf": [
+                          {
+                            "additionalProperties": false,
+                            "properties": {
+                              "removeDuplicates": {
+                                "enum": ["end", false, "start"]
+                              },
+                              "startWith": {
+                                "enum": ["file", "master"],
+                                "type": "string"
+                              }
+                            },
+                            "required": ["removeDuplicates", "startWith"],
+                            "type": "object"
+                          },
+                          {
+                            "enum": ["file"],
+                            "type": "string"
+                          }
+                        ]
+                      }
+                    },
+                    "required": ["fileWhitelist", "mergeBehaviour"],
+                    "type": "object"
+                  }
+                ]
+              }
+            },
+            "required": ["outputFormat", "steps"],
+            "type": "object"
+          },
           "ImageSizeArea": {
             "additionalProperties": false,
             "properties": {
@@ -91,9 +322,6 @@
           "ImageSizeAspectRatio": {
             "additionalProperties": false,
             "properties": {
-              "area": {
-                "type": "integer"
-              },
               "type": {
                 "enum": ["x:y"],
                 "type": "string"
@@ -105,7 +333,7 @@
                 "type": "integer"
               }
             },
-            "required": ["area", "type", "x", "y"],
+            "required": ["type", "x", "y"],
             "title": "Aspect ratio (e.g. 3:2 = 1.5).",
             "type": "object"
           },
@@ -139,7 +367,7 @@
               }
             },
             "required": ["height", "type", "width"],
-            "title": "Maximum values of height and width given, aspect ratio preserved.",
+            "title": "Width and height emphatically given, original aspect ratio ignored.",
             "type": "object"
           },
           "ImageSizeMinWidthHeight": {
@@ -223,7 +451,7 @@
               }
             },
             "required": ["height", "type", "width"],
-            "title": "Width and height emphatically given, original aspect ratio ignored.",
+            "title": "Maximum values of height and width given, aspect ratio preserved.",
             "type": "object"
           },
           "ImageSizeWidthHeightEnlarge": {
@@ -262,161 +490,6 @@
             "title": "Shrinks an image with dimension(s) larger than the corresponding width and/or height argument(s).",
             "type": "object"
           },
-          "OutputImageFormat": {
-            "enum": [
-              "a",
-              "aai",
-              "ai",
-              "art",
-              "avs",
-              "b",
-              "bgr",
-              "bgra",
-              "bgro",
-              "bmp",
-              "bmp2",
-              "bmp3",
-              "c",
-              "cal",
-              "cals",
-              "cin",
-              "clip",
-              "cmyk",
-              "cmyka",
-              "cur",
-              "data",
-              "dcx",
-              "dds",
-              "dpx",
-              "dxt1",
-              "dxt5",
-              "epdf",
-              "epi",
-              "eps",
-              "epsf",
-              "epsi",
-              "ept",
-              "ept2",
-              "ept3",
-              "fax",
-              "fits",
-              "flv",
-              "fts",
-              "g",
-              "g3",
-              "g4",
-              "gif",
-              "gif87",
-              "gray",
-              "graya",
-              "group4",
-              "hdr",
-              "heic",
-              "hrz",
-              "icb",
-              "ico",
-              "icon",
-              "inline",
-              "ipl",
-              "j2c",
-              "j2k",
-              "jng",
-              "jp2",
-              "jpc",
-              "jpe",
-              "jpeg",
-              "jpg",
-              "jpm",
-              "jps",
-              "jpt",
-              "k",
-              "m",
-              "m2v",
-              "m4v",
-              "map",
-              "mask",
-              "mat",
-              "miff",
-              "mkv",
-              "mng",
-              "mono",
-              "mov",
-              "mp4",
-              "mpc",
-              "mpeg",
-              "mpg",
-              "mtv",
-              "mvg",
-              "null",
-              "o",
-              "otb",
-              "pal",
-              "palm",
-              "pam",
-              "pbm",
-              "pcd",
-              "pcds",
-              "pcl",
-              "pct",
-              "pcx",
-              "pdb",
-              "pdf",
-              "pdfa",
-              "pfm",
-              "pgm",
-              "pgx",
-              "picon",
-              "pict",
-              "pjpeg",
-              "png",
-              "png00",
-              "png24",
-              "png32",
-              "png48",
-              "png64",
-              "png8",
-              "pnm",
-              "ppm",
-              "ps",
-              "psb",
-              "psd",
-              "ptif",
-              "r",
-              "ras",
-              "rgb",
-              "rgba",
-              "rgbo",
-              "rgf",
-              "sgi",
-              "six",
-              "sixel",
-              "sun",
-              "svg",
-              "tga",
-              "tiff",
-              "tiff64",
-              "txt",
-              "uyvy",
-              "vda",
-              "vicar",
-              "vid",
-              "viff",
-              "vips",
-              "vst",
-              "wbmp",
-              "webp",
-              "wmv",
-              "xbm",
-              "xpm",
-              "xv",
-              "y",
-              "ycbcr",
-              "ycbcra",
-              "yuv"
-            ],
-            "title": "Supported output image format.",
-            "type": "string"
-          },
           "ResizeStep": {
             "additionalProperties": false,
             "properties": {
@@ -443,18 +516,14 @@
             "title": "Output path",
             "type": "string"
           },
-          "outputFormat": {
-            "$ref": "#/definitions/OutputImageFormat"
+          "pipeline": {
+            "$ref": "#/definitions/ImagePipeline"
           },
-          "steps": {
-            "items": {
-              "$ref": "#/definitions/ResizeStep"
-            },
-            "title": "Steps",
-            "type": "array"
+          "pipelineMergeBehaviour": {
+            "$ref": "#/definitions/ImagePipelineMergeBehaviour"
           }
         },
-        "required": ["input", "output", "outputFormat", "steps"],
+        "required": ["input", "output", "pipeline"],
         "type": "object"
       },
       "ui": {}
@@ -489,11 +558,13 @@
             "params": {
               "input": "/",
               "output": "/",
-              "outputFormat": {
-                "ref": "format"
-              },
-              "steps": {
-                "ref": "[{if: width == null && height == null, then: `[]`}, {if: width != null && height == null, then: to_array({type:'resize',geometry:{size:{type:'width',width:width}}})}, {if: width == null && height != null, then: to_array({type:'resize',geometry:{size:{type:'xheight',height:height}}})}, {if: resizeMode=='Maximum', then:to_array({type:'resize',geometry:{size:{type:'widthxheight',width:width,height:height}}})}, {if: resizeMode=='Minimum', then:to_array({type:'resize',geometry:{size:{type:'widthxheight^',width:width,height:height}}})}, {if: resizeMode=='Exact', then:to_array({type:'resize',geometry:{size:{type:'widthxheight!',width:width,height:height}}})}][?if]|[0].then"
+              "pipeline": {
+                "outputFormat": {
+                  "ref": "format"
+                },
+                "steps": {
+                  "ref": "[{if: width == null && height == null, then: `[]`}, {if: width != null && height == null, then: to_array({type:'resize',geometry:{size:{type:'width',width:width}}})}, {if: width == null && height != null, then: to_array({type:'resize',geometry:{size:{type:'xheight',height:height}}})}, {if: resizeMode=='Maximum', then:to_array({type:'resize',geometry:{size:{type:'widthxheight',width:width,height:height}}})}, {if: resizeMode=='Minimum', then:to_array({type:'resize',geometry:{size:{type:'widthxheight^',width:width,height:height}}})}, {if: resizeMode=='Exact', then:to_array({type:'resize',geometry:{size:{type:'widthxheight!',width:width,height:height}}})}][?if]|[0].then"
+                }
               }
             }
           }
