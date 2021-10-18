@@ -9,6 +9,20 @@
         "$schema": "http://json-schema.org/draft-07/schema#",
         "additionalProperties": false,
         "definitions": {
+          "CropStep": {
+            "additionalProperties": false,
+            "properties": {
+              "geometry": {
+                "$ref": "#/definitions/ImageGeometry"
+              },
+              "type": {
+                "enum": ["crop"],
+                "type": "string"
+              }
+            },
+            "required": ["geometry", "type"],
+            "type": "object"
+          },
           "ImageGeometry": {
             "additionalProperties": false,
             "properties": {
@@ -233,7 +247,14 @@
               },
               "steps": {
                 "items": {
-                  "$ref": "#/definitions/ResizeStep"
+                  "anyOf": [
+                    {
+                      "$ref": "#/definitions/ResizeStep"
+                    },
+                    {
+                      "$ref": "#/definitions/CropStep"
+                    }
+                  ]
                 },
                 "title": "Steps",
                 "type": "array"
@@ -267,7 +288,7 @@
                     "properties": {
                       "fileWhitelist": {
                         "items": {
-                          "enum": ["resize"],
+                          "enum": ["crop", "resize"],
                           "type": "string"
                         },
                         "type": "array"
@@ -553,7 +574,7 @@
           {
             "plugin": {
               "packageName": "upload-image-plugin",
-              "packageVersion": "1.27.0"
+              "packageVersion": "1.28.0"
             },
             "params": {
               "input": "/",
