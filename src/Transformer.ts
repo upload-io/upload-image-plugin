@@ -381,10 +381,11 @@ export class Transformer {
 
   private makeTransformationArg(step: ImagePipelineStep): string[] {
     switch (step.type) {
+      case "crop":
       case "resize":
         return this.makeTransformationUnivariateGeometryArg(step);
       default:
-        assertUnreachable(step.type);
+        assertUnreachable(step);
     }
   }
 
