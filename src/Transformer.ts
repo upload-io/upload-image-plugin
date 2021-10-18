@@ -95,12 +95,9 @@ export class Transformer {
     }
 
     const paramsFromFile: ParamsFromFile = JSON.parse((await fsAsync.readFile(inputPath)).toString());
-    const fileIdOrUrl = paramsFromFile.input;
-    const destinationFilePath = inputPath;
-    const isUrl = fileIdOrUrl.startsWith("http://") || fileIdOrUrl.startsWith("https://");
-    const request: DownloadRequest = isUrl
-      ? { destinationFilePath, url: fileIdOrUrl }
-      : { destinationFilePath, fileId: fileIdOrUrl };
+    const sourceFile = paramsFromFile.input;
+    const destinationFile = inputPath;
+    const request: DownloadRequest = { destinationFile, sourceFile };
     const response = await download({ file: request });
 
     if (response.file.isError) {
@@ -108,7 +105,7 @@ export class Transformer {
     }
 
     return {
-      path: request.destinationFilePath,
+      path: request.destinationFile,
       contentType: response.file.headers["content-type"],
       pipeline: this.mergePipelines(paramsFromFile, params)
     };
