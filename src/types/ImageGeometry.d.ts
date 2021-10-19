@@ -14,9 +14,9 @@ export type ImageSize =
   | ImageSizeScaleXY
   | ImageSizeWidth
   | ImageSizeHeight
-  | ImageSizeWidthHeight
-  | ImageSizeMinWidthHeight
-  | ImageSizeMaxWidthHeight
+  | ImageSizeWidthHeightMax
+  | ImageSizeWidthHeightMin
+  | ImageSizeWidthHeightForce
   | ImageSizeWidthHeightShrink
   | ImageSizeWidthHeightEnlarge
   | ImageSizeArea
@@ -66,7 +66,7 @@ export interface ImageSizeHeight {
 /**
  * Maximum values of height and width given, aspect ratio preserved.
  */
-export interface ImageSizeWidthHeight {
+export interface ImageSizeWidthHeightMax {
   height: number;
   type: "widthxheight";
   width: number;
@@ -75,7 +75,7 @@ export interface ImageSizeWidthHeight {
 /**
  * Minimum values of width and height given, aspect ratio preserved.
  */
-export interface ImageSizeMinWidthHeight {
+export interface ImageSizeWidthHeightMin {
   height: number;
   type: "widthxheight^";
   width: number;
@@ -84,7 +84,7 @@ export interface ImageSizeMinWidthHeight {
 /**
  * Width and height emphatically given, original aspect ratio ignored.
  */
-export interface ImageSizeMaxWidthHeight {
+export interface ImageSizeWidthHeightForce {
   height: number;
   type: "widthxheight!";
   width: number;
