@@ -1,6 +1,6 @@
-# Upload Compression Plugin
+# Upload Image Plugin
 
-Compress and decompress files on [Upload](https://upload.io).
+Resize, crop, and convert images on [Upload](https://upload.io).
 
 To use this plugin use the following settings in a "Transformation Step" in the Upload Dashboard:
 
