@@ -4,8 +4,6 @@
 export type SupportedImageFormat =
   | "ai"
   | "bmp"
-  | "bmp2"
-  | "bmp3"
   | "epi"
   | "eps"
   | "gif"

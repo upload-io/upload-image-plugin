@@ -10,7 +10,7 @@ import { reverse, uniqBy } from "ramda";
 import { ImageMagickError } from "upload-image-plugin/types/Errors";
 import { MagickInfo } from "upload-image-plugin/magick/MagickInfo";
 import { GeometryUtils } from "upload-image-plugin/common/GeometryUtils";
-import { SupportedImageFormat } from "upload-image-plugin/types/OutputImageFormat";
+import { SupportedImageFormat } from "upload-image-plugin/types/SupportedImageFormat";
 import os from "os";
 import mime from "mime";
 import { promises as fsAsync } from "fs";

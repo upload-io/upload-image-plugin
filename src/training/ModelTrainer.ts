@@ -3,7 +3,7 @@ import { MemoryEstimationModel } from "upload-image-plugin/MemoryEstimationModel
 import { MemoryEstimationModelParameters } from "upload-image-plugin/types/MemoryEstimationModelParameters";
 import { ModelParameterRange } from "upload-image-plugin/training/ModelParameterRange";
 import { Sample } from "upload-image-plugin/training/Sample";
-import { SupportedImageFormat } from "upload-image-plugin/types/OutputImageFormat";
+import { SupportedImageFormat } from "upload-image-plugin/types/SupportedImageFormat";
 import { FormatTrainingResult } from "upload-image-plugin/training/FormatTrainingResult";
 import Bluebird from "bluebird";
 import { promises as fsAsync } from "fs";

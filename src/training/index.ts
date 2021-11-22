@@ -1,6 +1,6 @@
 import { ModelTrainer } from "upload-image-plugin/training/ModelTrainer";
 import { MagickInfo } from "upload-image-plugin/magick/MagickInfo";
-import { SupportedImageFormat } from "upload-image-plugin/types/OutputImageFormat";
+import { SupportedImageFormat } from "upload-image-plugin/types/SupportedImageFormat";
 import { MemoryEstimationModelParameters } from "upload-image-plugin/types/MemoryEstimationModelParameters";
 
 const quickMode = process.env.QUICK_MODE === "true";
