@@ -441,7 +441,7 @@
           {
             "plugin": {
               "packageName": "upload-image-plugin",
-              "packageVersion": "1.29.0"
+              "packageVersion": "1.30.0"
             },
             "params": {
               "input": "/",
