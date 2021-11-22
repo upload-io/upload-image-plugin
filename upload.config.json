@@ -443,7 +443,7 @@
           {
             "plugin": {
               "packageName": "upload-image-plugin",
-              "packageVersion": "1.28.1"
+              "packageVersion": "1.29.0"
             },
             "params": {
               "input": "/",
