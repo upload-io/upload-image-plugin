@@ -1,8 +1,8 @@
 import { MemoryEstimationModelParameters } from "upload-image-plugin/types/MemoryEstimationModelParameters";
-import { OutputImageFormat } from "upload-image-plugin/types/OutputImageFormat";
+import { SupportedImageFormat } from "upload-image-plugin/types/OutputImageFormat";
 
 export interface FormatTrainingResult {
-  format: OutputImageFormat;
+  format: SupportedImageFormat;
   modelIfViable:
     | undefined
     | {

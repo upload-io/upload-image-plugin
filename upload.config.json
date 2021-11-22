@@ -45,13 +45,13 @@
                     "$ref": "#/definitions/ImageSizeHeight"
                   },
                   {
-                    "$ref": "#/definitions/ImageSizeWidthHeight"
+                    "$ref": "#/definitions/ImageSizeWidthHeightMax"
                   },
                   {
-                    "$ref": "#/definitions/ImageSizeMinWidthHeight"
+                    "$ref": "#/definitions/ImageSizeWidthHeightMin"
                   },
                   {
-                    "$ref": "#/definitions/ImageSizeMaxWidthHeight"
+                    "$ref": "#/definitions/ImageSizeWidthHeightForce"
                   },
                   {
                     "$ref": "#/definitions/ImageSizeWidthHeightShrink"
@@ -92,155 +92,24 @@
             "properties": {
               "outputFormat": {
                 "enum": [
-                  "a",
-                  "aai",
                   "ai",
-                  "art",
-                  "avs",
-                  "b",
-                  "bgr",
-                  "bgra",
-                  "bgro",
                   "bmp",
                   "bmp2",
                   "bmp3",
-                  "c",
-                  "cal",
-                  "cals",
-                  "cin",
-                  "clip",
-                  "cmyk",
-                  "cmyka",
-                  "cur",
-                  "data",
-                  "dcx",
-                  "dds",
-                  "dpx",
-                  "dxt1",
-                  "dxt5",
-                  "epdf",
                   "epi",
                   "eps",
-                  "epsf",
-                  "epsi",
-                  "ept",
-                  "ept2",
-                  "ept3",
-                  "fax",
-                  "fits",
-                  "flv",
-                  "fts",
-                  "g",
-                  "g3",
-                  "g4",
                   "gif",
-                  "gif87",
-                  "gray",
-                  "graya",
-                  "group4",
-                  "hdr",
                   "heic",
-                  "hrz",
-                  "icb",
                   "ico",
-                  "icon",
-                  "inline",
-                  "ipl",
-                  "j2c",
-                  "j2k",
-                  "jng",
                   "jp2",
-                  "jpc",
-                  "jpe",
-                  "jpeg",
                   "jpg",
-                  "jpm",
-                  "jps",
-                  "jpt",
-                  "k",
-                  "m",
-                  "m2v",
-                  "m4v",
-                  "map",
-                  "mask",
-                  "mat",
-                  "miff",
-                  "mkv",
-                  "mng",
-                  "mono",
-                  "mov",
-                  "mp4",
-                  "mpc",
-                  "mpeg",
-                  "mpg",
-                  "mtv",
-                  "mvg",
-                  "null",
-                  "o",
-                  "otb",
-                  "pal",
-                  "palm",
-                  "pam",
-                  "pbm",
-                  "pcd",
-                  "pcds",
-                  "pcl",
-                  "pct",
-                  "pcx",
-                  "pdb",
                   "pdf",
-                  "pdfa",
-                  "pfm",
-                  "pgm",
-                  "pgx",
-                  "picon",
-                  "pict",
                   "pjpeg",
                   "png",
-                  "png00",
-                  "png24",
-                  "png32",
-                  "png48",
-                  "png64",
-                  "png8",
-                  "pnm",
-                  "ppm",
-                  "ps",
-                  "psb",
                   "psd",
-                  "ptif",
-                  "r",
-                  "ras",
-                  "rgb",
-                  "rgba",
-                  "rgbo",
-                  "rgf",
-                  "sgi",
-                  "six",
-                  "sixel",
-                  "sun",
                   "svg",
-                  "tga",
                   "tiff",
-                  "tiff64",
-                  "txt",
-                  "uyvy",
-                  "vda",
-                  "vicar",
-                  "vid",
-                  "viff",
-                  "vips",
-                  "vst",
-                  "wbmp",
-                  "webp",
-                  "wmv",
-                  "xbm",
-                  "xpm",
-                  "xv",
-                  "y",
-                  "ycbcr",
-                  "ycbcra",
-                  "yuv"
+                  "webp"
                 ],
                 "title": "Output format",
                 "type": "string"
@@ -373,42 +242,6 @@
             "title": "Height given, width automagically selected to preserve aspect ratio.",
             "type": "object"
           },
-          "ImageSizeMaxWidthHeight": {
-            "additionalProperties": false,
-            "properties": {
-              "height": {
-                "type": "integer"
-              },
-              "type": {
-                "enum": ["widthxheight!"],
-                "type": "string"
-              },
-              "width": {
-                "type": "integer"
-              }
-            },
-            "required": ["height", "type", "width"],
-            "title": "Width and height emphatically given, original aspect ratio ignored.",
-            "type": "object"
-          },
-          "ImageSizeMinWidthHeight": {
-            "additionalProperties": false,
-            "properties": {
-              "height": {
-                "type": "integer"
-              },
-              "type": {
-                "enum": ["widthxheight^"],
-                "type": "string"
-              },
-              "width": {
-                "type": "integer"
-              }
-            },
-            "required": ["height", "type", "width"],
-            "title": "Minimum values of width and height given, aspect ratio preserved.",
-            "type": "object"
-          },
           "ImageSizeScale": {
             "additionalProperties": false,
             "properties": {
@@ -457,7 +290,43 @@
             "title": "Width given, height automagically selected to preserve aspect ratio.",
             "type": "object"
           },
-          "ImageSizeWidthHeight": {
+          "ImageSizeWidthHeightEnlarge": {
+            "additionalProperties": false,
+            "properties": {
+              "height": {
+                "type": "integer"
+              },
+              "type": {
+                "enum": ["widthxheight<"],
+                "type": "string"
+              },
+              "width": {
+                "type": "integer"
+              }
+            },
+            "required": ["height", "type", "width"],
+            "title": "Enlarges an image with dimension(s) smaller than the corresponding width and/or height argument(s).",
+            "type": "object"
+          },
+          "ImageSizeWidthHeightForce": {
+            "additionalProperties": false,
+            "properties": {
+              "height": {
+                "type": "integer"
+              },
+              "type": {
+                "enum": ["widthxheight!"],
+                "type": "string"
+              },
+              "width": {
+                "type": "integer"
+              }
+            },
+            "required": ["height", "type", "width"],
+            "title": "Width and height emphatically given, original aspect ratio ignored.",
+            "type": "object"
+          },
+          "ImageSizeWidthHeightMax": {
             "additionalProperties": false,
             "properties": {
               "height": {
@@ -475,14 +344,14 @@
             "title": "Maximum values of height and width given, aspect ratio preserved.",
             "type": "object"
           },
-          "ImageSizeWidthHeightEnlarge": {
+          "ImageSizeWidthHeightMin": {
             "additionalProperties": false,
             "properties": {
               "height": {
                 "type": "integer"
               },
               "type": {
-                "enum": ["widthxheight<"],
+                "enum": ["widthxheight^"],
                 "type": "string"
               },
               "width": {
@@ -490,7 +359,7 @@
               }
             },
             "required": ["height", "type", "width"],
-            "title": "Enlarges an image with dimension(s) smaller than the corresponding width and/or height argument(s).",
+            "title": "Minimum values of width and height given, aspect ratio preserved.",
             "type": "object"
           },
           "ImageSizeWidthHeightShrink": {
@@ -600,155 +469,24 @@
               "title": "Output format",
               "type": "string",
               "enum": [
-                "a",
-                "aai",
                 "ai",
-                "art",
-                "avs",
-                "b",
-                "bgr",
-                "bgra",
-                "bgro",
                 "bmp",
                 "bmp2",
                 "bmp3",
-                "c",
-                "cal",
-                "cals",
-                "cin",
-                "clip",
-                "cmyk",
-                "cmyka",
-                "cur",
-                "data",
-                "dcx",
-                "dds",
-                "dpx",
-                "dxt1",
-                "dxt5",
-                "epdf",
                 "epi",
                 "eps",
-                "epsf",
-                "epsi",
-                "ept",
-                "ept2",
-                "ept3",
-                "fax",
-                "fits",
-                "flv",
-                "fts",
-                "g",
-                "g3",
-                "g4",
                 "gif",
-                "gif87",
-                "gray",
-                "graya",
-                "group4",
-                "hdr",
                 "heic",
-                "hrz",
-                "icb",
                 "ico",
-                "icon",
-                "inline",
-                "ipl",
-                "j2c",
-                "j2k",
-                "jng",
                 "jp2",
-                "jpc",
-                "jpe",
-                "jpeg",
                 "jpg",
-                "jpm",
-                "jps",
-                "jpt",
-                "k",
-                "m",
-                "m2v",
-                "m4v",
-                "map",
-                "mask",
-                "mat",
-                "miff",
-                "mkv",
-                "mng",
-                "mono",
-                "mov",
-                "mp4",
-                "mpc",
-                "mpeg",
-                "mpg",
-                "mtv",
-                "mvg",
-                "null",
-                "o",
-                "otb",
-                "pal",
-                "palm",
-                "pam",
-                "pbm",
-                "pcd",
-                "pcds",
-                "pcl",
-                "pct",
-                "pcx",
-                "pdb",
                 "pdf",
-                "pdfa",
-                "pfm",
-                "pgm",
-                "pgx",
-                "picon",
-                "pict",
                 "pjpeg",
                 "png",
-                "png00",
-                "png24",
-                "png32",
-                "png48",
-                "png64",
-                "png8",
-                "pnm",
-                "ppm",
-                "ps",
-                "psb",
                 "psd",
-                "ptif",
-                "r",
-                "ras",
-                "rgb",
-                "rgba",
-                "rgbo",
-                "rgf",
-                "sgi",
-                "six",
-                "sixel",
-                "sun",
                 "svg",
-                "tga",
                 "tiff",
-                "tiff64",
-                "txt",
-                "uyvy",
-                "vda",
-                "vicar",
-                "vid",
-                "viff",
-                "vips",
-                "vst",
-                "wbmp",
-                "webp",
-                "wmv",
-                "xbm",
-                "xpm",
-                "xv",
-                "y",
-                "ycbcr",
-                "ycbcra",
-                "yuv"
+                "webp"
               ],
               "default": "jpg"
             },

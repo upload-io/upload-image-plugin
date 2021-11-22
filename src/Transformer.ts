@@ -10,7 +10,7 @@ import { reverse, uniqBy } from "ramda";
 import { ImageMagickError } from "upload-image-plugin/types/Errors";
 import { MagickInfo } from "upload-image-plugin/magick/MagickInfo";
 import { GeometryUtils } from "upload-image-plugin/common/GeometryUtils";
-import { OutputImageFormat } from "upload-image-plugin/types/OutputImageFormat";
+import { SupportedImageFormat } from "upload-image-plugin/types/OutputImageFormat";
 import os from "os";
 import mime from "mime";
 import { promises as fsAsync } from "fs";
@@ -123,7 +123,7 @@ export class Transformer {
     file: ImagePipeline,
     master: ImagePipeline,
     behaviour: ImagePipelineMergeBehaviour
-  ): OutputImageFormat | undefined {
+  ): SupportedImageFormat | undefined {
     switch (behaviour.outputFormat) {
       case "master":
         return master.outputFormat;
@@ -206,7 +206,7 @@ export class Transformer {
     await setMetadata(output, { contentType: mimeType ?? undefined });
   }
 
-  private async getInputDimensionsAndFormat(imagePath: string): Promise<[ImageWidthHeight, OutputImageFormat]> {
+  private async getInputDimensionsAndFormat(imagePath: string): Promise<[ImageWidthHeight, SupportedImageFormat]> {
     let stdout: string;
     try {
       stdout = (await this.runMagick(this.magickInfo.binaryPath, ["identify", imagePath])).stdout;
@@ -222,7 +222,7 @@ export class Transformer {
     // e.g. "images_jpf/09356268.jpf JP2 3532x2649 3532x2649+0+0 8-bit sRGB 0.000u 0:00.000"
     const lineParts = firstLine.split(" ");
 
-    const format = lineParts[1]?.toLowerCase() as OutputImageFormat;
+    const format = lineParts[1]?.toLowerCase() as SupportedImageFormat;
     if (format === undefined) {
       throw new Error(`Unexpected error: format was undefined: '${firstLine}'`);
     }

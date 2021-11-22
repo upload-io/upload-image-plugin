@@ -1,6 +1,6 @@
 import { ModelTrainer } from "upload-image-plugin/training/ModelTrainer";
 import { MagickInfo } from "upload-image-plugin/magick/MagickInfo";
-import { OutputImageFormat } from "upload-image-plugin/types/OutputImageFormat";
+import { SupportedImageFormat } from "upload-image-plugin/types/OutputImageFormat";
 import { MemoryEstimationModelParameters } from "upload-image-plugin/types/MemoryEstimationModelParameters";
 
 const quickMode = process.env.QUICK_MODE === "true";
@@ -26,7 +26,7 @@ modelTrainer.train().then(
       );
     });
 
-    const params: Partial<Record<OutputImageFormat, MemoryEstimationModelParameters>> = Object.fromEntries(
+    const params: Partial<Record<SupportedImageFormat, MemoryEstimationModelParameters>> = Object.fromEntries(
       results.map(x => [x.format, x.modelIfViable?.modelParameters])
     );
     console.log("");

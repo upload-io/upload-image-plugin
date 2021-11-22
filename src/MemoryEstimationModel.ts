@@ -1,5 +1,5 @@
 import { MemoryEstimationModelParameters } from "upload-image-plugin/types/MemoryEstimationModelParameters";
-import { OutputImageFormat } from "upload-image-plugin/types/OutputImageFormat";
+import { SupportedImageFormat } from "upload-image-plugin/types/OutputImageFormat";
 
 /**
  * See README.md.
@@ -16,8 +16,9 @@ export class MemoryEstimationModel {
     webp: { spaceCoefficient: 0.0187, spaceConstant: 9526, shareCoefficient: 0.135, shareConstant: 0 }
   };
 
-  private static readonly modelParametersPartial: Partial<Record<OutputImageFormat, MemoryEstimationModelParameters>> =
-    MemoryEstimationModel.modelParameters;
+  private static readonly modelParametersPartial: Partial<
+    Record<SupportedImageFormat, MemoryEstimationModelParameters>
+  > = MemoryEstimationModel.modelParameters;
 
   /**
    * Use one of the more expensive formats, so we overestimate.
@@ -31,8 +32,8 @@ export class MemoryEstimationModel {
   static getEstimateInKBForFormat(
     inputPixelCount: number,
     outputPixelCount: number,
-    inputFormat: OutputImageFormat,
-    outputFormat: OutputImageFormat
+    inputFormat: SupportedImageFormat,
+    outputFormat: SupportedImageFormat
   ): number {
     return MemoryEstimationModel.getEstimateInKB(
       inputPixelCount,
@@ -81,7 +82,7 @@ export class MemoryEstimationModel {
     return Math.ceil(largeSpaceKB + smallSpaceKB);
   }
 
-  private static getModelParamsForFormat(format: OutputImageFormat): MemoryEstimationModelParameters {
+  private static getModelParamsForFormat(format: SupportedImageFormat): MemoryEstimationModelParameters {
     return MemoryEstimationModel.modelParametersPartial[format] ?? MemoryEstimationModel.defaultModelParameters;
   }
 }

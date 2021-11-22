@@ -3,7 +3,7 @@ import { MemoryEstimationModel } from "upload-image-plugin/MemoryEstimationModel
 import { MemoryEstimationModelParameters } from "upload-image-plugin/types/MemoryEstimationModelParameters";
 import { ModelParameterRange } from "upload-image-plugin/training/ModelParameterRange";
 import { Sample } from "upload-image-plugin/training/Sample";
-import { OutputImageFormat } from "upload-image-plugin/types/OutputImageFormat";
+import { SupportedImageFormat } from "upload-image-plugin/types/OutputImageFormat";
 import { FormatTrainingResult } from "upload-image-plugin/training/FormatTrainingResult";
 import Bluebird from "bluebird";
 import { promises as fsAsync } from "fs";
@@ -25,7 +25,7 @@ export class ModelTrainer {
    */
   private readonly largeNoisyImage = path.join(__dirname, "input.jpg");
 
-  private readonly popularFormats: OutputImageFormat[] = ["jpg", "jp2", "png", "gif", "webp"];
+  private readonly popularFormats: SupportedImageFormat[] = ["jpg", "jp2", "png", "gif", "webp"];
 
   private readonly heightOverWidth = 0.75; // Can be anything, doesn't need to match input image.
   private readonly coefficientPrecision = 4;
@@ -101,7 +101,7 @@ export class ModelTrainer {
     return await Bluebird.map(formats, async x => this.trainWithSamples(x, await this.readSamples(x)));
   }
 
-  private async generateInputsIfNotExists(format: OutputImageFormat, dimensions: ImageWidthHeight[]): Promise<void> {
+  private async generateInputsIfNotExists(format: SupportedImageFormat, dimensions: ImageWidthHeight[]): Promise<void> {
     const samplesPath = this.getSamplesPath(format);
     if (process.env.FORCE_GENERATE !== "true" && (await this.exists(samplesPath))) {
       this.log(`Skipping input generation, samples already exist: ${samplesPath}`);
@@ -112,7 +112,7 @@ export class ModelTrainer {
     await Bluebird.mapSeries(dimensions, async x => await this.generateInputIfNotExists(format, x));
   }
 
-  private async generateSamplesIfNotExists(format: OutputImageFormat, sampleSpecs: SampleSpec[]): Promise<void> {
+  private async generateSamplesIfNotExists(format: SupportedImageFormat, sampleSpecs: SampleSpec[]): Promise<void> {
     const samplesPath = this.getSamplesPath(format);
     if (await this.exists(samplesPath)) {
       this.log(`Reusing samples: ${samplesPath}`);
@@ -127,7 +127,7 @@ export class ModelTrainer {
   }
 
   private async calculateSample(
-    format: OutputImageFormat,
+    format: SupportedImageFormat,
     { inputPixels, outputPixels, outputDimensions }: SampleSpec
   ): Promise<Sample> {
     this.log(`Calculating sample: ${format} ${inputPixels} > ${outputPixels}`);
@@ -224,7 +224,7 @@ export class ModelTrainer {
     return width * height;
   }
 
-  private async generateInputIfNotExists(format: OutputImageFormat, dimensions: ImageWidthHeight): Promise<void> {
+  private async generateInputIfNotExists(format: SupportedImageFormat, dimensions: ImageWidthHeight): Promise<void> {
     const imagePath = this.getInputPath(format, this.pixels(dimensions));
     if (await this.exists(imagePath)) {
       this.log(`Reusing input image: ${imagePath}`);
@@ -236,7 +236,7 @@ export class ModelTrainer {
     const { width, height } = dimensions;
 
     let bloatingArg = "";
-    if (format === "jpeg" || format === "jpg") {
+    if (format === "jpg") {
       bloatingArg = "-interlace Plane"; // Makes a progressive JPEG, which require more space to process.
     } else if (format === "gif" || format === "png") {
       bloatingArg = "-interlace Line"; // Makes an interlaced PNG, which require more space to process.
@@ -252,23 +252,23 @@ export class ModelTrainer {
     );
   }
 
-  private async readSamples(format: OutputImageFormat): Promise<Sample[]> {
+  private async readSamples(format: SupportedImageFormat): Promise<Sample[]> {
     return JSON.parse((await fsAsync.readFile(this.getSamplesPath(format))).toString());
   }
 
-  private async writeSamples(format: OutputImageFormat, samples: Sample[]): Promise<void> {
+  private async writeSamples(format: SupportedImageFormat, samples: Sample[]): Promise<void> {
     await fsAsync.writeFile(this.getSamplesPath(format), JSON.stringify(samples));
   }
 
-  private getSamplesPath(format: OutputImageFormat): string {
+  private getSamplesPath(format: SupportedImageFormat): string {
     return path.join(__dirname, `samples-${this.quickMode ? "quick" : "full"}-${format}.json`);
   }
 
-  private getInputPath(format: OutputImageFormat, pixelCount: number): string {
+  private getInputPath(format: SupportedImageFormat, pixelCount: number): string {
     return path.join(__dirname, `input-${format}-${pixelCount}.${format}`);
   }
 
-  private trainWithSamples(format: OutputImageFormat, trainingData: Sample[]): FormatTrainingResult {
+  private trainWithSamples(format: SupportedImageFormat, trainingData: Sample[]): FormatTrainingResult {
     const result = this.performBroadSweep(format, trainingData);
     if (result.modelIfViable === undefined) {
       return result;
@@ -277,13 +277,13 @@ export class ModelTrainer {
     return this.performNarrowSweep(format, trainingData, result.modelIfViable.modelParameters);
   }
 
-  private performBroadSweep(format: OutputImageFormat, trainingData: Sample[]): FormatTrainingResult {
+  private performBroadSweep(format: SupportedImageFormat, trainingData: Sample[]): FormatTrainingResult {
     this.log(`Training: ${format} (broad)`);
     return this.performSweep(format, trainingData, this.broad);
   }
 
   private performNarrowSweep(
-    format: OutputImageFormat,
+    format: SupportedImageFormat,
     trainingData: Sample[],
     broadSweepResult: MemoryEstimationModelParameters
   ): FormatTrainingResult {
@@ -306,7 +306,7 @@ export class ModelTrainer {
   }
 
   private performSweep(
-    format: OutputImageFormat,
+    format: SupportedImageFormat,
     trainingData: Sample[],
     { shareConstant, spaceConstant, shareCoefficient, spaceCoefficient }: ModelParameterRanges
   ): FormatTrainingResult {
