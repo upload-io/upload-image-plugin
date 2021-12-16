@@ -1,7 +1,9 @@
 tests/assets
 .tmp/
+.idea/
 .github
 .bin/image-magick/build
 dist-trainer/
 dist-aws/
+aws/trainer/ga
 trainer-prod-results/
