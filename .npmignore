@@ -3,4 +3,5 @@ tests/assets
 .github
 .bin/image-magick/build
 dist-trainer/
+dist-aws/
 trainer-prod-results/

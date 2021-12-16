@@ -29,6 +29,7 @@ npm-debug.log*
 # NPM Packages
 *.tgz
 dist/
+dist-aws/
 dist-trainer/
 
 # ImageMagick Build
