@@ -24,9 +24,7 @@ import { DownloadRequest } from "upload-plugin-sdk/dist/types/transform/Download
 import { ImagePipelineMergeBehaviour } from "upload-image-plugin/types/ImagePipelineMergeBehaviour";
 
 export class Transformer {
-  // If we get an OOM when applying +50% extra memory, then the model is clearly way off and either needs improving or
-  // retraining (with the problematic image).
-  private readonly memoryErrorMargin = 1.5;
+  private readonly memoryErrorMargin = 2;
 
   private readonly timePath = os.platform() === "darwin" ? "/usr/local/bin/gtime" : "/usr/bin/time";
 

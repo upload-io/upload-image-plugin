@@ -2,10 +2,12 @@ import { ModelTrainer } from "upload-image-plugin/training/ModelTrainer";
 import { MagickInfo } from "upload-image-plugin/magick/MagickInfo";
 import { SupportedImageFormat } from "upload-image-plugin/types/SupportedImageFormat";
 import { MemoryEstimationModelParameters } from "upload-image-plugin/types/MemoryEstimationModelParameters";
+import { TrainerMode } from "upload-image-plugin/training/TrainerMode";
 
-const quickMode = process.env.QUICK_MODE === "true";
+const trainerModeMaybe: TrainerMode | undefined = process.env.TRAINER_MODE as any;
+const trainerMode: TrainerMode = trainerModeMaybe ?? "full";
 const magickInfo = new MagickInfo();
-const modelTrainer = new ModelTrainer(quickMode, magickInfo);
+const modelTrainer = new ModelTrainer(trainerMode, magickInfo);
 
 modelTrainer.train().then(
   results => {
@@ -33,7 +35,7 @@ modelTrainer.train().then(
     console.log("PARAMS:");
     console.log(JSON.stringify(params));
     console.log("");
-    if (quickMode) {
+    if (trainerMode === "quick") {
       console.log("WARNING: QUICK_MODE was set... DO NOT USE THESE PARAMS!");
       console.log("");
     }

@@ -9,6 +9,7 @@ cd ../..
 rm -rf dist-aws
 mkdir -p dist-aws/.bin/image-magick
 cp -r dist-trainer dist-aws/dist-trainer
+rm dist-aws/dist-trainer/samples-full-*
 
 if [[ -z "${CODE_ONLY}" ]]; then
   cp -r .bin/image-magick/result dist-aws/.bin/image-magick

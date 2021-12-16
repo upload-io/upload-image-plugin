@@ -16,6 +16,7 @@ if [[ -f "/etc/init.d/${APP_NAME}" ]]; then
   sleep 10
   sudo rm /var/log/${APP_NAME}.log
   sudo rm /var/log/${APP_NAME}.err
+  sudo rm /home/ec2-user/dist-aws/dist-trainer/samples-full-*
 fi
 
 #

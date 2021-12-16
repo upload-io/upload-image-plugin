@@ -22,16 +22,7 @@ npm run deploy:trainer:new
 npm run deploy:trainer:existing
 ```
 
-### Collecting results
-
-```shell
-npm run deploy:trainer:downloadSamples
-```
-
-The above downloads the computed samples to the local repo -- you will see the changes with a `git status`.
-
-Note: if command fails with "No such file or directory", then most-likely the sample images are still being generated
-on the server.
+### Checking progress
 
 You can track progress with:
 
@@ -39,4 +30,22 @@ You can track progress with:
 npm run deploy:trainer:logs
 ```
 
-If you can't see any `Generated samples` log entries, then it hasn't finished generating samples for a single format yet.
+### Collecting results
+
+When the samples have been generated, download them with:
+
+```shell
+npm run deploy:trainer:downloadSamples
+```
+
+### Using the results
+
+1. Train the model locally, after downloading the samples from the EC2 instance (see above):
+
+   ```shell
+   npm run trainWithProdSamples
+   ```
+
+2. Copy resulting JSON from STDOUT.
+
+3. Paste into `MemoryEstimationModel.ts`

@@ -14,6 +14,7 @@ import { SampleSpec } from "upload-image-plugin/training/SampleSpec";
 import { ModelParameterRanges } from "upload-image-plugin/training/ModelParameterRanges";
 import os from "os";
 import { ImageWidthHeight } from "upload-image-plugin/types/ImageWidthHeight";
+import { TrainerMode } from "upload-image-plugin/training/TrainerMode";
 
 /**
  * The `samples-*.json` files must be generated on a PROD-like instance in EC2.
@@ -24,7 +25,8 @@ export class ModelTrainer {
   /**
    * We've found images with higher entropy require more memory, so rather than use 'rose:' we require a real image.
    */
-  private readonly largeNoisyImage = path.join(__dirname, "input.jpg");
+  private readonly largeNoisyImage = path.join(__dirname, "input-2.jpg");
+  private readonly imagePrefix = path.basename(this.largeNoisyImage, path.extname(this.largeNoisyImage));
 
   private readonly popularFormats: SupportedImageFormat[] = ["jpg", "jp2", "png", "gif", "webp"];
 
@@ -76,28 +78,35 @@ export class ModelTrainer {
     shareConstant: ModelParameterRange.generateRange(this.broadSweep.share.constant)
   };
 
-  constructor(private readonly quickMode: boolean, private readonly magickInfo: MagickInfo) {}
+  private readonly quickMode: boolean;
+
+  constructor(private readonly mode: TrainerMode, private readonly magickInfo: MagickInfo) {
+    this.quickMode = mode === "quick";
+  }
 
   /**
    * IMPORTANT: this must be run on the same instance type as used in PROD.
    */
   async train(): Promise<FormatTrainingResult[]> {
-    if (!(await this.exists(this.largeNoisyImage))) {
-      throw new Error(`Input image not found: ${this.largeNoisyImage}`);
-    }
-
     const formats = this.quickMode ? this.popularFormats.slice(0, 2) : this.popularFormats;
-    const inputDimensions = this.getInputDimensions();
-    const outputDimensions = this.getOutputDimensions();
-    const sampleSpecs = this.getSampleSpecs(inputDimensions, outputDimensions);
 
-    // Limit concurrency to avoid OOM.
-    await Bluebird.map(formats, async x => await this.generateInputImagesIfNotExists(x, inputDimensions), {
-      concurrency: 4
-    });
+    if (this.mode !== "train_only") {
+      if (!(await this.exists(this.largeNoisyImage))) {
+        throw new Error(`Input image not found: ${this.largeNoisyImage}`);
+      }
 
-    // Run in serial while measuring actual performance.
-    await Bluebird.mapSeries(formats, async x => await this.generateSamplesIfNotExists(x, sampleSpecs));
+      const inputDimensions = this.getInputDimensions();
+      const outputDimensions = this.getOutputDimensions();
+      const sampleSpecs = this.getSampleSpecs(inputDimensions, outputDimensions);
+
+      // Limit concurrency to avoid OOM.
+      await Bluebird.map(formats, async x => await this.generateInputImagesIfNotExists(x, inputDimensions), {
+        concurrency: 4
+      });
+
+      // Run in serial while measuring actual performance.
+      await Bluebird.mapSeries(formats, async x => await this.generateSamplesIfNotExists(x, sampleSpecs));
+    }
 
     return await Bluebird.map(formats, async x => this.trainWithSamples(x, await this.readSamples(x)));
   }
@@ -279,7 +288,7 @@ export class ModelTrainer {
   }
 
   private getInputPath(format: SupportedImageFormat, pixelCount: number): string {
-    return path.join(__dirname, `input-${format}-${pixelCount}.${format}`);
+    return path.join(__dirname, `${this.imagePrefix}-${format}-${pixelCount}.${format}`);
   }
 
   private trainWithSamples(format: SupportedImageFormat, trainingData: Sample[]): FormatTrainingResult {
@@ -292,7 +301,7 @@ export class ModelTrainer {
   }
 
   private performBroadSweep(format: SupportedImageFormat, trainingData: Sample[]): FormatTrainingResult {
-    this.log(`Training: ${format} (broad)`);
+    this.log(`Training: ${format} (phase 1: global maxima estimation)`);
     return this.performSweep(format, trainingData, this.broad);
   }
 
@@ -301,7 +310,7 @@ export class ModelTrainer {
     trainingData: Sample[],
     broadSweepResult: MemoryEstimationModelParameters
   ): FormatTrainingResult {
-    this.log(`Training: ${format} (narrow)`);
+    this.log(`Training: ${format} (phase 2: global maxima ascension)`);
     return this.performSweep(format, trainingData, this.makeNarrowSweepParams(broadSweepResult));
   }
 
