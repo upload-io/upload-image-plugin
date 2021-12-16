@@ -6,7 +6,7 @@ module.exports = {
   output: {
     libraryTarget: "commonjs2",
     path: path.resolve(__dirname, "dist-trainer"),
-    filename: "Trainer.js"
+    filename: "main.js"
   },
   mode: "development",
   devtool: false,

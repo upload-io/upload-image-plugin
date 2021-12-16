@@ -20,8 +20,16 @@
     "test": "jest",
     "train": "npm run buildTrainer && npm run runTrainer",
     "buildTrainer": "webpack --config webpack.config.trainer.js",
-    "runTrainer": "node ./dist-trainer/Trainer.js",
-    "generateSchema": "typescript-json-schema tsconfig.json Params --include 'src/types/*' --defaultNumberType integer --desctitles --required --strictNullChecks --refs true --noExtraProps"
+    "runTrainer": "node ./dist-trainer/main.js",
+    "generateSchema": "typescript-json-schema tsconfig.json Params --include 'src/types/*' --defaultNumberType integer --desctitles --required --strictNullChecks --refs true --noExtraProps",
+    "deploy:trainer:new": "npm run buildTrainer && aws/trainer/deploy_new.sh",
+    "deploy:trainer:existing": "npm run buildTrainer && aws/trainer/deploy_existing.sh",
+    "deploy:trainer:existing:codeOnly": "npm run buildTrainer && CODE_ONLY=1 aws/trainer/deploy_existing.sh",
+    "deploy:trainer:stop": "aws/trainer/stop_service.sh",
+    "deploy:trainer:restart": "aws/trainer/restart_service.sh",
+    "deploy:trainer:logs": "aws/trainer/print_logs.sh",
+    "deploy:trainer:downloadSamples": "aws/trainer/download_samples.sh",
+    "deploy:trainer:ssh": "aws/trainer/ssh.sh"
   },
   "husky": {
     "hooks": {

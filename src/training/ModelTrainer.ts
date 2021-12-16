@@ -14,6 +14,7 @@ import { SampleSpec } from "upload-image-plugin/training/SampleSpec";
 import { ModelParameterRanges } from "upload-image-plugin/training/ModelParameterRanges";
 import os from "os";
 import { ImageWidthHeight } from "upload-image-plugin/types/ImageWidthHeight";
+
 /**
  * The `samples-*.json` files must be generated on a PROD-like instance in EC2.
  *
@@ -91,7 +92,7 @@ export class ModelTrainer {
     const sampleSpecs = this.getSampleSpecs(inputDimensions, outputDimensions);
 
     // Limit concurrency to avoid OOM.
-    await Bluebird.map(formats, async x => await this.generateInputsIfNotExists(x, inputDimensions), {
+    await Bluebird.map(formats, async x => await this.generateInputImagesIfNotExists(x, inputDimensions), {
       concurrency: 4
     });
 
@@ -101,7 +102,10 @@ export class ModelTrainer {
     return await Bluebird.map(formats, async x => this.trainWithSamples(x, await this.readSamples(x)));
   }
 
-  private async generateInputsIfNotExists(format: SupportedImageFormat, dimensions: ImageWidthHeight[]): Promise<void> {
+  private async generateInputImagesIfNotExists(
+    format: SupportedImageFormat,
+    dimensions: ImageWidthHeight[]
+  ): Promise<void> {
     const samplesPath = this.getSamplesPath(format);
     if (process.env.FORCE_GENERATE !== "true" && (await this.exists(samplesPath))) {
       this.log(`Skipping input generation, samples already exist: ${samplesPath}`);
@@ -109,7 +113,7 @@ export class ModelTrainer {
     }
 
     // Run in serial, since parallelism already occurring outside this method.
-    await Bluebird.mapSeries(dimensions, async x => await this.generateInputIfNotExists(format, x));
+    await Bluebird.mapSeries(dimensions, async x => await this.generateInputImageIfNotExists(format, x));
   }
 
   private async generateSamplesIfNotExists(format: SupportedImageFormat, sampleSpecs: SampleSpec[]): Promise<void> {
@@ -124,13 +128,15 @@ export class ModelTrainer {
     // Run in serial while measuring actual performance.
     const samples = await Bluebird.mapSeries(sampleSpecs, async x => await this.calculateSample(format, x));
     await this.writeSamples(format, samples);
+
+    this.log(`Generated samples: ${samplesPath}`);
   }
 
   private async calculateSample(
     format: SupportedImageFormat,
     { inputPixels, outputPixels, outputDimensions }: SampleSpec
   ): Promise<Sample> {
-    this.log(`Calculating sample: ${format} ${inputPixels} > ${outputPixels}`);
+    this.log(`Calculating sample: ${format} ${inputPixels} > ${outputPixels}...`);
 
     const imagePath = this.getInputPath(format, inputPixels);
     const { stderr } = await this.execAsync(
@@ -139,6 +145,9 @@ export class ModelTrainer {
         " "
       )
     );
+
+    this.log(`Calculated sample: ${format} ${inputPixels} > ${outputPixels}.`);
+
     const actualUsedKB = parseInt(stderr.trim());
     if (!Number.isInteger(actualUsedKB)) {
       throw new Error(`Expected integer: '${stderr}'`);
@@ -212,6 +221,8 @@ export class ModelTrainer {
     return await new Promise((resolve, reject) => {
       execFile(path, args, { env: this.magickInfo.environment }, (error, stdout, stderr) => {
         if (error !== null) {
+          console.log(stdout);
+          console.log(stderr);
           reject(error);
         } else {
           resolve({ stdout, stderr });
@@ -224,7 +235,10 @@ export class ModelTrainer {
     return width * height;
   }
 
-  private async generateInputIfNotExists(format: SupportedImageFormat, dimensions: ImageWidthHeight): Promise<void> {
+  private async generateInputImageIfNotExists(
+    format: SupportedImageFormat,
+    dimensions: ImageWidthHeight
+  ): Promise<void> {
     const imagePath = this.getInputPath(format, this.pixels(dimensions));
     if (await this.exists(imagePath)) {
       this.log(`Reusing input image: ${imagePath}`);
