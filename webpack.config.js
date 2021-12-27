@@ -10,7 +10,9 @@ const externals = {
 };
 
 const npmInstallOptions = {
-  sharp: `--arch=arm64 --platform=linux sharp@${packageJson.dependencies.sharp}`
+  // When sharp v0.30.0 ships, we can use ARM.
+  // sharp: `--arch=arm64 --platform=linux sharp@${packageJson.dependencies.sharp}`
+  sharp: `--arch=x64 --platform=linux sharp@${packageJson.dependencies.sharp}`
 };
 
 module.exports = {
