@@ -9,11 +9,24 @@
         "$schema": "http://json-schema.org/draft-07/schema#",
         "additionalProperties": false,
         "definitions": {
+          "CropGeometry": {
+            "additionalProperties": false,
+            "properties": {
+              "offset": {
+                "$ref": "#/definitions/ImageOffset"
+              },
+              "size": {
+                "$ref": "#/definitions/ImageSizeWidthHeightForce"
+              }
+            },
+            "required": ["offset", "size"],
+            "type": "object"
+          },
           "CropStep": {
             "additionalProperties": false,
             "properties": {
               "geometry": {
-                "$ref": "#/definitions/ImageGeometry"
+                "$ref": "#/definitions/CropGeometry"
               },
               "type": {
                 "enum": ["crop"],
@@ -33,12 +46,6 @@
               "size": {
                 "anyOf": [
                   {
-                    "$ref": "#/definitions/ImageSizeScale"
-                  },
-                  {
-                    "$ref": "#/definitions/ImageSizeScaleXY"
-                  },
-                  {
                     "$ref": "#/definitions/ImageSizeWidth"
                   },
                   {
@@ -55,15 +62,6 @@
                   },
                   {
                     "$ref": "#/definitions/ImageSizeWidthHeightShrink"
-                  },
-                  {
-                    "$ref": "#/definitions/ImageSizeWidthHeightEnlarge"
-                  },
-                  {
-                    "$ref": "#/definitions/ImageSizeArea"
-                  },
-                  {
-                    "$ref": "#/definitions/ImageSizeAspectRatio"
                   }
                 ],
                 "title": "Image size."
@@ -91,24 +89,7 @@
             "additionalProperties": false,
             "properties": {
               "outputFormat": {
-                "enum": [
-                  "ai",
-                  "bmp",
-                  "epi",
-                  "eps",
-                  "gif",
-                  "heic",
-                  "ico",
-                  "jp2",
-                  "jpg",
-                  "pdf",
-                  "pjpeg",
-                  "png",
-                  "psd",
-                  "svg",
-                  "tiff",
-                  "webp"
-                ],
+                "enum": ["avif", "fits", "gif", "heif", "jpg", "pdf", "png", "ppm", "raw", "svg", "tiff", "webp"],
                 "title": "Output format",
                 "type": "string"
               },
@@ -192,39 +173,6 @@
             "required": ["outputFormat", "steps"],
             "type": "object"
           },
-          "ImageSizeArea": {
-            "additionalProperties": false,
-            "properties": {
-              "area": {
-                "type": "integer"
-              },
-              "type": {
-                "enum": ["area@"],
-                "type": "string"
-              }
-            },
-            "required": ["area", "type"],
-            "title": "Resize image to have specified area in pixels. Aspect ratio is preserved.",
-            "type": "object"
-          },
-          "ImageSizeAspectRatio": {
-            "additionalProperties": false,
-            "properties": {
-              "type": {
-                "enum": ["x:y"],
-                "type": "string"
-              },
-              "x": {
-                "type": "integer"
-              },
-              "y": {
-                "type": "integer"
-              }
-            },
-            "required": ["type", "x", "y"],
-            "title": "Aspect ratio (e.g. 3:2 = 1.5).",
-            "type": "object"
-          },
           "ImageSizeHeight": {
             "additionalProperties": false,
             "properties": {
@@ -240,39 +188,6 @@
             "title": "Height given, width automagically selected to preserve aspect ratio.",
             "type": "object"
           },
-          "ImageSizeScale": {
-            "additionalProperties": false,
-            "properties": {
-              "scale": {
-                "type": "integer"
-              },
-              "type": {
-                "enum": ["scale%"],
-                "type": "string"
-              }
-            },
-            "required": ["scale", "type"],
-            "title": "Height and width both scaled by specified percentage.",
-            "type": "object"
-          },
-          "ImageSizeScaleXY": {
-            "additionalProperties": false,
-            "properties": {
-              "scaleX": {
-                "type": "integer"
-              },
-              "scaleY": {
-                "type": "integer"
-              },
-              "type": {
-                "enum": ["scale-x%xscale-y%"],
-                "type": "string"
-              }
-            },
-            "required": ["scaleX", "scaleY", "type"],
-            "title": "Height and width individually scaled by specified percentages.",
-            "type": "object"
-          },
           "ImageSizeWidth": {
             "additionalProperties": false,
             "properties": {
@@ -286,24 +201,6 @@
             },
             "required": ["type", "width"],
             "title": "Width given, height automagically selected to preserve aspect ratio.",
-            "type": "object"
-          },
-          "ImageSizeWidthHeightEnlarge": {
-            "additionalProperties": false,
-            "properties": {
-              "height": {
-                "type": "integer"
-              },
-              "type": {
-                "enum": ["widthxheight<"],
-                "type": "string"
-              },
-              "width": {
-                "type": "integer"
-              }
-            },
-            "required": ["height", "type", "width"],
-            "title": "Enlarges an image with dimension(s) smaller than the corresponding width and/or height argument(s).",
             "type": "object"
           },
           "ImageSizeWidthHeightForce": {
@@ -466,24 +363,7 @@
             "format": {
               "title": "Output format",
               "type": "string",
-              "enum": [
-                "ai",
-                "bmp",
-                "epi",
-                "eps",
-                "gif",
-                "heic",
-                "ico",
-                "jp2",
-                "jpg",
-                "pdf",
-                "pjpeg",
-                "png",
-                "psd",
-                "svg",
-                "tiff",
-                "webp"
-              ],
+              "enum": ["avif", "fits", "gif", "heif", "jpg", "pdf", "png", "ppm", "raw", "svg", "tiff", "webp"],
               "default": "jpg"
             },
             "resizeMode": {
