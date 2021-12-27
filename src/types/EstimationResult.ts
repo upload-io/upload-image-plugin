@@ -1,6 +1,6 @@
 import { PluginEstimationResult } from "upload-plugin-sdk";
-import { InputImage } from "upload-image-plugin/types/InputImage";
+import { TransformationInput } from "upload-image-plugin/types/TransformationInput";
 
 export interface EstimationResult extends PluginEstimationResult {
-  inputImage: InputImage;
+  input: TransformationInput;
 }

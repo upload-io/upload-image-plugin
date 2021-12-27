@@ -1,6 +1,6 @@
 import { ImagePipeline } from "upload-image-plugin/types/ImagePipeline";
 
-export interface InputImage {
+export interface TransformationInput {
   contentType: string | undefined;
   path: string;
   pipeline: ImagePipeline;

@@ -28,7 +28,7 @@ export class ModelTrainer {
   private readonly largeNoisyImage = path.join(__dirname, "input-2.jpg");
   private readonly imagePrefix = path.basename(this.largeNoisyImage, path.extname(this.largeNoisyImage));
 
-  private readonly popularFormats: SupportedImageFormat[] = ["jpg", "jp2", "png", "gif", "webp"];
+  private readonly popularFormats: SupportedImageFormat[] = ["jpg", "png", "gif", "webp"];
 
   private readonly heightOverWidth = 0.75; // Can be anything, doesn't need to match input image.
   private readonly coefficientPrecision = 4;

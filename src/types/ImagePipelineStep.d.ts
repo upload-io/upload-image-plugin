@@ -1,10 +1,10 @@
-import { ImageGeometry } from "upload-image-plugin/types/ImageGeometry";
+import { CropGeometry, ImageGeometry } from "upload-image-plugin/types/ImageGeometry";
 
 export type ImagePipelineStep = ResizeStep | CropStep;
 export type ImagePipelineStepType = ImagePipelineStep["type"];
 
 export interface CropStep {
-  geometry: ImageGeometry;
+  geometry: CropGeometry;
   type: "crop";
 }
 

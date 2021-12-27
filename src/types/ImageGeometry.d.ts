@@ -6,21 +6,21 @@ export interface ImageGeometry {
   size: ImageSize;
 }
 
+export interface CropGeometry {
+  offset: ImageOffset;
+  size: ImageSizeWidthHeightForce;
+}
+
 /**
  * Image size.
  */
 export type ImageSize =
-  | ImageSizeScale
-  | ImageSizeScaleXY
   | ImageSizeWidth
   | ImageSizeHeight
   | ImageSizeWidthHeightMax
   | ImageSizeWidthHeightMin
   | ImageSizeWidthHeightForce
-  | ImageSizeWidthHeightShrink
-  | ImageSizeWidthHeightEnlarge
-  | ImageSizeArea
-  | ImageSizeAspectRatio;
+  | ImageSizeWidthHeightShrink;
 
 /**
  * Pixel offset.
@@ -28,23 +28,6 @@ export type ImageSize =
 export interface ImageOffset {
   x: number;
   y: number;
-}
-
-/**
- * Height and width both scaled by specified percentage.
- */
-export interface ImageSizeScale {
-  scale: number; // Percentage, i.e. 100 is 100%
-  type: "scale%";
-}
-
-/**
- * Height and width individually scaled by specified percentages.
- */
-export interface ImageSizeScaleXY {
-  scaleX: number; // Percentage, i.e. 100 is 100%
-  scaleY: number;
-  type: "scale-x%xscale-y%";
 }
 
 /**
@@ -97,30 +80,4 @@ export interface ImageSizeWidthHeightShrink {
   height: number;
   type: "widthxheight>";
   width: number;
-}
-
-/**
- * Enlarges an image with dimension(s) smaller than the corresponding width and/or height argument(s).
- */
-export interface ImageSizeWidthHeightEnlarge {
-  height: number;
-  type: "widthxheight<";
-  width: number;
-}
-
-/**
- * Resize image to have specified area in pixels. Aspect ratio is preserved.
- */
-export interface ImageSizeArea {
-  area: number;
-  type: "area@";
-}
-
-/**
- * Aspect ratio (e.g. 3:2 = 1.5).
- */
-export interface ImageSizeAspectRatio {
-  type: "x:y";
-  x: number;
-  y: number;
 }

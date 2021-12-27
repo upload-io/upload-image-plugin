@@ -2,19 +2,15 @@
  * Supported output image format.
  */
 export type SupportedImageFormat =
-  | "ai"
-  | "bmp"
-  | "epi"
-  | "eps"
+  | "avif"
+  | "fits"
   | "gif"
-  | "heic"
-  | "ico"
-  | "jp2"
+  | "heif"
   | "jpg"
   | "pdf"
-  | "pjpeg"
   | "png"
-  | "psd"
+  | "ppm"
+  | "raw"
   | "svg"
   | "tiff"
-  | "webp"; // Get from 'magick identify -list format | grep rw'. We use a subset to reduce bug surface area.
+  | "webp";
