@@ -16,6 +16,7 @@ This binary is built against Amazon Linux 2, 64-bit (ARM).
 To rebuild the `result/bin/magick` binary:
 
 ```shell
+make clean
 make
 ```
 

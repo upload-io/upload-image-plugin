@@ -1159,7 +1159,7 @@
 
 /* Target Host CPU */
 #ifndef MAGICKCORE_MAGICK_TARGET_CPU
-#define MAGICKCORE_MAGICK_TARGET_CPU aarch64
+#define MAGICKCORE_MAGICK_TARGET_CPU x86_64
 #endif
 
 /* Target Host OS */
@@ -1169,7 +1169,7 @@
 
 /* Target Host Vendor */
 #ifndef MAGICKCORE_MAGICK_TARGET_VENDOR
-#define MAGICKCORE_MAGICK_TARGET_VENDOR unknown
+#define MAGICKCORE_MAGICK_TARGET_VENDOR pc
 #endif
 
 /* Module directory name without ABI part. */

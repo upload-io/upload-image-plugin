@@ -8,7 +8,7 @@ DOCKER_IMAGE = uploadio/upload-image-plugin-magick-builder:latest
 MOUNTS = -v $(PROJECT_ROOT):/var/task
 
 # Must match the AMI we're using (Amazon Linux 2 ARM)
-PLATFORM = linux/arm64/v8
+PLATFORM = linux/amd64
 
 DOCKER = docker run -it --rm --platform $(PLATFORM) -w=/var/task/build
 
