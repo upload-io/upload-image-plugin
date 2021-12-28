@@ -89,7 +89,7 @@
             "additionalProperties": false,
             "properties": {
               "outputFormat": {
-                "enum": ["avif", "gif", "heic", "heif", "j2c", "j2k", "jp2", "jpg", "jpx", "png", "raw", "tif", "webp"],
+                "enum": ["avif", "jpg", "png", "tif", "webp"],
                 "title": "Output format",
                 "type": "string"
               },
@@ -338,7 +338,7 @@
           {
             "plugin": {
               "packageName": "upload-image-plugin",
-              "packageVersion": "2.0.5"
+              "packageVersion": "2.0.6"
             },
             "params": {
               "input": "/",
@@ -363,7 +363,7 @@
             "format": {
               "title": "Output format",
               "type": "string",
-              "enum": ["avif", "gif", "heic", "heif", "j2c", "j2k", "jp2", "jpg", "jpx", "png", "raw", "tif", "webp"],
+              "enum": ["avif", "jpg", "png", "tif", "webp"],
               "default": "jpg"
             },
             "resizeMode": {
