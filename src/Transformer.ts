@@ -176,7 +176,7 @@ export class Transformer {
 
     const { outputFormat } = input.pipeline;
     const imagePipeline =
-      outputFormat === undefined ? imagePipelinePartial : imagePipelinePartial.toFormat(outputFormat);
+      outputFormat === undefined ? imagePipelinePartial : imagePipelinePartial.toFormat(outputFormat as any);
 
     const tempPath = `${outputResolved}.tmp`;
     await imagePipeline.toFile(tempPath);

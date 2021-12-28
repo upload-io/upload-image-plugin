@@ -89,7 +89,7 @@
             "additionalProperties": false,
             "properties": {
               "outputFormat": {
-                "enum": ["avif", "fits", "gif", "heif", "jpg", "pdf", "png", "ppm", "raw", "svg", "tiff", "webp"],
+                "enum": ["avif", "gif", "heic", "heif", "j2c", "j2k", "jp2", "jpg", "jpx", "png", "raw", "tif", "webp"],
                 "title": "Output format",
                 "type": "string"
               },
@@ -363,7 +363,7 @@
             "format": {
               "title": "Output format",
               "type": "string",
-              "enum": ["avif", "fits", "gif", "heif", "jpg", "pdf", "png", "ppm", "raw", "svg", "tiff", "webp"],
+              "enum": ["avif", "gif", "heic", "heif", "j2c", "j2k", "jp2", "jpg", "jpx", "png", "raw", "tif", "webp"],
               "default": "jpg"
             },
             "resizeMode": {

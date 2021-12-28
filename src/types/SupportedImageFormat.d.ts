@@ -2,15 +2,16 @@
  * Supported output image format.
  */
 export type SupportedImageFormat =
-  | "avif"
-  | "fits"
-  | "gif"
+  | "heic"
   | "heif"
+  | "avif"
   | "jpg"
-  | "pdf"
   | "png"
-  | "ppm"
   | "raw"
-  | "svg"
-  | "tiff"
-  | "webp";
+  | "tif"
+  | "webp"
+  | "gif"
+  | "jp2"
+  | "jpx"
+  | "j2k"
+  | "j2c";
