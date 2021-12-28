@@ -1,8 +1,10 @@
 /**
  * Supported output image format.
+ *
+ * Important: ensure each of these work when transcoding large images (6000x4000) without downsizing.
  */
 export type SupportedImageFormat =
-  | "avif"
+  // | "avif" -- times out on larger images
   // | "gif" -- requires a custom build of lipvips (i.e. not the binary bundled with sharp).
   // | "heic" -- produces un-open-able images & also times-out with large images
   // | "heif" -- produces un-open-able images & also times-out with large images
@@ -13,5 +15,5 @@ export type SupportedImageFormat =
   | "jpg"
   | "png"
   // | "raw" -- unsupported output format
-  | "tif"
+  // | "tif" -- odd one to support, given we're not supporting so many others. Works without issue, though.
   | "webp";

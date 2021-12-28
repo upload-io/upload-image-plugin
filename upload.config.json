@@ -89,7 +89,7 @@
             "additionalProperties": false,
             "properties": {
               "outputFormat": {
-                "enum": ["avif", "jpg", "png", "tif", "webp"],
+                "enum": ["jpg", "png", "webp"],
                 "title": "Output format",
                 "type": "string"
               },
@@ -363,7 +363,7 @@
             "format": {
               "title": "Output format",
               "type": "string",
-              "enum": ["avif", "jpg", "png", "tif", "webp"],
+              "enum": ["jpg", "png", "webp"],
               "default": "jpg"
             },
             "resizeMode": {
