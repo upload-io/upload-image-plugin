@@ -557,7 +557,8 @@
                         "Fixed (Top Right)",
                         "Fixed (Bottom Left)",
                         "Fixed (Bottom Right)"
-                      ]
+                      ],
+                      "default": "Smart (Vibrancy)"
                     }
                   },
                   "required": ["cropStrategy"]
