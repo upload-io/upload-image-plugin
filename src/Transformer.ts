@@ -16,6 +16,7 @@ import { TransformationArtifactPath } from "upload-image-plugin/types/Transforma
 import { DownloadRequest } from "upload-plugin-sdk/dist/types/transform/DownloadRequest";
 import { ImagePipelineMergeBehaviour } from "upload-image-plugin/types/ImagePipelineMergeBehaviour";
 import sharp, { Region, ResizeOptions, Sharp } from "sharp";
+import { ImageCropStrategy } from "upload-image-plugin/types/ImageCropStrategy";
 
 export class Transformer {
   private readonly memoryEstimateConstantBytes = 1024 * 1024 * 10; // 10MB
@@ -238,9 +239,33 @@ export class Transformer {
           fit: "inside",
           withoutEnlargement: true
         };
+      case "widthxheightc":
+        return {
+          width: size.width,
+          height: size.height,
+          fit: "cover",
+          position: this.getCropPosition(size.cropStrategy)
+        };
       default:
         assertUnreachable(size);
     }
+  }
+
+  private getCropPosition(cropStrategy: ImageCropStrategy): string {
+    const strategies: Record<ImageCropStrategy["type"], string> = {
+      fixedBottom: "bottom",
+      fixedBottomLeft: "left bottom",
+      fixedBottomRight: "right bottom",
+      fixedCenter: "center",
+      fixedLeft: "left",
+      fixedRight: "right",
+      fixedTop: "top",
+      fixedTopLeft: "left top",
+      fixedTopRight: "right top",
+      smartAttention: "attention",
+      smartEntropy: "entropy"
+    };
+    return strategies[cropStrategy.type];
   }
 
   private async setContentType(

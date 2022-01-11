@@ -1,3 +1,5 @@
+import { ImageCropStrategy } from "upload-image-plugin/types/ImageCropStrategy";
+
 /**
  * Image size with optional offset.
  */
@@ -20,7 +22,8 @@ export type ImageSize =
   | ImageSizeWidthHeightMax
   | ImageSizeWidthHeightMin
   | ImageSizeWidthHeightForce
-  | ImageSizeWidthHeightShrink;
+  | ImageSizeWidthHeightShrink
+  | ImageSizeWidthHeightCover;
 
 /**
  * Pixel offset.
@@ -52,6 +55,16 @@ export interface ImageSizeHeight {
 export interface ImageSizeWidthHeightMax {
   height: number;
   type: "widthxheight";
+  width: number;
+}
+
+/**
+ * Aspect ratio preserved, image cropped if required. Position dictates cropping strategy.
+ */
+export interface ImageSizeWidthHeightCover {
+  cropStrategy: ImageCropStrategy;
+  height: number;
+  type: "widthxheightc";
   width: number;
 }
 
