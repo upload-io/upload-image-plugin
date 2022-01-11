@@ -1,7 +1,7 @@
 {
   "plugin": {
     "summary": {
-      "description": "Transcode and resize images.",
+      "description": "Resize, crop & convert images.",
       "icon": "ImageResize"
     },
     "parameters": {
@@ -62,6 +62,9 @@
                   },
                   {
                     "$ref": "#/definitions/ImageSizeWidthHeightShrink"
+                  },
+                  {
+                    "$ref": "#/definitions/ImageSizeWidthHeightCover"
                   }
                 ],
                 "title": "Image size."
@@ -201,6 +204,149 @@
             },
             "required": ["type", "width"],
             "title": "Width given, height automagically selected to preserve aspect ratio.",
+            "type": "object"
+          },
+          "ImageSizeWidthHeightCover": {
+            "additionalProperties": false,
+            "properties": {
+              "cropStrategy": {
+                "anyOf": [
+                  {
+                    "additionalProperties": false,
+                    "properties": {
+                      "type": {
+                        "enum": ["fixedCenter"],
+                        "type": "string"
+                      }
+                    },
+                    "required": ["type"],
+                    "type": "object"
+                  },
+                  {
+                    "additionalProperties": false,
+                    "properties": {
+                      "type": {
+                        "enum": ["fixedTop"],
+                        "type": "string"
+                      }
+                    },
+                    "required": ["type"],
+                    "type": "object"
+                  },
+                  {
+                    "additionalProperties": false,
+                    "properties": {
+                      "type": {
+                        "enum": ["fixedTopLeft"],
+                        "type": "string"
+                      }
+                    },
+                    "required": ["type"],
+                    "type": "object"
+                  },
+                  {
+                    "additionalProperties": false,
+                    "properties": {
+                      "type": {
+                        "enum": ["fixedTopRight"],
+                        "type": "string"
+                      }
+                    },
+                    "required": ["type"],
+                    "type": "object"
+                  },
+                  {
+                    "additionalProperties": false,
+                    "properties": {
+                      "type": {
+                        "enum": ["fixedBottom"],
+                        "type": "string"
+                      }
+                    },
+                    "required": ["type"],
+                    "type": "object"
+                  },
+                  {
+                    "additionalProperties": false,
+                    "properties": {
+                      "type": {
+                        "enum": ["fixedBottomLeft"],
+                        "type": "string"
+                      }
+                    },
+                    "required": ["type"],
+                    "type": "object"
+                  },
+                  {
+                    "additionalProperties": false,
+                    "properties": {
+                      "type": {
+                        "enum": ["fixedBottomRight"],
+                        "type": "string"
+                      }
+                    },
+                    "required": ["type"],
+                    "type": "object"
+                  },
+                  {
+                    "additionalProperties": false,
+                    "properties": {
+                      "type": {
+                        "enum": ["fixedLeft"],
+                        "type": "string"
+                      }
+                    },
+                    "required": ["type"],
+                    "type": "object"
+                  },
+                  {
+                    "additionalProperties": false,
+                    "properties": {
+                      "type": {
+                        "enum": ["fixedRight"],
+                        "type": "string"
+                      }
+                    },
+                    "required": ["type"],
+                    "type": "object"
+                  },
+                  {
+                    "additionalProperties": false,
+                    "properties": {
+                      "type": {
+                        "enum": ["smartEntropy"],
+                        "type": "string"
+                      }
+                    },
+                    "required": ["type"],
+                    "type": "object"
+                  },
+                  {
+                    "additionalProperties": false,
+                    "properties": {
+                      "type": {
+                        "enum": ["smartAttention"],
+                        "type": "string"
+                      }
+                    },
+                    "required": ["type"],
+                    "type": "object"
+                  }
+                ]
+              },
+              "height": {
+                "type": "integer"
+              },
+              "type": {
+                "enum": ["widthxheightc"],
+                "type": "string"
+              },
+              "width": {
+                "type": "integer"
+              }
+            },
+            "required": ["cropStrategy", "height", "type", "width"],
+            "title": "Aspect ratio preserved, image cropped if required. Position dictates cropping strategy.",
             "type": "object"
           },
           "ImageSizeWidthHeightForce": {
@@ -348,7 +494,7 @@
                   "ref": "format"
                 },
                 "steps": {
-                  "ref": "[{if: width == null && height == null, then: `[]`}, {if: width != null && height == null, then: to_array({type:'resize',geometry:{size:{type:'width',width:width}}})}, {if: width == null && height != null, then: to_array({type:'resize',geometry:{size:{type:'xheight',height:height}}})}, {if: resizeMode=='Maximum', then:to_array({type:'resize',geometry:{size:{type:'widthxheight',width:width,height:height}}})}, {if: resizeMode=='Minimum', then:to_array({type:'resize',geometry:{size:{type:'widthxheight^',width:width,height:height}}})}, {if: resizeMode=='Exact', then:to_array({type:'resize',geometry:{size:{type:'widthxheight!',width:width,height:height}}})}][?if]|[0].then"
+                  "ref": "[{if: width == null && height == null, then: `[]`}, {if: width != null && height == null, then: to_array({type:'resize',geometry:{size:{type:'width',width:width}}})}, {if: width == null && height != null, then: to_array({type:'resize',geometry:{size:{type:'xheight',height:height}}})}, {if: resizeMode=='Maximum', then:to_array({type:'resize',geometry:{size:{type:'widthxheight',width:width,height:height}}})}, {if: resizeMode=='Minimum', then:to_array({type:'resize',geometry:{size:{type:'widthxheight^',width:width,height:height}}})}, {if: resizeMode=='Exact', then:to_array({type:'resize',geometry:{size:{type:'widthxheight!',width:width,height:height}}})},{if: resizeMode=='Crop', then:to_array({type:'resize',geometry:{size:{type:'widthxheightc',width:width,height:height,cropStrategy:{type: [{if: cropStrategy=='Smart (Vibrancy)', then: 'smartAttention'},{if: cropStrategy=='Smart (Detail)', then: 'smartEntropy'},{if: cropStrategy=='Fixed (Center)', then: 'fixedCenter'},{if: cropStrategy=='Fixed (Left)', then: 'fixedLeft'},{if: cropStrategy=='Fixed (Right)', then: 'fixedRight'},{if: cropStrategy=='Fixed (Top)', then: 'fixedTop'},{if: cropStrategy=='Fixed (Bottom)', then: 'fixedBottom'},{if: cropStrategy=='Fixed (Top Left)', then: 'fixedTopLeft'},{if: cropStrategy=='Fixed (Top Right)', then: 'fixedTopRight'},{if: cropStrategy=='Fixed (Bottom Left)', then: 'fixedBottomLeft'},{if: cropStrategy=='Fixed (Bottom Right)', then: 'fixedBottomRight'}][?if]|[0].then}}}})}][?if]|[0].then"
                 }
               }
             }
@@ -369,7 +515,7 @@
             "resizeMode": {
               "title": "Dimensions",
               "type": "string",
-              "enum": ["Minimum", "Maximum", "Exact"],
+              "enum": ["Minimum", "Maximum", "Exact", "Crop"],
               "default": "Maximum"
             },
             "width": {
@@ -387,10 +533,41 @@
               "default": 600
             }
           },
-          "required": ["resizeMode"]
+          "required": ["resizeMode"],
+          "dependencies": {
+            "resizeMode": {
+              "oneOf": [
+                {
+                  "properties": {
+                    "resizeMode": {
+                      "enum": ["Crop"]
+                    },
+                    "cropStrategy": {
+                      "title": "Cropping",
+                      "type": "string",
+                      "enum": [
+                        "Smart (Vibrancy)",
+                        "Smart (Detail)",
+                        "Fixed (Center)",
+                        "Fixed (Left)",
+                        "Fixed (Right)",
+                        "Fixed (Top)",
+                        "Fixed (Bottom)",
+                        "Fixed (Top Left)",
+                        "Fixed (Top Right)",
+                        "Fixed (Bottom Left)",
+                        "Fixed (Bottom Right)"
+                      ]
+                    }
+                  },
+                  "required": ["cropStrategy"]
+                }
+              ]
+            }
+          }
         },
         "ui": {
-          "ui:order": ["format", "resizeMode", "width", "height"]
+          "ui:order": ["format", "resizeMode", "cropStrategy", "width", "height"]
         }
       }
     }
