@@ -540,6 +540,13 @@
                 {
                   "properties": {
                     "resizeMode": {
+                      "enum": ["Minimum", "Maximum", "Exact"]
+                    }
+                  }
+                },
+                {
+                  "properties": {
+                    "resizeMode": {
                       "enum": ["Crop"]
                     },
                     "cropStrategy": {
