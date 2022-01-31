@@ -20,12 +20,8 @@ import { ImageCropStrategy } from "upload-image-plugin/types/ImageCropStrategy";
 
 export class Transformer {
   private readonly memoryEstimateConstantBytes = 1024 * 1024 * 10; // 10MB
-  private readonly memoryEstimateFileSizeCoefficient = 50; // Fast rough estimate -- prevents needing to call out to ImageMagick to perform estimation, so transformation runs faster.
+  private readonly memoryEstimateFileSizeCoefficient = 10; // Fast rough estimate
 
-  /**
-   * See README.md for a full explanation on how we calculate and
-   * limit ImageMagick's memory usage.
-   */
   async estimate(
     params: Params,
     resolvePath: LocalFileResolver,
