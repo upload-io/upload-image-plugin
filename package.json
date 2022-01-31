@@ -1,6 +1,6 @@
 {
   "name": "upload-image-plugin",
-  "version": "2.3.0",
+  "version": "2.4.0",
   "author": "Upload <hello@upload.io> (https://upload.io)",
   "description": "Resize, crop, transcode and downsample images.",
   "license": "MIT",
