@@ -10,9 +10,7 @@ const externals = {
 };
 
 const npmInstallOptions = {
-  // When sharp v0.30.0 ships, we can use ARM.
-  // sharp: `--arch=arm64 --platform=linux sharp@${packageJson.dependencies.sharp}`
-  sharp: `--arch=x64 --platform=linux sharp@${packageJson.dependencies.sharp}`
+  sharp: `--arch=arm64 --platform=linux sharp@${packageJson.dependencies.sharp}`
 };
 
 module.exports = {
@@ -30,7 +28,7 @@ module.exports = {
         scripts: [
           "./runInDistDir.sh npm init -y",
           ...Object.keys(externals).map(
-            packageName => `./runInDistDir.sh npm install ${npmInstallOptions[packageName] || ""} ${packageName}`
+            packageName => `./runInDistDir.sh npm install ${npmInstallOptions[packageName] || packageName}`
           ),
           async () => {
             // We need to remove the 'files' field from Sharp's package.json, else its native binaries will be excluded
