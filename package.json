@@ -1,8 +1,8 @@
 {
   "name": "upload-image-plugin",
-  "version": "2.5.1",
+  "version": "2.5.2",
   "author": "Upload <hello@upload.io> (https://upload.io)",
-  "description": "Resize, crop, transcode and downsample images via Upload's Image API.",
+  "description": "Resizes, crops, and converts images for Upload's Image API.",
   "license": "MIT",
   "main": "dist/main.js",
   "homepage": "https://upload.io/image-upload-api",
