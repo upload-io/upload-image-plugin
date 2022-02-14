@@ -1,6 +1,6 @@
 # Upload Image Plugin
 
-Resize, crop, and convert images on [Upload](https://upload.io).
+Resize, crop, and convert images on [Upload](https://upload.io/image-upload-api).
 
 To use this plugin use the following settings in a "Transformation Step" in the Upload Dashboard:
 

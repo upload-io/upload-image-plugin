@@ -32,8 +32,8 @@ dist/
 dist-aws/
 dist-trainer/
 
-# ImageMagick Build
-.bin/image-magick/build
+# libvips Build
+bin/libvips/build
 
 # Webpack directories
 .webpack
