@@ -1,6 +1,6 @@
 # Upload Image Plugin
 
-Resizes, crops, and converts images for [Upload's Image API](https://upload.io/image-upload-api).
+Resizes, crops, and converts images for Upload.io's [Image Upload API](https://upload.io/image-upload-api).
 
 To use this plugin use the following settings in a "Transformation Step" in the Upload Dashboard:
 
