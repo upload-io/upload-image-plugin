@@ -1,4 +1,4 @@
-import { ImagePipeline } from "upload-image-plugin/types/ImagePipeline";
+import { ImagePipeline } from "upload-image-plugin/params/ImagePipeline";
 
 export interface ParamsFromFile {
   input: string;

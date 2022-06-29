@@ -1,4 +1,4 @@
-import { ImagePipelineStepType } from "upload-image-plugin/types/ImagePipelineStep";
+import { ImagePipelineStepType } from "upload-image-plugin/params/ImagePipelineStep";
 
 export interface ImagePipelineMergeBehaviour {
   outputFormat: "master" | "file" | "fileThenMaster";

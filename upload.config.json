@@ -9,6 +9,76 @@
         "$schema": "http://json-schema.org/draft-07/schema#",
         "additionalProperties": false,
         "definitions": {
+          "CompositeStep": {
+            "additionalProperties": false,
+            "properties": {
+              "blend": {
+                "enum": [
+                  "add",
+                  "clear",
+                  "color-burn",
+                  "color-dodge",
+                  "darken",
+                  "destination",
+                  "destination-atop",
+                  "destination-in",
+                  "destination-out",
+                  "destination-over",
+                  "difference",
+                  "exclusion",
+                  "hard-light",
+                  "lighten",
+                  "multiply",
+                  "overlay",
+                  "saturate",
+                  "screen",
+                  "soft-light",
+                  "source",
+                  "source-atop",
+                  "source-in",
+                  "source-out",
+                  "source-over",
+                  "xor"
+                ],
+                "type": "string"
+              },
+              "gravity": {
+                "enum": [
+                  "center",
+                  "east",
+                  "north",
+                  "northeast",
+                  "northwest",
+                  "south",
+                  "southeast",
+                  "southwest",
+                  "west"
+                ],
+                "type": "string"
+              },
+              "imageFileId": {
+                "type": "string"
+              },
+              "left": {
+                "type": "integer"
+              },
+              "premultiplied": {
+                "type": "boolean"
+              },
+              "tile": {
+                "type": "boolean"
+              },
+              "top": {
+                "type": "integer"
+              },
+              "type": {
+                "enum": ["composite"],
+                "type": "string"
+              }
+            },
+            "required": ["imageFileId", "type"],
+            "type": "object"
+          },
           "CropGeometry": {
             "additionalProperties": false,
             "properties": {
@@ -20,6 +90,7 @@
               }
             },
             "required": ["offset", "size"],
+            "title": "Geometry defining an image crop.",
             "type": "object"
           },
           "CropStep": {
@@ -34,44 +105,6 @@
               }
             },
             "required": ["geometry", "type"],
-            "type": "object"
-          },
-          "ImageGeometry": {
-            "additionalProperties": false,
-            "properties": {
-              "offset": {
-                "$ref": "#/definitions/ImageOffset",
-                "title": "Pixel offset."
-              },
-              "size": {
-                "anyOf": [
-                  {
-                    "$ref": "#/definitions/ImageSizeWidth"
-                  },
-                  {
-                    "$ref": "#/definitions/ImageSizeHeight"
-                  },
-                  {
-                    "$ref": "#/definitions/ImageSizeWidthHeightMax"
-                  },
-                  {
-                    "$ref": "#/definitions/ImageSizeWidthHeightMin"
-                  },
-                  {
-                    "$ref": "#/definitions/ImageSizeWidthHeightForce"
-                  },
-                  {
-                    "$ref": "#/definitions/ImageSizeWidthHeightShrink"
-                  },
-                  {
-                    "$ref": "#/definitions/ImageSizeWidthHeightCover"
-                  }
-                ],
-                "title": "Image size."
-              }
-            },
-            "required": ["size"],
-            "title": "Image size with optional offset.",
             "type": "object"
           },
           "ImageOffset": {
@@ -104,6 +137,9 @@
                     },
                     {
                       "$ref": "#/definitions/CropStep"
+                    },
+                    {
+                      "$ref": "#/definitions/CompositeStep"
                     }
                   ]
                 },
@@ -139,7 +175,7 @@
                     "properties": {
                       "fileWhitelist": {
                         "items": {
-                          "enum": ["crop", "resize"],
+                          "enum": ["composite", "crop", "resize"],
                           "type": "string"
                         },
                         "type": "array"
@@ -421,11 +457,46 @@
             "title": "Shrinks an image with dimension(s) larger than the corresponding width and/or height argument(s).",
             "type": "object"
           },
+          "ResizeGeometry": {
+            "additionalProperties": false,
+            "description": "\nNote: Some resize modes automatically crop to maintain an aspect ratio without distorting the image.",
+            "properties": {
+              "size": {
+                "anyOf": [
+                  {
+                    "$ref": "#/definitions/ImageSizeWidth"
+                  },
+                  {
+                    "$ref": "#/definitions/ImageSizeHeight"
+                  },
+                  {
+                    "$ref": "#/definitions/ImageSizeWidthHeightMax"
+                  },
+                  {
+                    "$ref": "#/definitions/ImageSizeWidthHeightMin"
+                  },
+                  {
+                    "$ref": "#/definitions/ImageSizeWidthHeightForce"
+                  },
+                  {
+                    "$ref": "#/definitions/ImageSizeWidthHeightShrink"
+                  },
+                  {
+                    "$ref": "#/definitions/ImageSizeWidthHeightCover"
+                  }
+                ],
+                "title": "Image size."
+              }
+            },
+            "required": ["size"],
+            "title": "Geometry defining an image resize.",
+            "type": "object"
+          },
           "ResizeStep": {
             "additionalProperties": false,
             "properties": {
               "geometry": {
-                "$ref": "#/definitions/ImageGeometry"
+                "$ref": "#/definitions/ResizeGeometry"
               },
               "type": {
                 "enum": ["resize"],
@@ -484,7 +555,7 @@
           {
             "plugin": {
               "packageName": "upload-image-plugin",
-              "packageVersion": "2.5.0"
+              "packageVersion": "2.5.4-alpha.2"
             },
             "params": {
               "input": "/",
@@ -494,7 +565,7 @@
                   "ref": "format"
                 },
                 "steps": {
-                  "ref": "[{if: width == null && height == null, then: `[]`}, {if: width != null && height == null, then: to_array({type:'resize',geometry:{size:{type:'width',width:width}}})}, {if: width == null && height != null, then: to_array({type:'resize',geometry:{size:{type:'xheight',height:height}}})}, {if: resizeMode=='Maximum', then:to_array({type:'resize',geometry:{size:{type:'widthxheight',width:width,height:height}}})}, {if: resizeMode=='Minimum', then:to_array({type:'resize',geometry:{size:{type:'widthxheight^',width:width,height:height}}})}, {if: resizeMode=='Exact', then:to_array({type:'resize',geometry:{size:{type:'widthxheight!',width:width,height:height}}})},{if: resizeMode=='Crop', then:to_array({type:'resize',geometry:{size:{type:'widthxheightc',width:width,height:height,cropStrategy:{type: [{if: cropStrategy=='Smart (Vibrancy)', then: 'smartAttention'},{if: cropStrategy=='Smart (Detail)', then: 'smartEntropy'},{if: cropStrategy=='Fixed (Center)', then: 'fixedCenter'},{if: cropStrategy=='Fixed (Left)', then: 'fixedLeft'},{if: cropStrategy=='Fixed (Right)', then: 'fixedRight'},{if: cropStrategy=='Fixed (Top)', then: 'fixedTop'},{if: cropStrategy=='Fixed (Bottom)', then: 'fixedBottom'},{if: cropStrategy=='Fixed (Top Left)', then: 'fixedTopLeft'},{if: cropStrategy=='Fixed (Top Right)', then: 'fixedTopRight'},{if: cropStrategy=='Fixed (Bottom Left)', then: 'fixedBottomLeft'},{if: cropStrategy=='Fixed (Bottom Right)', then: 'fixedBottomRight'}][?if]|[0].then}}}})}][?if]|[0].then"
+                  "ref": "[[{if: width == null && height == null, then: `[]`}, {if: width != null && height == null, then: to_array({type:'resize',geometry:{size:{type:'width',width:width}}})}, {if: width == null && height != null, then: to_array({type:'resize',geometry:{size:{type:'xheight',height:height}}})}, {if: resizeMode=='Maximum', then:to_array({type:'resize',geometry:{size:{type:'widthxheight',width:width,height:height}}})}, {if: resizeMode=='Minimum', then:to_array({type:'resize',geometry:{size:{type:'widthxheight^',width:width,height:height}}})}, {if: resizeMode=='Exact', then:to_array({type:'resize',geometry:{size:{type:'widthxheight!',width:width,height:height}}})},{if: resizeMode=='Crop', then:to_array({type:'resize',geometry:{size:{type:'widthxheightc',width:width,height:height,cropStrategy:{type: [{if: cropStrategy=='Smart (Vibrancy)', then: 'smartAttention'},{if: cropStrategy=='Smart (Detail)', then: 'smartEntropy'},{if: cropStrategy=='Fixed (Center)', then: 'fixedCenter'},{if: cropStrategy=='Fixed (Left)', then: 'fixedLeft'},{if: cropStrategy=='Fixed (Right)', then: 'fixedRight'},{if: cropStrategy=='Fixed (Top)', then: 'fixedTop'},{if: cropStrategy=='Fixed (Bottom)', then: 'fixedBottom'},{if: cropStrategy=='Fixed (Top Left)', then: 'fixedTopLeft'},{if: cropStrategy=='Fixed (Top Right)', then: 'fixedTopRight'},{if: cropStrategy=='Fixed (Bottom Left)', then: 'fixedBottomLeft'},{if: cropStrategy=='Fixed (Bottom Right)', then: 'fixedBottomRight'}][?if]|[0].then}}}})}][?if]|[0].then,transformationSteps][]"
                 }
               }
             }
@@ -531,6 +602,17 @@
               "title": "Height",
               "type": "integer",
               "default": 600
+            },
+            "transformationSteps": {
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/definitions/CompositeStep"
+                  }
+                ]
+              },
+              "title": "Steps",
+              "type": "array"
             }
           },
           "required": ["resizeMode"],
@@ -575,7 +657,39 @@
           }
         },
         "ui": {
-          "ui:order": ["format", "resizeMode", "cropStrategy", "width", "height"]
+          "ui:order": ["format", "resizeMode", "cropStrategy", "width", "height", "transformationSteps"],
+          "transformationSteps": {
+            "items": {
+              "ui:order": ["type", "imageFileId", "gravity", "left", "top", "tile", "blend", "premultiplied"],
+              "type": {
+                "ui:title": "Transformation Type",
+                "composite": {
+                  "ui:title": "Add Image Overlay"
+                }
+              },
+              "imageFileId": {
+                "ui:title": "Image"
+              },
+              "blend": {
+                "ui:title": "Blend Mode"
+              },
+              "gravity": {
+                "ui:title": "Image Position (Relative)"
+              },
+              "left": {
+                "ui:title": "Image Position (Absolute X)"
+              },
+              "top": {
+                "ui:title": "Image Position (Absolute Y)"
+              },
+              "tile": {
+                "ui:title": "Repeat Image"
+              },
+              "premultiplied": {
+                "ui:title": "Blend Mode: Disable Base Image Premultiplication"
+              }
+            }
+          }
         }
       }
     }

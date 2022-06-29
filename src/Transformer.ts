@@ -1,22 +1,30 @@
-import { FileMetadataGetter, FileMetadataSetter, LocalFileResolver, Logger } from "upload-plugin-sdk";
-import { Params } from "upload-image-plugin/types/Params";
-import { ImagePipelineStep } from "upload-image-plugin/types/ImagePipelineStep";
-import { CropGeometry, ImageSize } from "upload-image-plugin/types/ImageGeometry";
+import {
+  DownloadResponse,
+  FileMetadata,
+  FileMetadataGetter,
+  FileMetadataSetter,
+  LocalFileResolver,
+  Logger
+} from "upload-plugin-sdk";
+import { Params } from "upload-image-plugin/params/Params";
+import { ImagePipelineStep } from "upload-image-plugin/params/ImagePipelineStep";
+import { CropGeometry, ImageSize } from "upload-image-plugin/params/ImageGeometry";
 import { assertUnreachable } from "upload-image-plugin/common/TypeUtils";
 import { reverse, uniqBy } from "ramda";
-import { SupportedImageFormat } from "upload-image-plugin/types/SupportedImageFormat";
+import { SupportedOutputFormat } from "upload-image-plugin/params/SupportedOutputFormat";
 import mime from "mime";
 import { promises as fsAsync } from "fs";
-import { TransformationInput } from "upload-image-plugin/types/TransformationInput";
-import { EstimationResult } from "upload-image-plugin/types/EstimationResult";
+import { TransformationInput } from "upload-image-plugin/model/TransformationInput";
+import { EstimationResult } from "upload-image-plugin/model/EstimationResult";
 import { FileDownloader } from "upload-plugin-sdk/dist/types/transform/FileDownloader";
-import { ParamsFromFile } from "upload-image-plugin/types/ParamsFromFile";
-import { ImagePipeline } from "upload-image-plugin/types/ImagePipeline";
-import { TransformationArtifactPath } from "upload-image-plugin/types/TransformationArtifactPath";
+import { ParamsFromFile } from "upload-image-plugin/params/ParamsFromFile";
+import { ImagePipeline } from "upload-image-plugin/params/ImagePipeline";
+import { TransformationArtifactPath } from "upload-image-plugin/params/TransformationArtifactPath";
 import { DownloadRequest } from "upload-plugin-sdk/dist/types/transform/DownloadRequest";
-import { ImagePipelineMergeBehaviour } from "upload-image-plugin/types/ImagePipelineMergeBehaviour";
+import { ImagePipelineMergeBehaviour } from "upload-image-plugin/params/ImagePipelineMergeBehaviour";
 import sharp, { Region, ResizeOptions, Sharp } from "sharp";
-import { ImageCropStrategy } from "upload-image-plugin/types/ImageCropStrategy";
+import { ImageCropStrategy } from "upload-image-plugin/params/ImageCropStrategy";
+import { compositeBlendModeMapping } from "upload-image-plugin/common/CompositeBlendModeMapping";
 
 export class Transformer {
   private readonly memoryEstimateConstantBytes = 1024 * 1024 * 10; // 10MB
@@ -53,8 +61,18 @@ export class Transformer {
   ): Promise<void> {
     log("Transforming image...");
     await this.transformImage(input, output, resolvePath);
-    await this.setContentType(input, output, setMetadata);
+    await Promise.all([this.deleteTemporaryFiles(input), this.setContentType(input, output, setMetadata)]);
     log("Image transformed.");
+  }
+
+  private async deleteTemporaryFiles(input: TransformationInput): Promise<void> {
+    await Promise.all(
+      Object.values(input.tempDownloadedFiles).map(async x => {
+        if (x !== undefined) {
+          await fsAsync.unlink(x.request.destinationFile);
+        }
+      })
+    );
   }
 
   private async getInputImage(
@@ -64,30 +82,95 @@ export class Transformer {
     getMetadata: FileMetadataGetter
   ): Promise<TransformationInput> {
     const inputPath = resolvePath(params.input);
-    const metadata = await getMetadata(params.input);
-    if (metadata.contentType !== "application/json") {
+    const [pipeline, metadata, paramsFromFile] = await this.getPipeline(inputPath, params, getMetadata);
+    const tempFileDownloadRequests = this.makeTemporaryFileDownloadRequests(pipeline, resolvePath);
+    if (paramsFromFile === undefined) {
       return {
         path: inputPath,
         contentType: metadata.contentType,
-        pipeline: params.pipeline
+        pipeline,
+        tempDownloadedFiles: this.zipFileDownloadRequests(
+          tempFileDownloadRequests,
+          await download(tempFileDownloadRequests)
+        )
       };
     }
 
-    const paramsFromFile: ParamsFromFile = JSON.parse((await fsAsync.readFile(inputPath)).toString());
     const sourceFile = paramsFromFile.input;
     const destinationFile = inputPath;
     const request: DownloadRequest = { destinationFile, sourceFile };
-    const response = await download({ file: request });
+    const downloads: Record<"file" | string, DownloadResponse> = await download({
+      file: request,
+      ...tempFileDownloadRequests
+    });
+    const { file, ...tempFileDownloadResponses } = downloads;
 
-    if (response.file.isError) {
+    if (file.isError) {
       throw new Error(`Failed to download file for cropping: ${paramsFromFile.input}`);
     }
 
     return {
       path: request.destinationFile,
-      contentType: response.file.headers["content-type"],
-      pipeline: this.mergePipelines(paramsFromFile, params)
+      contentType: file.headers["content-type"],
+      pipeline,
+      tempDownloadedFiles: this.zipFileDownloadRequests(tempFileDownloadRequests, tempFileDownloadResponses)
     };
+  }
+
+  /**
+   * Key is the file ID or file URL used by the transformation steps.
+   * Files will be deleted after the transformation runs.
+   */
+  private makeTemporaryFileDownloadRequests(
+    pipeline: ImagePipeline,
+    resolvePath: LocalFileResolver
+  ): Record<string, DownloadRequest> {
+    return Object.fromEntries(
+      pipeline.steps.flatMap(
+        (x): Array<[string, DownloadRequest]> => {
+          switch (x.type) {
+            case "resize":
+            case "crop":
+              return [];
+            case "composite":
+              return [
+                [
+                  x.imageFileId,
+                  {
+                    sourceFile: x.imageFileId,
+                    destinationFile: resolvePath(`/tmp/${x.imageFileId}`)
+                  }
+                ]
+              ];
+            default:
+              assertUnreachable(x);
+          }
+        }
+      )
+    );
+  }
+
+  private zipFileDownloadRequests(
+    requests: Record<string, DownloadRequest>,
+    responses: Record<string, DownloadResponse>
+  ): Record<string, { request: DownloadRequest; response: DownloadResponse }> {
+    return Object.fromEntries(
+      Object.entries(requests).map(([key, request]) => [key, { request, response: responses[key] }])
+    );
+  }
+
+  private async getPipeline(
+    inputPath: string,
+    params: Params,
+    getMetadata: FileMetadataGetter
+  ): Promise<[ImagePipeline, FileMetadata, ParamsFromFile | undefined]> {
+    const metadata = await getMetadata(params.input);
+    if (metadata.contentType !== "application/json") {
+      return [params.pipeline, metadata, undefined];
+    }
+
+    const paramsFromFile: ParamsFromFile = JSON.parse((await fsAsync.readFile(inputPath)).toString());
+    return [this.mergePipelines(paramsFromFile, params), metadata, paramsFromFile];
   }
 
   private mergePipelines(file: ParamsFromFile, master: Params): ImagePipeline {
@@ -102,7 +185,7 @@ export class Transformer {
     file: ImagePipeline,
     master: ImagePipeline,
     behaviour: ImagePipelineMergeBehaviour
-  ): SupportedImageFormat | undefined {
+  ): SupportedOutputFormat | undefined {
     switch (behaviour.outputFormat) {
       case "master":
         return master.outputFormat;
@@ -167,7 +250,7 @@ export class Transformer {
     const outputResolved = resolvePath(output);
 
     const imagePipelinePartial = input.pipeline.steps.reduce(
-      (img, step) => this.applyTransformationArg(step, img),
+      (img, step) => this.applyTransformationArg(input, step, img),
       sharp(inputResolved)
     );
 
@@ -175,20 +258,45 @@ export class Transformer {
     const imagePipeline =
       outputFormat === undefined ? imagePipelinePartial : imagePipelinePartial.toFormat(outputFormat as any);
 
+    // Buffer to new file, since input file and output file may be the same location, and AFAIK libvips may stream
+    // its processing such that the output is written whilst the input is read.
     const tempPath = `${outputResolved}.tmp`;
     await imagePipeline.toFile(tempPath);
     await fsAsync.rename(tempPath, outputResolved);
   }
 
-  private applyTransformationArg(step: ImagePipelineStep, img: Sharp): Sharp {
+  private applyTransformationArg(input: TransformationInput, step: ImagePipelineStep, img: Sharp): Sharp {
     switch (step.type) {
       case "crop":
         return img.extract(this.getCropOptions(step.geometry));
       case "resize":
         return img.resize(this.getResizeOptions(step.geometry.size));
+      case "composite":
+        return img.composite([
+          {
+            input: this.getTemporaryDownloadedFilePath(input, step.imageFileId),
+            top: step.top,
+            left: step.left,
+            tile: step.tile,
+            premultiplied: step.premultiplied,
+            gravity: step.gravity,
+            blend: step.blend === undefined ? undefined : compositeBlendModeMapping[step.blend]
+          }
+        ]);
       default:
         assertUnreachable(step);
     }
+  }
+
+  private getTemporaryDownloadedFilePath(input: TransformationInput, fileIdOrUrl: string): string {
+    const tempDownloadedFile = input.tempDownloadedFiles[fileIdOrUrl];
+    if (tempDownloadedFile === undefined) {
+      throw new Error(`File was never downloaded: ${fileIdOrUrl}`);
+    }
+    if (tempDownloadedFile.response.isError) {
+      throw new Error(`Failed to download ancillary file for image transformations: ${fileIdOrUrl}`);
+    }
+    return tempDownloadedFile.request.destinationFile;
   }
 
   private getCropOptions({ size, offset }: CropGeometry): Region {

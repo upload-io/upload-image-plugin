@@ -1,6 +1,6 @@
 {
   "name": "upload-image-plugin",
-  "version": "2.5.3",
+  "version": "2.5.4-alpha.2",
   "author": "Upload <hello@upload.io> (https://upload.io)",
   "description": "Resizes, crops, and converts images for Upload's Image API.",
   "license": "MIT",
@@ -22,7 +22,7 @@
     "trainWithProdSamples": "cp trainer-prod-results/* dist-trainer && TRAINER_MODE=train_only npm run train",
     "buildTrainer": "webpack --config webpack.config.trainer.js",
     "runTrainer": "node ./dist-trainer/main.js",
-    "generateSchema": "typescript-json-schema tsconfig.json Params --include 'src/types/*' --defaultNumberType integer --desctitles --required --strictNullChecks --refs true --noExtraProps",
+    "generateSchema": "typescript-json-schema tsconfig.json Params --include 'src/params/*' --defaultNumberType integer --desctitles --required --strictNullChecks --refs true --noExtraProps",
     "deploy:trainer:new": "npm run buildTrainer && aws/trainer/deploy_new.sh",
     "deploy:trainer:existing": "npm run buildTrainer && aws/trainer/deploy_existing.sh",
     "deploy:trainer:existing:codeOnly": "npm run buildTrainer && CODE_ONLY=1 aws/trainer/deploy_existing.sh",
@@ -41,7 +41,7 @@
     "*/**/*.{js,jsx,ts,tsx}": [
       "eslint"
     ],
-    "src/types/**/*.{ts,tsx}": [
+    "src/params/**/*.{ts,tsx}": [
       "bash -c \"npm run generateSchema\""
     ],
     "*/**/*.{js,jsx,ts,tsx,test}": [

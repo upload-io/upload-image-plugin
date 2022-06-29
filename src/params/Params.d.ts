@@ -1,6 +1,6 @@
-import { TransformationArtifactPath } from "upload-image-plugin/types/TransformationArtifactPath";
-import { ImagePipeline } from "upload-image-plugin/types/ImagePipeline";
-import { ImagePipelineMergeBehaviour } from "upload-image-plugin/types/ImagePipelineMergeBehaviour";
+import { TransformationArtifactPath } from "upload-image-plugin/params/TransformationArtifactPath";
+import { ImagePipeline } from "upload-image-plugin/params/ImagePipeline";
+import { ImagePipelineMergeBehaviour } from "upload-image-plugin/params/ImagePipelineMergeBehaviour";
 
 export interface Params {
   /**

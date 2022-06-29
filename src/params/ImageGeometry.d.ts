@@ -1,13 +1,17 @@
-import { ImageCropStrategy } from "upload-image-plugin/types/ImageCropStrategy";
+import { ImageCropStrategy } from "upload-image-plugin/params/ImageCropStrategy";
 
 /**
- * Image size with optional offset.
+ * Geometry defining an image resize.
+ *
+ * Note: Some resize modes automatically crop to maintain an aspect ratio without distorting the image.
  */
-export interface ImageGeometry {
-  offset?: ImageOffset;
+export interface ResizeGeometry {
   size: ImageSize;
 }
 
+/**
+ * Geometry defining an image crop.
+ */
 export interface CropGeometry {
   offset: ImageOffset;
   size: ImageSizeWidthHeightForce;

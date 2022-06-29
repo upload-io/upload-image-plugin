@@ -1,4 +1,4 @@
-import { ImageWidthHeight } from "upload-image-plugin/types/ImageWidthHeight";
+import { ImageWidthHeight } from "upload-image-plugin/params/ImageWidthHeight";
 
 export class GeometryUtils {
   static dimsFromAspectRatio(ratio: ImageWidthHeight, area: number): ImageWidthHeight {

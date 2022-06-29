@@ -1,7 +1,7 @@
-import { Params } from "upload-image-plugin/types/Params";
+import { Params } from "upload-image-plugin/params/Params";
 import { transform } from "upload-plugin-sdk";
 import { Transformer } from "upload-image-plugin/Transformer";
-import { EstimationResult } from "upload-image-plugin/types/EstimationResult";
+import { EstimationResult } from "upload-image-plugin/model/EstimationResult";
 
 const transformer = new Transformer();
 

@@ -3,7 +3,7 @@
  *
  * Important: ensure each of these work when transcoding large images (6000x4000) without downsizing.
  */
-export type SupportedImageFormat =
+export type SupportedOutputFormat =
   // | "avif" -- times out on larger images
   // | "gif" -- requires a custom build of lipvips (i.e. not the binary bundled with sharp).
   // | "heic" -- produces un-open-able images & also times-out with large images
