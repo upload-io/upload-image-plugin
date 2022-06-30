@@ -133,6 +133,7 @@ export class Transformer {
             case "crop":
             case "flip":
             case "blur":
+            case "negative":
             case "greyscale":
               return [];
             case "composite":
@@ -274,6 +275,8 @@ export class Transformer {
         return img.extract(this.getCropOptions(step.geometry));
       case "resize":
         return img.resize(this.getResizeOptions(step.geometry.size));
+      case "negative":
+        return img.negate({ alpha: step.negateAlpha });
       case "greyscale":
         return img.greyscale(true);
       case "flip": {

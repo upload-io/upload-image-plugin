@@ -205,6 +205,9 @@
                     },
                     {
                       "$ref": "#/definitions/GreyscaleStep"
+                    },
+                    {
+                      "$ref": "#/definitions/NegativeStep"
                     }
                   ]
                 },
@@ -240,7 +243,7 @@
                     "properties": {
                       "fileWhitelist": {
                         "items": {
-                          "enum": ["blur", "composite", "crop", "flip", "greyscale", "resize"],
+                          "enum": ["blur", "composite", "crop", "flip", "greyscale", "negative", "resize"],
                           "type": "string"
                         },
                         "type": "array"
@@ -522,6 +525,22 @@
             "title": "Shrinks an image with dimension(s) larger than the corresponding width and/or height argument(s).",
             "type": "object"
           },
+          "NegativeStep": {
+            "additionalProperties": false,
+            "properties": {
+              "negateAlpha": {
+                "title": "Negate Alpha Channel",
+                "type": "boolean"
+              },
+              "type": {
+                "enum": ["negative"],
+                "title": "Transformation Type",
+                "type": "string"
+              }
+            },
+            "required": ["negateAlpha", "type"],
+            "type": "object"
+          },
           "ResizeGeometry": {
             "additionalProperties": false,
             "description": "\nNote: Some resize modes automatically crop to maintain an aspect ratio without distorting the image.",
@@ -767,6 +786,22 @@
               },
               "required": ["type"],
               "type": "object"
+            },
+            "NegativeStep": {
+              "additionalProperties": false,
+              "properties": {
+                "negateAlpha": {
+                  "title": "Negate Alpha Channel",
+                  "type": "boolean"
+                },
+                "type": {
+                  "enum": ["negative"],
+                  "title": "Transformation Type",
+                  "type": "string"
+                }
+              },
+              "required": ["negateAlpha", "type"],
+              "type": "object"
             }
           },
           "properties": {
@@ -810,6 +845,9 @@
                   },
                   {
                     "$ref": "#/definitions/GreyscaleStep"
+                  },
+                  {
+                    "$ref": "#/definitions/NegativeStep"
                   }
                 ]
               },
@@ -872,7 +910,8 @@
                 "blend",
                 "premultiplied",
                 "percentage",
-                "axis"
+                "axis",
+                "negateAlpha"
               ],
               "percentage": {
                 "ui:widget": "range"
