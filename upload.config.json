@@ -576,6 +576,78 @@
         "schema": {
           "$schema": "http://json-schema.org/draft-07/schema#",
           "type": "object",
+          "definitions": {
+            "CompositeStep": {
+              "additionalProperties": false,
+              "properties": {
+                "blend": {
+                  "enum": [
+                    "add",
+                    "clear",
+                    "color-burn",
+                    "color-dodge",
+                    "darken",
+                    "destination",
+                    "destination-atop",
+                    "destination-in",
+                    "destination-out",
+                    "destination-over",
+                    "difference",
+                    "exclusion",
+                    "hard-light",
+                    "lighten",
+                    "multiply",
+                    "overlay",
+                    "saturate",
+                    "screen",
+                    "soft-light",
+                    "source",
+                    "source-atop",
+                    "source-in",
+                    "source-out",
+                    "source-over",
+                    "xor"
+                  ],
+                  "type": "string"
+                },
+                "gravity": {
+                  "enum": [
+                    "center",
+                    "east",
+                    "north",
+                    "northeast",
+                    "northwest",
+                    "south",
+                    "southeast",
+                    "southwest",
+                    "west"
+                  ],
+                  "type": "string"
+                },
+                "imageFileId": {
+                  "type": "string"
+                },
+                "left": {
+                  "type": "integer"
+                },
+                "premultiplied": {
+                  "type": "boolean"
+                },
+                "tile": {
+                  "type": "boolean"
+                },
+                "top": {
+                  "type": "integer"
+                },
+                "type": {
+                  "enum": ["composite"],
+                  "type": "string"
+                }
+              },
+              "required": ["imageFileId", "type"],
+              "type": "object"
+            }
+          },
           "properties": {
             "format": {
               "title": "Output format",
