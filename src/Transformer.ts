@@ -131,6 +131,7 @@ export class Transformer {
           switch (x.type) {
             case "resize":
             case "crop":
+            case "flip":
             case "blur":
               return [];
             case "composite":
@@ -272,6 +273,17 @@ export class Transformer {
         return img.extract(this.getCropOptions(step.geometry));
       case "resize":
         return img.resize(this.getResizeOptions(step.geometry.size));
+      case "flip": {
+        switch (step.axis) {
+          case "horizontal":
+            return img.flip();
+          case "vertical":
+            return img.flop();
+          default:
+            assertUnreachable(step.axis);
+        }
+        break;
+      }
       case "blur": {
         const min = 0.3;
         const max = 1000;

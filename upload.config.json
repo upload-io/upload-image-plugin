@@ -134,6 +134,23 @@
             "required": ["geometry", "type"],
             "type": "object"
           },
+          "FlipStep": {
+            "additionalProperties": false,
+            "properties": {
+              "axis": {
+                "enum": ["horizontal", "vertical"],
+                "title": "Axis",
+                "type": "string"
+              },
+              "type": {
+                "enum": ["flip"],
+                "title": "Transformation Type",
+                "type": "string"
+              }
+            },
+            "required": ["axis", "type"],
+            "type": "object"
+          },
           "ImageOffset": {
             "additionalProperties": false,
             "properties": {
@@ -170,6 +187,9 @@
                     },
                     {
                       "$ref": "#/definitions/BlurStep"
+                    },
+                    {
+                      "$ref": "#/definitions/FlipStep"
                     }
                   ]
                 },
@@ -205,7 +225,7 @@
                     "properties": {
                       "fileWhitelist": {
                         "items": {
-                          "enum": ["blur", "composite", "crop", "resize"],
+                          "enum": ["blur", "composite", "crop", "flip", "resize"],
                           "type": "string"
                         },
                         "type": "array"
@@ -703,6 +723,23 @@
               },
               "required": ["imageFileId", "type"],
               "type": "object"
+            },
+            "FlipStep": {
+              "additionalProperties": false,
+              "properties": {
+                "axis": {
+                  "enum": ["horizontal", "vertical"],
+                  "title": "Axis",
+                  "type": "string"
+                },
+                "type": {
+                  "enum": ["flip"],
+                  "title": "Transformation Type",
+                  "type": "string"
+                }
+              },
+              "required": ["axis", "type"],
+              "type": "object"
             }
           },
           "properties": {
@@ -740,6 +777,9 @@
                   },
                   {
                     "$ref": "#/definitions/CompositeStep"
+                  },
+                  {
+                    "$ref": "#/definitions/FlipStep"
                   }
                 ]
               },
@@ -801,7 +841,8 @@
                 "tile",
                 "blend",
                 "premultiplied",
-                "percentage"
+                "percentage",
+                "axis"
               ],
               "percentage": {
                 "ui:widget": "range"

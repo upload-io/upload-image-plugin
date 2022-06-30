@@ -2,7 +2,7 @@ import { CropGeometry, ResizeGeometry } from "upload-image-plugin/params/ImageGe
 import { CompositeBlendMode } from "upload-image-plugin/params/CompositeBlendMode";
 import { CompositeGravityMode } from "upload-image-plugin/params/CompositeGravityMode";
 
-export type ImagePipelineStep = ResizeStep | CropStep | CompositeStep | BlurStep;
+export type ImagePipelineStep = ResizeStep | CropStep | CompositeStep | BlurStep | FlipStep;
 export type ImagePipelineStepType = ImagePipelineStep["type"];
 
 export interface CropStep {
@@ -43,6 +43,18 @@ export interface BlurStep {
    * Transformation Type
    */
   type: "blur";
+}
+
+export interface FlipStep {
+  /**
+   * Axis
+   */
+  axis: "horizontal" | "vertical";
+
+  /**
+   * Transformation Type
+   */
+  type: "flip";
 }
 
 export interface CompositeStep {
