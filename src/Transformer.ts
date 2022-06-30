@@ -131,6 +131,7 @@ export class Transformer {
           switch (x.type) {
             case "resize":
             case "crop":
+            case "blur":
               return [];
             case "composite":
               return [
@@ -271,6 +272,17 @@ export class Transformer {
         return img.extract(this.getCropOptions(step.geometry));
       case "resize":
         return img.resize(this.getResizeOptions(step.geometry.size));
+      case "blur": {
+        const min = 0.3;
+        const max = 1000;
+        const range = max - min;
+        // This converts the range 1-100 to 0-100. This is because we advertise a minimum blur of 1 (which we want to
+        // map to Sharp's minimum blur of 0.3) rather than advertise a minimum blur of 0, which would be confusing as it
+        // would misleadingly imply no blur.
+        const zeroToHundred = (step.percentage - 1) * (100 / 99);
+        const blurAmount = min + range * (zeroToHundred / 100);
+        return img.blur(blurAmount);
+      }
       case "composite":
         return img.composite([
           {

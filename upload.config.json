@@ -9,6 +9,24 @@
         "$schema": "http://json-schema.org/draft-07/schema#",
         "additionalProperties": false,
         "definitions": {
+          "BlurStep": {
+            "additionalProperties": false,
+            "properties": {
+              "percentage": {
+                "maximum": 100,
+                "minimum": 1,
+                "title": "Blur Amount",
+                "type": "integer"
+              },
+              "type": {
+                "enum": ["blur"],
+                "title": "Transformation Type",
+                "type": "string"
+              }
+            },
+            "required": ["percentage", "type"],
+            "type": "object"
+          },
           "CompositeStep": {
             "additionalProperties": false,
             "properties": {
@@ -40,6 +58,7 @@
                   "source-over",
                   "xor"
                 ],
+                "title": "Blend Mode",
                 "type": "string"
               },
               "gravity": {
@@ -54,25 +73,32 @@
                   "southwest",
                   "west"
                 ],
+                "title": "Image Position (Relative)",
                 "type": "string"
               },
               "imageFileId": {
+                "title": "Image",
                 "type": "string"
               },
               "left": {
+                "title": "Image Position (Absolute X)",
                 "type": "integer"
               },
               "premultiplied": {
+                "title": "Blend Mode: Disable Base Image Premultiplication",
                 "type": "boolean"
               },
               "tile": {
+                "title": "Repeat Image",
                 "type": "boolean"
               },
               "top": {
+                "title": "Image Position (Absolute Y)",
                 "type": "integer"
               },
               "type": {
                 "enum": ["composite"],
+                "title": "Transformation Type",
                 "type": "string"
               }
             },
@@ -101,6 +127,7 @@
               },
               "type": {
                 "enum": ["crop"],
+                "title": "Transformation Type",
                 "type": "string"
               }
             },
@@ -140,6 +167,9 @@
                     },
                     {
                       "$ref": "#/definitions/CompositeStep"
+                    },
+                    {
+                      "$ref": "#/definitions/BlurStep"
                     }
                   ]
                 },
@@ -175,7 +205,7 @@
                     "properties": {
                       "fileWhitelist": {
                         "items": {
-                          "enum": ["composite", "crop", "resize"],
+                          "enum": ["blur", "composite", "crop", "resize"],
                           "type": "string"
                         },
                         "type": "array"
@@ -500,6 +530,7 @@
               },
               "type": {
                 "enum": ["resize"],
+                "title": "Transformation Type",
                 "type": "string"
               }
             },
@@ -577,6 +608,24 @@
           "$schema": "http://json-schema.org/draft-07/schema#",
           "type": "object",
           "definitions": {
+            "BlurStep": {
+              "additionalProperties": false,
+              "properties": {
+                "percentage": {
+                  "maximum": 100,
+                  "minimum": 1,
+                  "title": "Blur Amount",
+                  "type": "integer"
+                },
+                "type": {
+                  "enum": ["blur"],
+                  "title": "Transformation Type",
+                  "type": "string"
+                }
+              },
+              "required": ["percentage", "type"],
+              "type": "object"
+            },
             "CompositeStep": {
               "additionalProperties": false,
               "properties": {
@@ -608,6 +657,7 @@
                     "source-over",
                     "xor"
                   ],
+                  "title": "Blend Mode",
                   "type": "string"
                 },
                 "gravity": {
@@ -622,25 +672,32 @@
                     "southwest",
                     "west"
                   ],
+                  "title": "Image Position (Relative)",
                   "type": "string"
                 },
                 "imageFileId": {
+                  "title": "Image",
                   "type": "string"
                 },
                 "left": {
+                  "title": "Image Position (Absolute X)",
                   "type": "integer"
                 },
                 "premultiplied": {
+                  "title": "Blend Mode: Disable Base Image Premultiplication",
                   "type": "boolean"
                 },
                 "tile": {
+                  "title": "Repeat Image",
                   "type": "boolean"
                 },
                 "top": {
+                  "title": "Image Position (Absolute Y)",
                   "type": "integer"
                 },
                 "type": {
                   "enum": ["composite"],
+                  "title": "Transformation Type",
                   "type": "string"
                 }
               },
@@ -650,7 +707,7 @@
           },
           "properties": {
             "format": {
-              "title": "Output format",
+              "title": "Output Format",
               "type": "string",
               "enum": ["jpg", "png", "webp"],
               "default": "jpg"
@@ -678,6 +735,9 @@
             "transformationSteps": {
               "items": {
                 "anyOf": [
+                  {
+                    "$ref": "#/definitions/BlurStep"
+                  },
                   {
                     "$ref": "#/definitions/CompositeStep"
                   }
@@ -732,33 +792,24 @@
           "ui:order": ["format", "resizeMode", "cropStrategy", "width", "height", "transformationSteps"],
           "transformationSteps": {
             "items": {
-              "ui:order": ["type", "imageFileId", "gravity", "left", "top", "tile", "blend", "premultiplied"],
+              "ui:order": [
+                "type",
+                "imageFileId",
+                "gravity",
+                "left",
+                "top",
+                "tile",
+                "blend",
+                "premultiplied",
+                "percentage"
+              ],
+              "percentage": {
+                "ui:widget": "range"
+              },
               "type": {
-                "ui:title": "Transformation Type",
                 "composite": {
                   "ui:title": "Add Image Overlay"
                 }
-              },
-              "imageFileId": {
-                "ui:title": "Image"
-              },
-              "blend": {
-                "ui:title": "Blend Mode"
-              },
-              "gravity": {
-                "ui:title": "Image Position (Relative)"
-              },
-              "left": {
-                "ui:title": "Image Position (Absolute X)"
-              },
-              "top": {
-                "ui:title": "Image Position (Absolute Y)"
-              },
-              "tile": {
-                "ui:title": "Repeat Image"
-              },
-              "premultiplied": {
-                "ui:title": "Blend Mode: Disable Base Image Premultiplication"
               }
             }
           }
