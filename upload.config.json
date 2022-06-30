@@ -555,7 +555,7 @@
           {
             "plugin": {
               "packageName": "upload-image-plugin",
-              "packageVersion": "2.5.4-alpha.2"
+              "packageVersion": "2.5.4-alpha.3"
             },
             "params": {
               "input": "/",
