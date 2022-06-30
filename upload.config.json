@@ -650,7 +650,7 @@
                   "ref": "format"
                 },
                 "steps": {
-                  "ref": "[[{if: width == null && height == null, then: `[]`}, {if: width != null && height == null, then: to_array({type:'resize',geometry:{size:{type:'width',width:width}}})}, {if: width == null && height != null, then: to_array({type:'resize',geometry:{size:{type:'xheight',height:height}}})}, {if: resizeMode=='Maximum', then:to_array({type:'resize',geometry:{size:{type:'widthxheight',width:width,height:height}}})}, {if: resizeMode=='Minimum', then:to_array({type:'resize',geometry:{size:{type:'widthxheight^',width:width,height:height}}})}, {if: resizeMode=='Exact', then:to_array({type:'resize',geometry:{size:{type:'widthxheight!',width:width,height:height}}})},{if: resizeMode=='Crop', then:to_array({type:'resize',geometry:{size:{type:'widthxheightc',width:width,height:height,cropStrategy:{type: [{if: cropStrategy=='Smart (Vibrancy)', then: 'smartAttention'},{if: cropStrategy=='Smart (Detail)', then: 'smartEntropy'},{if: cropStrategy=='Fixed (Center)', then: 'fixedCenter'},{if: cropStrategy=='Fixed (Left)', then: 'fixedLeft'},{if: cropStrategy=='Fixed (Right)', then: 'fixedRight'},{if: cropStrategy=='Fixed (Top)', then: 'fixedTop'},{if: cropStrategy=='Fixed (Bottom)', then: 'fixedBottom'},{if: cropStrategy=='Fixed (Top Left)', then: 'fixedTopLeft'},{if: cropStrategy=='Fixed (Top Right)', then: 'fixedTopRight'},{if: cropStrategy=='Fixed (Bottom Left)', then: 'fixedBottomLeft'},{if: cropStrategy=='Fixed (Bottom Right)', then: 'fixedBottomRight'}][?if]|[0].then}}}})}][?if]|[0].then,transformationSteps][]"
+                  "ref": "[[{if: outputImage.width == null && outputImage.height == null, then: `[]`}, {if: outputImage.width != null && outputImage.height == null, then: to_array({type:'resize',geometry:{size:{type:'width',width:outputImage.width}}})}, {if: outputImage.width == null && outputImage.height != null, then: to_array({type:'resize',geometry:{size:{type:'xheight',height:outputImage.height}}})}, {if: outputImage.resizeMode=='Maximum', then:to_array({type:'resize',geometry:{size:{type:'widthxheight',width:outputImage.width,height:outputImage.height}}})}, {if: outputImage.resizeMode=='Minimum', then:to_array({type:'resize',geometry:{size:{type:'widthxheight^',width:outputImage.width,height:outputImage.height}}})}, {if: outputImage.resizeMode=='Exact', then:to_array({type:'resize',geometry:{size:{type:'widthxheight!',width:outputImage.width,height:outputImage.height}}})},{if: outputImage.resizeMode=='Crop', then:to_array({type:'resize',geometry:{size:{type:'widthxheightc',width:outputImage.width,height:outputImage.height,cropStrategy:{type: [{if: outputImage.cropStrategy=='Smart (Vibrancy)', then: 'smartAttention'},{if: outputImage.cropStrategy=='Smart (Detail)', then: 'smartEntropy'},{if: outputImage.cropStrategy=='Fixed (Center)', then: 'fixedCenter'},{if: outputImage.cropStrategy=='Fixed (Left)', then: 'fixedLeft'},{if: outputImage.cropStrategy=='Fixed (Right)', then: 'fixedRight'},{if: outputImage.cropStrategy=='Fixed (Top)', then: 'fixedTop'},{if: outputImage.cropStrategy=='Fixed (Bottom)', then: 'fixedBottom'},{if: outputImage.cropStrategy=='Fixed (Top Left)', then: 'fixedTopLeft'},{if: outputImage.cropStrategy=='Fixed (Top Right)', then: 'fixedTopRight'},{if: outputImage.cropStrategy=='Fixed (Bottom Left)', then: 'fixedBottomLeft'},{if: outputImage.cropStrategy=='Fixed (Bottom Right)', then: 'fixedBottomRight'}][?if]|[0].then}}}})}][?if]|[0].then,transformationSteps][]"
                 }
               }
             }
@@ -805,31 +805,77 @@
             }
           },
           "properties": {
-            "format": {
-              "title": "Output Format",
-              "type": "string",
-              "enum": ["jpg", "png", "webp"],
-              "default": "jpg"
-            },
-            "resizeMode": {
-              "title": "Dimensions",
-              "type": "string",
-              "enum": ["Minimum", "Maximum", "Exact", "Crop"],
-              "default": "Maximum"
-            },
-            "width": {
-              "maximum": 10000,
-              "minimum": 1,
-              "title": "Width",
-              "type": "integer",
-              "default": 800
-            },
-            "height": {
-              "maximum": 10000,
-              "minimum": 1,
-              "title": "Height",
-              "type": "integer",
-              "default": 600
+            "outputImage": {
+              "type": "object",
+              "title": "Output Image",
+              "required": ["resizeMode"],
+              "dependencies": {
+                "resizeMode": {
+                  "oneOf": [
+                    {
+                      "properties": {
+                        "resizeMode": {
+                          "enum": ["Minimum", "Maximum", "Exact"]
+                        }
+                      }
+                    },
+                    {
+                      "properties": {
+                        "resizeMode": {
+                          "enum": ["Crop"]
+                        },
+                        "cropStrategy": {
+                          "title": "Crop Mode",
+                          "type": "string",
+                          "enum": [
+                            "Smart (Vibrancy)",
+                            "Smart (Detail)",
+                            "Fixed (Center)",
+                            "Fixed (Left)",
+                            "Fixed (Right)",
+                            "Fixed (Top)",
+                            "Fixed (Bottom)",
+                            "Fixed (Top Left)",
+                            "Fixed (Top Right)",
+                            "Fixed (Bottom Left)",
+                            "Fixed (Bottom Right)"
+                          ],
+                          "default": "Smart (Vibrancy)"
+                        }
+                      },
+                      "required": ["cropStrategy"]
+                    }
+                  ]
+                }
+              },
+              "properties": {
+                "format": {
+                  "title": "Output Format",
+                  "type": "string",
+                  "enum": ["jpg", "png", "webp"],
+                  "default": "jpg"
+                },
+                "resizeMode": {
+                  "title": "Resize Mode",
+                  "type": "string",
+                  "enum": ["Minimum", "Maximum", "Exact", "Crop"],
+                  "default": "Maximum"
+                },
+                "width": {
+                  "maximum": 10000,
+                  "minimum": 1,
+                  "title": "Width",
+                  "type": "integer",
+                  "default": 800
+                },
+                "height": {
+                  "maximum": 10000,
+                  "minimum": 1,
+                  "title": "Height",
+                  "type": "integer",
+                  "default": 600
+                }
+              }
             },
             "transformationSteps": {
               "items": {
@@ -851,53 +897,17 @@
                   }
                 ]
               },
-              "title": "Steps",
+              "title": "Transformation Steps",
               "type": "array"
             }
           },
-          "required": ["resizeMode"],
-          "dependencies": {
-            "resizeMode": {
-              "oneOf": [
-                {
-                  "properties": {
-                    "resizeMode": {
-                      "enum": ["Minimum", "Maximum", "Exact"]
-                    }
-                  }
-                },
-                {
-                  "properties": {
-                    "resizeMode": {
-                      "enum": ["Crop"]
-                    },
-                    "cropStrategy": {
-                      "title": "Cropping",
-                      "type": "string",
-                      "enum": [
-                        "Smart (Vibrancy)",
-                        "Smart (Detail)",
-                        "Fixed (Center)",
-                        "Fixed (Left)",
-                        "Fixed (Right)",
-                        "Fixed (Top)",
-                        "Fixed (Bottom)",
-                        "Fixed (Top Left)",
-                        "Fixed (Top Right)",
-                        "Fixed (Bottom Left)",
-                        "Fixed (Bottom Right)"
-                      ],
-                      "default": "Smart (Vibrancy)"
-                    }
-                  },
-                  "required": ["cropStrategy"]
-                }
-              ]
-            }
-          }
+          "required": ["outputImage"]
         },
         "ui": {
-          "ui:order": ["format", "resizeMode", "cropStrategy", "width", "height", "transformationSteps"],
+          "ui:order": ["outputImage", "transformationSteps"],
+          "outputImage": {
+            "ui:order": ["format", "width", "height", "resizeMode", "cropStrategy"]
+          },
           "transformationSteps": {
             "items": {
               "ui:order": [
