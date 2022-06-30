@@ -151,6 +151,18 @@
             "required": ["axis", "type"],
             "type": "object"
           },
+          "GreyscaleStep": {
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "enum": ["greyscale"],
+                "title": "Transformation Type",
+                "type": "string"
+              }
+            },
+            "required": ["type"],
+            "type": "object"
+          },
           "ImageOffset": {
             "additionalProperties": false,
             "properties": {
@@ -190,6 +202,9 @@
                     },
                     {
                       "$ref": "#/definitions/FlipStep"
+                    },
+                    {
+                      "$ref": "#/definitions/GreyscaleStep"
                     }
                   ]
                 },
@@ -225,7 +240,7 @@
                     "properties": {
                       "fileWhitelist": {
                         "items": {
-                          "enum": ["blur", "composite", "crop", "flip", "resize"],
+                          "enum": ["blur", "composite", "crop", "flip", "greyscale", "resize"],
                           "type": "string"
                         },
                         "type": "array"
@@ -740,6 +755,18 @@
               },
               "required": ["axis", "type"],
               "type": "object"
+            },
+            "GreyscaleStep": {
+              "additionalProperties": false,
+              "properties": {
+                "type": {
+                  "enum": ["greyscale"],
+                  "title": "Transformation Type",
+                  "type": "string"
+                }
+              },
+              "required": ["type"],
+              "type": "object"
             }
           },
           "properties": {
@@ -780,6 +807,9 @@
                   },
                   {
                     "$ref": "#/definitions/FlipStep"
+                  },
+                  {
+                    "$ref": "#/definitions/GreyscaleStep"
                   }
                 ]
               },
