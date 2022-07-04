@@ -1,6 +1,7 @@
 import { CropGeometry, ResizeGeometry } from "upload-image-plugin/params/ImageGeometry";
 import { CompositeBlendMode } from "upload-image-plugin/params/CompositeBlendMode";
 import { CompositeGravityMode } from "upload-image-plugin/params/CompositeGravityMode";
+import { BlurMode } from "upload-image-plugin/params/BlurSettings";
 
 export type ImagePipelineStep =
   | ResizeStep
@@ -56,14 +57,7 @@ export interface GreyscaleStep {
 }
 
 export interface BlurStep {
-  /**
-   * Blur Amount
-   *
-   * @isInt
-   * @minimum 1
-   * @maximum 100
-   */
-  percentage: number;
+  mode: BlurMode;
 
   /**
    * Transformation Type

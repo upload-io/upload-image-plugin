@@ -9,14 +9,48 @@
         "$schema": "http://json-schema.org/draft-07/schema#",
         "additionalProperties": false,
         "definitions": {
-          "BlurStep": {
+          "BlurModeFast": {
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "enum": ["fast"],
+                "title": "Blur Mode",
+                "type": "string"
+              }
+            },
+            "required": ["type"],
+            "type": "object"
+          },
+          "BlurModeSlow": {
             "additionalProperties": false,
             "properties": {
               "percentage": {
                 "maximum": 100,
                 "minimum": 1,
-                "title": "Blur Amount",
+                "title": "Blur Strength",
                 "type": "integer"
+              },
+              "type": {
+                "enum": ["slow"],
+                "title": "Blur Mode",
+                "type": "string"
+              }
+            },
+            "required": ["percentage", "type"],
+            "type": "object"
+          },
+          "BlurStep": {
+            "additionalProperties": false,
+            "properties": {
+              "mode": {
+                "anyOf": [
+                  {
+                    "$ref": "#/definitions/BlurModeFast"
+                  },
+                  {
+                    "$ref": "#/definitions/BlurModeSlow"
+                  }
+                ]
               },
               "type": {
                 "enum": ["blur"],
@@ -24,7 +58,7 @@
                 "type": "string"
               }
             },
-            "required": ["percentage", "type"],
+            "required": ["mode", "type"],
             "type": "object"
           },
           "CompositeStep": {
@@ -647,7 +681,7 @@
           {
             "plugin": {
               "packageName": "upload-image-plugin",
-              "packageVersion": "2.5.4-alpha.16"
+              "packageVersion": "2.5.4-alpha.17"
             },
             "params": {
               "input": "/",
@@ -669,15 +703,49 @@
           "$schema": "http://json-schema.org/draft-07/schema#",
           "type": "object",
           "definitions": {
-            "BlurStep": {
+            "BlurModeFast": {
+              "additionalProperties": false,
+              "properties": {
+                "type": {
+                  "enum": ["fast"],
+                  "title": "Blur Mode",
+                  "type": "string"
+                }
+              },
+              "required": ["type"],
+              "type": "object"
+            },
+            "BlurModeSlow": {
               "additionalProperties": false,
               "properties": {
                 "percentage": {
                   "maximum": 100,
                   "minimum": 1,
-                  "title": "Blur Amount",
+                  "title": "Blur Strength",
                   "type": "integer",
                   "default": 20
+                },
+                "type": {
+                  "enum": ["slow"],
+                  "title": "Blur Mode",
+                  "type": "string"
+                }
+              },
+              "required": ["percentage", "type"],
+              "type": "object"
+            },
+            "BlurStep": {
+              "additionalProperties": false,
+              "properties": {
+                "mode": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/definitions/BlurModeFast"
+                    },
+                    {
+                      "$ref": "#/definitions/BlurModeSlow"
+                    }
+                  ]
                 },
                 "type": {
                   "enum": ["blur"],
@@ -685,7 +753,7 @@
                   "type": "string"
                 }
               },
-              "required": ["percentage", "type"],
+              "required": ["mode", "type"],
               "type": "object"
             },
             "CompositeStep": {
@@ -940,6 +1008,7 @@
             "items": {
               "ui:order": [
                 "type",
+                "mode",
                 "imageFileId",
                 "gravity",
                 "left",
@@ -951,8 +1020,10 @@
                 "axis",
                 "negateAlpha"
               ],
-              "percentage": {
-                "ui:widget": "range"
+              "mode": {
+                "percentage": {
+                  "ui:widget": "range"
+                }
               },
               "axis": {
                 "ui:options:labels:transform": "propercase"

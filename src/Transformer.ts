@@ -297,15 +297,24 @@ export class Transformer {
         break;
       }
       case "blur": {
-        const min = 0.3;
-        const max = 1000;
-        const range = max - min;
-        // This converts the range 1-100 to 0-100. This is because we advertise a minimum blur of 1 (which we want to
-        // map to Sharp's minimum blur of 0.3) rather than advertise a minimum blur of 0, which would be confusing as it
-        // would misleadingly imply no blur.
-        const zeroToHundred = (step.percentage - 1) * (100 / 99);
-        const blurAmount = min + range * (zeroToHundred / 100);
-        return img.blur(blurAmount);
+        switch (step.mode.type) {
+          case "fast":
+            return img.blur();
+          case "slow": {
+            const min = 0.3;
+            const max = 1000;
+            const range = max - min;
+            // This converts the range 1-100 to 0-100. This is because we advertise a minimum blur of 1 (which we want to
+            // map to Sharp's minimum blur of 0.3) rather than advertise a minimum blur of 0, which would be confusing as it
+            // would misleadingly imply no blur.
+            const zeroToHundred = (step.mode.percentage - 1) * (100 / 99);
+            const blurAmount = min + range * (zeroToHundred / 100);
+            return img.blur(blurAmount);
+          }
+          default:
+            assertUnreachable(step.mode);
+        }
+        break;
       }
       case "composite":
         return img.composite([
