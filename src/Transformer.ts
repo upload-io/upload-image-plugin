@@ -25,6 +25,7 @@ import { ImagePipelineMergeBehaviour } from "upload-image-plugin/params/ImagePip
 import sharp, { Region, ResizeOptions, Sharp } from "sharp";
 import { ImageCropStrategy } from "upload-image-plugin/params/ImageCropStrategy";
 import { compositeBlendModeMapping } from "upload-image-plugin/common/CompositeBlendModeMapping";
+import * as Path from "path";
 
 export class Transformer {
   private readonly memoryEstimateConstantBytes = 1024 * 1024 * 10; // 10MB
@@ -84,6 +85,11 @@ export class Transformer {
     const inputPath = resolvePath(params.input);
     const [pipeline, metadata, paramsFromFile] = await this.getPipeline(inputPath, params, getMetadata);
     const tempFileDownloadRequests = this.makeTemporaryFileDownloadRequests(pipeline, resolvePath);
+    const tempFileDirectories = Array.from(
+      new Set(Object.values(tempFileDownloadRequests).map(x => Path.dirname(x.destinationFile)))
+    );
+    await Promise.all(tempFileDirectories.map(async x => await fsAsync.mkdir(x, { recursive: true })));
+
     if (paramsFromFile === undefined) {
       return {
         path: inputPath,
@@ -192,11 +198,11 @@ export class Transformer {
   ): SupportedOutputFormat | undefined {
     switch (behaviour.outputFormat) {
       case "master":
-        return master.outputFormat;
+        return master.outputFormat ?? undefined;
       case "file":
-        return file.outputFormat;
+        return file.outputFormat ?? undefined;
       case "fileThenMaster":
-        return file.outputFormat ?? master.outputFormat;
+        return file.outputFormat ?? master.outputFormat ?? undefined;
       default:
         assertUnreachable(behaviour.outputFormat);
     }
@@ -282,9 +288,9 @@ export class Transformer {
       case "flip": {
         switch (step.axis) {
           case "horizontal":
-            return img.flip();
-          case "vertical":
             return img.flop();
+          case "vertical":
+            return img.flip();
           default:
             assertUnreachable(step.axis);
         }
@@ -308,7 +314,7 @@ export class Transformer {
             top: step.top,
             left: step.left,
             tile: step.tile,
-            premultiplied: step.premultiplied,
+            premultiplied: !(step.premultiplyBaseImage ?? true),
             gravity: step.gravity,
             blend: step.blend === undefined ? undefined : compositeBlendModeMapping[step.blend]
           }
@@ -407,7 +413,7 @@ export class Transformer {
     output: TransformationArtifactPath,
     setMetadata: FileMetadataSetter
   ): Promise<void> {
-    const outputFormat = input.pipeline.outputFormat;
+    const outputFormat = input.pipeline.outputFormat ?? undefined;
     const mimeType = outputFormat === undefined ? input.contentType : mime.getType(outputFormat);
     await setMetadata(output, { contentType: mimeType ?? undefined });
   }

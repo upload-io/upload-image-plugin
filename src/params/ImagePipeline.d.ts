@@ -5,7 +5,7 @@ export interface ImagePipeline {
   /**
    * Output format
    */
-  outputFormat: SupportedOutputFormat | undefined;
+  outputFormat: SupportedOutputFormat | undefined | null; // We support 'null' because it's easier to generate using JMES path (i.e. for our templates) than 'undefined' is.
 
   /**
    * Steps

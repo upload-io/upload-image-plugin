@@ -84,8 +84,8 @@
                 "title": "Image Position (Absolute X)",
                 "type": "integer"
               },
-              "premultiplied": {
-                "title": "Blend Mode: Disable Base Image Premultiplication",
+              "premultiplyBaseImage": {
+                "title": "Premultiply Base Image",
                 "type": "boolean"
               },
               "tile": {
@@ -181,9 +181,16 @@
             "additionalProperties": false,
             "properties": {
               "outputFormat": {
-                "enum": ["jpg", "png", "webp"],
-                "title": "Output format",
-                "type": "string"
+                "anyOf": [
+                  {
+                    "enum": ["jpg", "png", "webp"],
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Output format"
               },
               "steps": {
                 "items": {
@@ -627,27 +634,27 @@
       },
       "transformation": {
         "description": {
-          "ref": "[{if: format != null && (width != null || height != null), then: join('', ['Converts images to \"', to_string(format), '\" and resizes to ', to_string(width || 'ANY'), 'x', to_string(height || 'ANY'), '.'])}, {if: format != null, then: join('', ['Converts images to \"', to_string(format), '\".'])}, {if: width != null || height != null, then: join('', ['Resizes images to ', to_string(width || 'ANY'), 'x', to_string(height || 'ANY'), '.'])}, {if: `true`, then: join('', ['Returns the original image.'])}][?if]|[0].then"
+          "ref": "[{if: outputImage.format != 'original' && (outputImage.width != null || outputImage.height != null), then: join('', ['Converts images to \"', to_string(outputImage.format), '\" and resizes to ', to_string(outputImage.width || 'ANY'), 'x', to_string(outputImage.height || 'ANY'), '.'])}, {if: outputImage.format != 'original', then: join('', ['Converts images to \"', to_string(outputImage.format), '\".'])}, {if: outputImage.width != null || outputImage.height != null, then: join('', ['Resizes images to ', to_string(outputImage.width || 'ANY'), 'x', to_string(outputImage.height || 'ANY'), '.'])}, {if: `true`, then: join('', ['Returns the original image.'])}][?if]|[0].then"
         },
         "scope": {
           "mime": ["*"],
           "tag": ["*"]
         },
         "slug": {
-          "ref": "join('', [{if: `true`, then: format || 'original_format'}, {if: width != null, then: [';w=', to_string(width)]}, {if: height != null, then: [';h=', to_string(height)]}][?if].then[])"
+          "ref": "join('', [{if: `true`, then: outputImage.format}, {if: outputImage.width != null, then: [';w=', to_string(outputImage.width)]}, {if: outputImage.height != null, then: [';h=', to_string(outputImage.height)]}][?if].then[])"
         },
         "steps": [
           {
             "plugin": {
               "packageName": "upload-image-plugin",
-              "packageVersion": "2.5.4-alpha.3"
+              "packageVersion": "2.5.4-alpha.16"
             },
             "params": {
               "input": "/",
               "output": "/",
               "pipeline": {
                 "outputFormat": {
-                  "ref": "format"
+                  "ref": "[{if: outputImage.format != 'original', then: outputImage.format}, {if: `true`, then: null}][?if]|[0].then"
                 },
                 "steps": {
                   "ref": "[[{if: outputImage.width == null && outputImage.height == null, then: `[]`}, {if: outputImage.width != null && outputImage.height == null, then: to_array({type:'resize',geometry:{size:{type:'width',width:outputImage.width}}})}, {if: outputImage.width == null && outputImage.height != null, then: to_array({type:'resize',geometry:{size:{type:'xheight',height:outputImage.height}}})}, {if: outputImage.resizeMode=='Maximum', then:to_array({type:'resize',geometry:{size:{type:'widthxheight',width:outputImage.width,height:outputImage.height}}})}, {if: outputImage.resizeMode=='Minimum', then:to_array({type:'resize',geometry:{size:{type:'widthxheight^',width:outputImage.width,height:outputImage.height}}})}, {if: outputImage.resizeMode=='Exact', then:to_array({type:'resize',geometry:{size:{type:'widthxheight!',width:outputImage.width,height:outputImage.height}}})},{if: outputImage.resizeMode=='Crop', then:to_array({type:'resize',geometry:{size:{type:'widthxheightc',width:outputImage.width,height:outputImage.height,cropStrategy:{type: [{if: outputImage.cropStrategy=='Smart (Vibrancy)', then: 'smartAttention'},{if: outputImage.cropStrategy=='Smart (Detail)', then: 'smartEntropy'},{if: outputImage.cropStrategy=='Fixed (Center)', then: 'fixedCenter'},{if: outputImage.cropStrategy=='Fixed (Left)', then: 'fixedLeft'},{if: outputImage.cropStrategy=='Fixed (Right)', then: 'fixedRight'},{if: outputImage.cropStrategy=='Fixed (Top)', then: 'fixedTop'},{if: outputImage.cropStrategy=='Fixed (Bottom)', then: 'fixedBottom'},{if: outputImage.cropStrategy=='Fixed (Top Left)', then: 'fixedTopLeft'},{if: outputImage.cropStrategy=='Fixed (Top Right)', then: 'fixedTopRight'},{if: outputImage.cropStrategy=='Fixed (Bottom Left)', then: 'fixedBottomLeft'},{if: outputImage.cropStrategy=='Fixed (Bottom Right)', then: 'fixedBottomRight'}][?if]|[0].then}}}})}][?if]|[0].then,transformationSteps][]"
@@ -669,7 +676,8 @@
                   "maximum": 100,
                   "minimum": 1,
                   "title": "Blur Amount",
-                  "type": "integer"
+                  "type": "integer",
+                  "default": 20
                 },
                 "type": {
                   "enum": ["blur"],
@@ -712,7 +720,8 @@
                     "xor"
                   ],
                   "title": "Blend Mode",
-                  "type": "string"
+                  "type": "string",
+                  "default": "source-over"
                 },
                 "gravity": {
                   "enum": [
@@ -726,27 +735,30 @@
                     "southwest",
                     "west"
                   ],
-                  "title": "Image Position (Relative)",
-                  "type": "string"
+                  "title": "Image Position (Auto)",
+                  "type": "string",
+                  "default": "center"
                 },
                 "imageFileId": {
-                  "title": "Image",
+                  "title": "Image Source",
                   "type": "string"
                 },
                 "left": {
-                  "title": "Image Position (Absolute X)",
+                  "title": "Image Position (X)",
                   "type": "integer"
                 },
-                "premultiplied": {
-                  "title": "Blend Mode: Disable Base Image Premultiplication",
-                  "type": "boolean"
+                "premultiplyBaseImage": {
+                  "title": "Premultiply Base Image",
+                  "type": "boolean",
+                  "default": true
                 },
                 "tile": {
                   "title": "Repeat Image",
-                  "type": "boolean"
+                  "type": "boolean",
+                  "default": false
                 },
                 "top": {
-                  "title": "Image Position (Absolute Y)",
+                  "title": "Image Position (Y)",
                   "type": "integer"
                 },
                 "type": {
@@ -755,7 +767,7 @@
                   "type": "string"
                 }
               },
-              "required": ["imageFileId", "type"],
+              "required": ["imageFileId", "type", "gravity", "blend", "tile", "premultiplyBaseImage"],
               "type": "object"
             },
             "FlipStep": {
@@ -764,7 +776,8 @@
                 "axis": {
                   "enum": ["horizontal", "vertical"],
                   "title": "Axis",
-                  "type": "string"
+                  "type": "string",
+                  "default": "horizontal"
                 },
                 "type": {
                   "enum": ["flip"],
@@ -791,8 +804,9 @@
               "additionalProperties": false,
               "properties": {
                 "negateAlpha": {
-                  "title": "Negate Alpha Channel",
-                  "type": "boolean"
+                  "title": "Negative Alpha Channel",
+                  "type": "boolean",
+                  "default": false
                 },
                 "type": {
                   "enum": ["negative"],
@@ -808,7 +822,7 @@
             "outputImage": {
               "type": "object",
               "title": "Output Image",
-              "required": ["resizeMode"],
+              "required": ["resizeMode", "format"],
               "dependencies": {
                 "resizeMode": {
                   "oneOf": [
@@ -850,9 +864,9 @@
               },
               "properties": {
                 "format": {
-                  "title": "Output Format",
+                  "title": "Format",
                   "type": "string",
-                  "enum": ["jpg", "png", "webp"],
+                  "enum": ["original", "jpg", "png", "webp"],
                   "default": "jpg"
                 },
                 "resizeMode": {
@@ -906,7 +920,21 @@
         "ui": {
           "ui:order": ["outputImage", "transformationSteps"],
           "outputImage": {
-            "ui:order": ["format", "width", "height", "resizeMode", "cropStrategy"]
+            "ui:order": ["format", "width", "height", "resizeMode", "cropStrategy"],
+            "format": {
+              "original": {
+                "ui:title": "Original Format"
+              },
+              "jpg": {
+                "ui:title": "JPG"
+              },
+              "png": {
+                "ui:title": "PNG"
+              },
+              "webp": {
+                "ui:title": "WebP"
+              }
+            }
           },
           "transformationSteps": {
             "items": {
@@ -918,7 +946,7 @@
                 "top",
                 "tile",
                 "blend",
-                "premultiplied",
+                "premultiplyBaseImage",
                 "percentage",
                 "axis",
                 "negateAlpha"
@@ -926,9 +954,18 @@
               "percentage": {
                 "ui:widget": "range"
               },
+              "axis": {
+                "ui:options:labels:transform": "propercase"
+              },
+              "gravity": {
+                "ui:options:labels:transform": "propercase"
+              },
+              "blend": {
+                "ui:options:labels:transform": "propercase"
+              },
               "type": {
                 "composite": {
-                  "ui:title": "Add Image Overlay"
+                  "ui:title": "Overlay"
                 }
               }
             }

@@ -106,9 +106,9 @@ export interface CompositeStep {
   left?: number;
 
   /**
-   * Blend Mode: Disable Base Image Premultiplication
+   * Premultiply Base Image
    */
-  premultiplied?: boolean;
+  premultiplyBaseImage?: boolean;
 
   /**
    * Repeat Image
