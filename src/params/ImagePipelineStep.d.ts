@@ -4,6 +4,7 @@ import { CompositeGravityMode } from "upload-image-plugin/params/CompositeGravit
 import { BlurMode } from "upload-image-plugin/params/BlurMode";
 import { SharpenMode } from "upload-image-plugin/params/SharpenMode";
 import { RotateMode } from "upload-image-plugin/params/RotateMode";
+import { ColorRGB } from "upload-image-plugin/params/ColorRGB";
 
 export type ImagePipelineStep =
   | ResizeStep
@@ -12,6 +13,7 @@ export type ImagePipelineStep =
   | CompositeStep
   | BlurStep
   | SharpenStep
+  | TintStep
   | FlipStep
   | GreyscaleStep
   | NegativeStep;
@@ -60,6 +62,18 @@ export interface NegativeStep {
    * Transformation Type
    */
   type: "negative";
+}
+
+export interface TintStep {
+  /**
+   * Tint Color
+   */
+  color: ColorRGB;
+
+  /**
+   * Transformation Type
+   */
+  type: "tint";
 }
 
 export interface GreyscaleStep {

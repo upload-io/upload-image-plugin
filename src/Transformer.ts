@@ -138,6 +138,7 @@ export class Transformer {
             case "resize":
             case "crop":
             case "rotate":
+            case "tint":
             case "flip":
             case "blur":
             case "sharpen":
@@ -301,6 +302,8 @@ export class Transformer {
         return img.negate({ alpha: step.negateAlpha });
       case "greyscale":
         return img.greyscale(true);
+      case "tint":
+        return img.tint(step.color);
       case "flip": {
         switch (step.axis) {
           case "horizontal":

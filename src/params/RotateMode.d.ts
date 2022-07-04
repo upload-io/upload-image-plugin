@@ -1,4 +1,4 @@
-import { Color } from "upload-image-plugin/params/Color";
+import { ColorRGBA } from "upload-image-plugin/params/ColorRGBA";
 
 export type RotateMode = RotateModeAuto | RotateModeManual;
 
@@ -13,7 +13,7 @@ export interface RotateModeManual {
   /**
    * Background Color
    */
-  backgroundColor: Color;
+  backgroundColor: ColorRGBA;
 
   /**
    * Rotate Degrees

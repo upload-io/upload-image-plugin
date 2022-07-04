@@ -248,6 +248,9 @@
                       "$ref": "#/definitions/SharpenStep"
                     },
                     {
+                      "$ref": "#/definitions/TintStep"
+                    },
+                    {
                       "$ref": "#/definitions/FlipStep"
                     },
                     {
@@ -299,7 +302,8 @@
                             "negative",
                             "resize",
                             "rotate",
-                            "sharpen"
+                            "sharpen",
+                            "tint"
                           ],
                           "type": "string"
                         },
@@ -653,7 +657,7 @@
             "properties": {
               "type": {
                 "enum": ["automatic"],
-                "title": "Rotate Type",
+                "title": "Rotation Type",
                 "type": "string"
               }
             },
@@ -671,12 +675,12 @@
               "degrees": {
                 "maximum": 360,
                 "minimum": 0,
-                "title": "Rotate Degrees",
+                "title": "Rotation Degrees",
                 "type": "integer"
               },
               "type": {
                 "enum": ["manual"],
-                "title": "Rotate Mode",
+                "title": "Rotation Type",
                 "type": "string"
               }
             },
@@ -756,6 +760,23 @@
             },
             "required": ["mode", "type"],
             "type": "object"
+          },
+          "TintStep": {
+            "additionalProperties": false,
+            "properties": {
+              "color": {
+                "pattern": "^#[a-fA-F\\d]{6}$",
+                "title": "Tint Color",
+                "type": "string"
+              },
+              "type": {
+                "enum": ["tint"],
+                "title": "Transformation Type",
+                "type": "string"
+              }
+            },
+            "required": ["color", "type"],
+            "type": "object"
           }
         },
         "properties": {
@@ -806,7 +827,7 @@
           {
             "plugin": {
               "packageName": "upload-image-plugin",
-              "packageVersion": "2.5.4-alpha.19"
+              "packageVersion": "2.5.4-alpha.22"
             },
             "params": {
               "input": "/",
@@ -1063,12 +1084,30 @@
               "required": ["mode", "type"],
               "type": "object"
             },
+            "TintStep": {
+              "additionalProperties": false,
+              "properties": {
+                "color": {
+                  "pattern": "^#[a-fA-F\\d]{6}$",
+                  "title": "Tint Color",
+                  "type": "string",
+                  "default": "#8f5715"
+                },
+                "type": {
+                  "enum": ["tint"],
+                  "title": "Transformation Type",
+                  "type": "string"
+                }
+              },
+              "required": ["color", "type"],
+              "type": "object"
+            },
             "RotateModeAuto": {
               "additionalProperties": false,
               "properties": {
                 "type": {
                   "enum": ["automatic"],
-                  "title": "Rotate Type",
+                  "title": "Rotation Type",
                   "type": "string"
                 }
               },
@@ -1087,13 +1126,13 @@
                 "degrees": {
                   "maximum": 360,
                   "minimum": 0,
-                  "title": "Rotate Degrees",
+                  "title": "Rotation Degrees",
                   "type": "integer",
                   "default": 90
                 },
                 "type": {
                   "enum": ["manual"],
-                  "title": "Rotate Mode",
+                  "title": "Rotation Type",
                   "type": "string"
                 }
               },
@@ -1219,6 +1258,9 @@
                   },
                   {
                     "$ref": "#/definitions/RotateStep"
+                  },
+                  {
+                    "$ref": "#/definitions/TintStep"
                   }
                 ]
               },
@@ -1252,6 +1294,7 @@
               "ui:order": [
                 "type",
                 "mode",
+                "color",
                 "imageFileId",
                 "gravity",
                 "left",
@@ -1263,7 +1306,7 @@
                 "negateAlpha"
               ],
               "mode": {
-                "ui:order": ["percentage", "degrees", "backgroundColor"],
+                "ui:order": ["type", "percentage", "degrees", "backgroundColor"],
                 "percentage": {
                   "ui:widget": "range"
                 },
