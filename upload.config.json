@@ -242,6 +242,9 @@
                       "$ref": "#/definitions/BlurStep"
                     },
                     {
+                      "$ref": "#/definitions/SharpenStep"
+                    },
+                    {
                       "$ref": "#/definitions/FlipStep"
                     },
                     {
@@ -284,7 +287,7 @@
                     "properties": {
                       "fileWhitelist": {
                         "items": {
-                          "enum": ["blur", "composite", "crop", "flip", "greyscale", "negative", "resize"],
+                          "enum": ["blur", "composite", "crop", "flip", "greyscale", "negative", "resize", "sharpen"],
                           "type": "string"
                         },
                         "type": "array"
@@ -631,6 +634,58 @@
             },
             "required": ["geometry", "type"],
             "type": "object"
+          },
+          "SharpenModeFast": {
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "enum": ["fast"],
+                "title": "Sharpen Mode",
+                "type": "string"
+              }
+            },
+            "required": ["type"],
+            "type": "object"
+          },
+          "SharpenModeSlow": {
+            "additionalProperties": false,
+            "properties": {
+              "percentage": {
+                "maximum": 100,
+                "minimum": 1,
+                "title": "Sharpen Strength",
+                "type": "integer"
+              },
+              "type": {
+                "enum": ["slow"],
+                "title": "Sharpen Mode",
+                "type": "string"
+              }
+            },
+            "required": ["percentage", "type"],
+            "type": "object"
+          },
+          "SharpenStep": {
+            "additionalProperties": false,
+            "properties": {
+              "mode": {
+                "anyOf": [
+                  {
+                    "$ref": "#/definitions/SharpenModeFast"
+                  },
+                  {
+                    "$ref": "#/definitions/SharpenModeSlow"
+                  }
+                ]
+              },
+              "type": {
+                "enum": ["sharpen"],
+                "title": "Transformation Type",
+                "type": "string"
+              }
+            },
+            "required": ["mode", "type"],
+            "type": "object"
           }
         },
         "properties": {
@@ -681,7 +736,7 @@
           {
             "plugin": {
               "packageName": "upload-image-plugin",
-              "packageVersion": "2.5.4-alpha.17"
+              "packageVersion": "2.5.4-alpha.18"
             },
             "params": {
               "input": "/",
@@ -708,7 +763,7 @@
               "properties": {
                 "type": {
                   "enum": ["fast"],
-                  "title": "Blur Mode",
+                  "title": "Blur Type",
                   "type": "string"
                 }
               },
@@ -727,7 +782,7 @@
                 },
                 "type": {
                   "enum": ["slow"],
-                  "title": "Blur Mode",
+                  "title": "Blur Type",
                   "type": "string"
                 }
               },
@@ -884,6 +939,59 @@
               },
               "required": ["negateAlpha", "type"],
               "type": "object"
+            },
+            "SharpenModeFast": {
+              "additionalProperties": false,
+              "properties": {
+                "type": {
+                  "enum": ["fast"],
+                  "title": "Sharpen Type",
+                  "type": "string"
+                }
+              },
+              "required": ["type"],
+              "type": "object"
+            },
+            "SharpenModeSlow": {
+              "additionalProperties": false,
+              "properties": {
+                "percentage": {
+                  "maximum": 100,
+                  "minimum": 1,
+                  "title": "Sharpen Strength",
+                  "type": "integer",
+                  "default": 20
+                },
+                "type": {
+                  "enum": ["slow"],
+                  "title": "Sharpen Type",
+                  "type": "string"
+                }
+              },
+              "required": ["percentage", "type"],
+              "type": "object"
+            },
+            "SharpenStep": {
+              "additionalProperties": false,
+              "properties": {
+                "mode": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/definitions/SharpenModeFast"
+                    },
+                    {
+                      "$ref": "#/definitions/SharpenModeSlow"
+                    }
+                  ]
+                },
+                "type": {
+                  "enum": ["sharpen"],
+                  "title": "Transformation Type",
+                  "type": "string"
+                }
+              },
+              "required": ["mode", "type"],
+              "type": "object"
             }
           },
           "properties": {
@@ -964,6 +1072,9 @@
                 "anyOf": [
                   {
                     "$ref": "#/definitions/BlurStep"
+                  },
+                  {
+                    "$ref": "#/definitions/SharpenStep"
                   },
                   {
                     "$ref": "#/definitions/CompositeStep"

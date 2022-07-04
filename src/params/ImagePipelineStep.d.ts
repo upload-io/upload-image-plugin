@@ -1,13 +1,15 @@
 import { CropGeometry, ResizeGeometry } from "upload-image-plugin/params/ImageGeometry";
 import { CompositeBlendMode } from "upload-image-plugin/params/CompositeBlendMode";
 import { CompositeGravityMode } from "upload-image-plugin/params/CompositeGravityMode";
-import { BlurMode } from "upload-image-plugin/params/BlurSettings";
+import { BlurMode } from "upload-image-plugin/params/BlurMode";
+import { SharpenMode } from "upload-image-plugin/params/SharpenMode";
 
 export type ImagePipelineStep =
   | ResizeStep
   | CropStep
   | CompositeStep
   | BlurStep
+  | SharpenStep
   | FlipStep
   | GreyscaleStep
   | NegativeStep;
@@ -63,6 +65,15 @@ export interface BlurStep {
    * Transformation Type
    */
   type: "blur";
+}
+
+export interface SharpenStep {
+  mode: SharpenMode;
+
+  /**
+   * Transformation Type
+   */
+  type: "sharpen";
 }
 
 export interface FlipStep {

@@ -139,6 +139,7 @@ export class Transformer {
             case "crop":
             case "flip":
             case "blur":
+            case "sharpen":
             case "negative":
             case "greyscale":
               return [];
@@ -275,6 +276,20 @@ export class Transformer {
     await fsAsync.rename(tempPath, outputResolved);
   }
 
+  /**
+   * @param percentage From 1 to 100.
+   */
+  private percentageToGaussianSigma(percentage: number): number {
+    const min = 0.3;
+    const max = 1000;
+    const range = max - min;
+    // This converts the range 1-100 to 0-100. This is because we advertise a minimum blur of 1 (which we want to
+    // map to Sharp's minimum blur of 0.3) rather than advertise a minimum blur of 0, which would be confusing as it
+    // would misleadingly imply no blur.
+    const zeroToHundred = (percentage - 1) * (100 / 99);
+    return min + range * (zeroToHundred / 100);
+  }
+
   private applyTransformationArg(input: TransformationInput, step: ImagePipelineStep, img: Sharp): Sharp {
     switch (step.type) {
       case "crop":
@@ -296,21 +311,23 @@ export class Transformer {
         }
         break;
       }
+      case "sharpen": {
+        switch (step.mode.type) {
+          case "fast":
+            return img.sharpen();
+          case "slow":
+            return img.sharpen(this.percentageToGaussianSigma(step.mode.percentage));
+          default:
+            assertUnreachable(step.mode);
+        }
+        break;
+      }
       case "blur": {
         switch (step.mode.type) {
           case "fast":
             return img.blur();
-          case "slow": {
-            const min = 0.3;
-            const max = 1000;
-            const range = max - min;
-            // This converts the range 1-100 to 0-100. This is because we advertise a minimum blur of 1 (which we want to
-            // map to Sharp's minimum blur of 0.3) rather than advertise a minimum blur of 0, which would be confusing as it
-            // would misleadingly imply no blur.
-            const zeroToHundred = (step.mode.percentage - 1) * (100 / 99);
-            const blurAmount = min + range * (zeroToHundred / 100);
-            return img.blur(blurAmount);
-          }
+          case "slow":
+            return img.blur(this.percentageToGaussianSigma(step.mode.percentage));
           default:
             assertUnreachable(step.mode);
         }
