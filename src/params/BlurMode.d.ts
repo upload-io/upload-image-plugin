@@ -2,7 +2,7 @@ export type BlurMode = BlurModeFast | BlurModeSlow;
 
 export interface BlurModeFast {
   /**
-   * Blur Mode
+   * Blur Type
    */
   type: "fast";
 }
@@ -18,7 +18,7 @@ export interface BlurModeSlow {
   percentage: number;
 
   /**
-   * Blur Mode
+   * Blur Type
    */
   type: "slow";
 }

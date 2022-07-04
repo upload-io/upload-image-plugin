@@ -14,7 +14,7 @@
             "properties": {
               "type": {
                 "enum": ["fast"],
-                "title": "Blur Mode",
+                "title": "Blur Type",
                 "type": "string"
               }
             },
@@ -32,7 +32,7 @@
               },
               "type": {
                 "enum": ["slow"],
-                "title": "Blur Mode",
+                "title": "Blur Type",
                 "type": "string"
               }
             },
@@ -236,6 +236,9 @@
                       "$ref": "#/definitions/CropStep"
                     },
                     {
+                      "$ref": "#/definitions/RotateStep"
+                    },
+                    {
                       "$ref": "#/definitions/CompositeStep"
                     },
                     {
@@ -287,7 +290,17 @@
                     "properties": {
                       "fileWhitelist": {
                         "items": {
-                          "enum": ["blur", "composite", "crop", "flip", "greyscale", "negative", "resize", "sharpen"],
+                          "enum": [
+                            "blur",
+                            "composite",
+                            "crop",
+                            "flip",
+                            "greyscale",
+                            "negative",
+                            "resize",
+                            "rotate",
+                            "sharpen"
+                          ],
                           "type": "string"
                         },
                         "type": "array"
@@ -635,12 +648,69 @@
             "required": ["geometry", "type"],
             "type": "object"
           },
+          "RotateModeAuto": {
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "enum": ["automatic"],
+                "title": "Rotate Type",
+                "type": "string"
+              }
+            },
+            "required": ["type"],
+            "type": "object"
+          },
+          "RotateModeManual": {
+            "additionalProperties": false,
+            "properties": {
+              "backgroundColor": {
+                "pattern": "^#[a-fA-F\\d]{8}$",
+                "title": "Background Color",
+                "type": "string"
+              },
+              "degrees": {
+                "maximum": 360,
+                "minimum": 0,
+                "title": "Rotate Degrees",
+                "type": "integer"
+              },
+              "type": {
+                "enum": ["manual"],
+                "title": "Rotate Mode",
+                "type": "string"
+              }
+            },
+            "required": ["backgroundColor", "degrees", "type"],
+            "type": "object"
+          },
+          "RotateStep": {
+            "additionalProperties": false,
+            "properties": {
+              "mode": {
+                "anyOf": [
+                  {
+                    "$ref": "#/definitions/RotateModeAuto"
+                  },
+                  {
+                    "$ref": "#/definitions/RotateModeManual"
+                  }
+                ]
+              },
+              "type": {
+                "enum": ["rotate"],
+                "title": "Transformation Type",
+                "type": "string"
+              }
+            },
+            "required": ["mode", "type"],
+            "type": "object"
+          },
           "SharpenModeFast": {
             "additionalProperties": false,
             "properties": {
               "type": {
                 "enum": ["fast"],
-                "title": "Sharpen Mode",
+                "title": "Sharpen Type",
                 "type": "string"
               }
             },
@@ -658,7 +728,7 @@
               },
               "type": {
                 "enum": ["slow"],
-                "title": "Sharpen Mode",
+                "title": "Sharpen Type",
                 "type": "string"
               }
             },
@@ -736,7 +806,7 @@
           {
             "plugin": {
               "packageName": "upload-image-plugin",
-              "packageVersion": "2.5.4-alpha.18"
+              "packageVersion": "2.5.4-alpha.19"
             },
             "params": {
               "input": "/",
@@ -992,6 +1062,65 @@
               },
               "required": ["mode", "type"],
               "type": "object"
+            },
+            "RotateModeAuto": {
+              "additionalProperties": false,
+              "properties": {
+                "type": {
+                  "enum": ["automatic"],
+                  "title": "Rotate Type",
+                  "type": "string"
+                }
+              },
+              "required": ["type"],
+              "type": "object"
+            },
+            "RotateModeManual": {
+              "additionalProperties": false,
+              "properties": {
+                "backgroundColor": {
+                  "pattern": "^#[a-fA-F\\d]{8}$",
+                  "title": "Background Color",
+                  "type": "string",
+                  "default": "#00000000"
+                },
+                "degrees": {
+                  "maximum": 360,
+                  "minimum": 0,
+                  "title": "Rotate Degrees",
+                  "type": "integer",
+                  "default": 90
+                },
+                "type": {
+                  "enum": ["manual"],
+                  "title": "Rotate Mode",
+                  "type": "string"
+                }
+              },
+              "required": ["backgroundColor", "degrees", "type"],
+              "type": "object"
+            },
+            "RotateStep": {
+              "additionalProperties": false,
+              "properties": {
+                "mode": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/definitions/RotateModeAuto"
+                    },
+                    {
+                      "$ref": "#/definitions/RotateModeManual"
+                    }
+                  ]
+                },
+                "type": {
+                  "enum": ["rotate"],
+                  "title": "Transformation Type",
+                  "type": "string"
+                }
+              },
+              "required": ["mode", "type"],
+              "type": "object"
             }
           },
           "properties": {
@@ -1087,6 +1216,9 @@
                   },
                   {
                     "$ref": "#/definitions/NegativeStep"
+                  },
+                  {
+                    "$ref": "#/definitions/RotateStep"
                   }
                 ]
               },
@@ -1127,13 +1259,24 @@
                 "tile",
                 "blend",
                 "premultiplyBaseImage",
-                "percentage",
                 "axis",
                 "negateAlpha"
               ],
               "mode": {
+                "ui:order": ["percentage", "degrees", "backgroundColor"],
                 "percentage": {
                   "ui:widget": "range"
+                },
+                "backgroundColor": {
+                  "ui:widget": "color",
+                  "ui:options": {
+                    "alpha": true
+                  }
+                },
+                "type": {
+                  "automatic": {
+                    "ui:title": "Automatic (Use Image EXIF Metadata)"
+                  }
                 }
               },
               "axis": {

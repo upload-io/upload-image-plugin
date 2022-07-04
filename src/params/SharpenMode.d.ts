@@ -2,7 +2,7 @@ export type SharpenMode = SharpenModeFast | SharpenModeSlow;
 
 export interface SharpenModeFast {
   /**
-   * Sharpen Mode
+   * Sharpen Type
    */
   type: "fast";
 }
@@ -18,7 +18,7 @@ export interface SharpenModeSlow {
   percentage: number;
 
   /**
-   * Sharpen Mode
+   * Sharpen Type
    */
   type: "slow";
 }

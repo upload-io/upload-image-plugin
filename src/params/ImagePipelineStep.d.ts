@@ -3,10 +3,12 @@ import { CompositeBlendMode } from "upload-image-plugin/params/CompositeBlendMod
 import { CompositeGravityMode } from "upload-image-plugin/params/CompositeGravityMode";
 import { BlurMode } from "upload-image-plugin/params/BlurMode";
 import { SharpenMode } from "upload-image-plugin/params/SharpenMode";
+import { RotateMode } from "upload-image-plugin/params/RotateMode";
 
 export type ImagePipelineStep =
   | ResizeStep
   | CropStep
+  | RotateStep
   | CompositeStep
   | BlurStep
   | SharpenStep
@@ -37,6 +39,15 @@ export interface ResizeStep {
    * Transformation Type
    */
   type: "resize";
+}
+
+export interface RotateStep {
+  mode: RotateMode;
+
+  /**
+   * Transformation Type
+   */
+  type: "rotate";
 }
 
 export interface NegativeStep {

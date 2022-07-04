@@ -137,6 +137,7 @@ export class Transformer {
           switch (x.type) {
             case "resize":
             case "crop":
+            case "rotate":
             case "flip":
             case "blur":
             case "sharpen":
@@ -308,6 +309,17 @@ export class Transformer {
             return img.flip();
           default:
             assertUnreachable(step.axis);
+        }
+        break;
+      }
+      case "rotate": {
+        switch (step.mode.type) {
+          case "automatic":
+            return img.rotate();
+          case "manual":
+            return img.rotate(step.mode.degrees, { background: step.mode.backgroundColor });
+          default:
+            assertUnreachable(step.mode);
         }
         break;
       }
