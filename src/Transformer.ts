@@ -366,7 +366,7 @@ export class Transformer {
           case "fast":
             return img.sharpen();
           case "slow":
-            return img.sharpen(this.percentageToGaussianSigma(step.mode.percentage, 100)); // 1000 times out.
+            return img.sharpen(this.percentageToGaussianSigma(step.mode.percentage, 20)); // 1000 times out (and the image doesn't actually sharpen beyond a certain amount).
           default:
             assertUnreachable(step.mode);
         }
