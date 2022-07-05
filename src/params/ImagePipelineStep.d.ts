@@ -15,6 +15,7 @@ export type ImagePipelineStep =
   | SharpenStep
   | TintStep
   | FlipStep
+  | ModulateStep
   | GreyscaleStep
   | NegativeStep;
 export type ImagePipelineStepType = ImagePipelineStep["type"];
@@ -74,6 +75,49 @@ export interface TintStep {
    * Transformation Type
    */
   type: "tint";
+}
+
+export interface ModulateStep {
+  /**
+   * Brightness
+   *
+   * @isInt
+   * @minimum -100
+   * @maximum 100
+   */
+  brightness: number;
+
+  /**
+   * Hue
+   *
+   * @isInt
+   * @minimum -180
+   * @maximum 180
+   */
+  hue: number;
+
+  /**
+   * Lightness
+   *
+   * @isInt
+   * @minimum -100
+   * @maximum 100
+   */
+  lightness: number;
+
+  /**
+   * Saturation
+   *
+   * @isInt
+   * @minimum -100
+   * @maximum 100
+   */
+  saturation: number;
+
+  /**
+   * Transformation Type
+   */
+  type: "modulate";
 }
 
 export interface GreyscaleStep {

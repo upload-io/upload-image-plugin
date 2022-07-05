@@ -254,6 +254,9 @@
                       "$ref": "#/definitions/FlipStep"
                     },
                     {
+                      "$ref": "#/definitions/ModulateStep"
+                    },
+                    {
                       "$ref": "#/definitions/GreyscaleStep"
                     },
                     {
@@ -299,6 +302,7 @@
                             "crop",
                             "flip",
                             "greyscale",
+                            "modulate",
                             "negative",
                             "resize",
                             "rotate",
@@ -586,6 +590,42 @@
             "title": "Shrinks an image with dimension(s) larger than the corresponding width and/or height argument(s).",
             "type": "object"
           },
+          "ModulateStep": {
+            "additionalProperties": false,
+            "properties": {
+              "brightness": {
+                "maximum": 100,
+                "minimum": -100,
+                "title": "Brightness",
+                "type": "integer"
+              },
+              "hue": {
+                "maximum": 180,
+                "minimum": -180,
+                "title": "Hue",
+                "type": "integer"
+              },
+              "lightness": {
+                "maximum": 100,
+                "minimum": -100,
+                "title": "Lightness",
+                "type": "integer"
+              },
+              "saturation": {
+                "maximum": 100,
+                "minimum": -100,
+                "title": "Saturation",
+                "type": "integer"
+              },
+              "type": {
+                "enum": ["modulate"],
+                "title": "Transformation Type",
+                "type": "string"
+              }
+            },
+            "required": ["brightness", "hue", "lightness", "saturation", "type"],
+            "type": "object"
+          },
           "NegativeStep": {
             "additionalProperties": false,
             "properties": {
@@ -657,7 +697,7 @@
             "properties": {
               "type": {
                 "enum": ["automatic"],
-                "title": "Rotation Type",
+                "title": "Rotate Type",
                 "type": "string"
               }
             },
@@ -675,12 +715,12 @@
               "degrees": {
                 "maximum": 360,
                 "minimum": 0,
-                "title": "Rotation Degrees",
+                "title": "Rotate Degrees",
                 "type": "integer"
               },
               "type": {
                 "enum": ["manual"],
-                "title": "Rotation Type",
+                "title": "Rotate Mode",
                 "type": "string"
               }
             },
@@ -827,7 +867,7 @@
           {
             "plugin": {
               "packageName": "upload-image-plugin",
-              "packageVersion": "2.5.4-alpha.22"
+              "packageVersion": "2.5.4-alpha.25"
             },
             "params": {
               "input": "/",
@@ -1102,12 +1142,52 @@
               "required": ["color", "type"],
               "type": "object"
             },
+            "ModulateStep": {
+              "additionalProperties": false,
+              "properties": {
+                "brightness": {
+                  "maximum": 100,
+                  "minimum": -100,
+                  "title": "Brightness",
+                  "type": "integer",
+                  "default": 0
+                },
+                "hue": {
+                  "maximum": 180,
+                  "minimum": -180,
+                  "title": "Hue",
+                  "type": "integer",
+                  "default": 0
+                },
+                "lightness": {
+                  "maximum": 100,
+                  "minimum": -100,
+                  "title": "Lightness",
+                  "type": "integer",
+                  "default": 0
+                },
+                "saturation": {
+                  "maximum": 100,
+                  "minimum": -100,
+                  "title": "Saturation",
+                  "type": "integer",
+                  "default": 0
+                },
+                "type": {
+                  "enum": ["modulate"],
+                  "title": "Transformation Type",
+                  "type": "string"
+                }
+              },
+              "required": ["brightness", "hue", "lightness", "saturation", "type"],
+              "type": "object"
+            },
             "RotateModeAuto": {
               "additionalProperties": false,
               "properties": {
                 "type": {
                   "enum": ["automatic"],
-                  "title": "Rotation Type",
+                  "title": "Rotate Type",
                   "type": "string"
                 }
               },
@@ -1126,13 +1206,13 @@
                 "degrees": {
                   "maximum": 360,
                   "minimum": 0,
-                  "title": "Rotation Degrees",
+                  "title": "Rotate Degrees",
                   "type": "integer",
                   "default": 90
                 },
                 "type": {
                   "enum": ["manual"],
-                  "title": "Rotation Type",
+                  "title": "Rotate Type",
                   "type": "string"
                 }
               },
@@ -1261,6 +1341,9 @@
                   },
                   {
                     "$ref": "#/definitions/TintStep"
+                  },
+                  {
+                    "$ref": "#/definitions/ModulateStep"
                   }
                 ]
               },
@@ -1303,7 +1386,11 @@
                 "blend",
                 "premultiplyBaseImage",
                 "axis",
-                "negateAlpha"
+                "negateAlpha",
+                "brightness",
+                "hue",
+                "saturation",
+                "lightness"
               ],
               "mode": {
                 "ui:order": ["type", "percentage", "degrees", "backgroundColor"],
@@ -1322,6 +1409,9 @@
                   }
                 }
               },
+              "color": {
+                "ui:widget": "color"
+              },
               "axis": {
                 "ui:options:labels:transform": "propercase"
               },
@@ -1331,9 +1421,24 @@
               "blend": {
                 "ui:options:labels:transform": "propercase"
               },
+              "brightness": {
+                "ui:widget": "range"
+              },
+              "lightness": {
+                "ui:widget": "range"
+              },
+              "saturation": {
+                "ui:widget": "range"
+              },
+              "hue": {
+                "ui:widget": "range"
+              },
               "type": {
                 "composite": {
                   "ui:title": "Overlay"
+                },
+                "modulate": {
+                  "ui:title": "Brightness / Hue / Saturation / Lightness"
                 }
               }
             }

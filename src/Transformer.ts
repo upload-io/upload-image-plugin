@@ -142,6 +142,7 @@ export class Transformer {
             case "flip":
             case "blur":
             case "sharpen":
+            case "modulate":
             case "negative":
             case "greyscale":
               return [];
@@ -292,6 +293,30 @@ export class Transformer {
     return min + range * (zeroToHundred / 100);
   }
 
+  private selectOnRange(factor: number, start: number, end: number): number {
+    const range = Math.abs(start - end);
+    const progress = factor * range;
+    if (start < end) {
+      return start + progress;
+    }
+    return start - progress;
+  }
+
+  /**
+   * Converts a value on an absolute range to a value on a relative range.
+   * Example: -100...0...100  ->  0.1...1...10
+   */
+  private toRelativeValue(
+    absoluteValue: number,
+    absoluteRange: { max: number; min: number },
+    relativeRange: { max: number; min: number }
+  ): number {
+    if (absoluteValue >= 0) {
+      return this.selectOnRange(absoluteValue / absoluteRange.max, 1, relativeRange.max);
+    }
+    return this.selectOnRange(Math.abs(absoluteValue) / Math.abs(absoluteRange.min), 1, relativeRange.min);
+  }
+
   private applyTransformationArg(input: TransformationInput, step: ImagePipelineStep, img: Sharp): Sharp {
     switch (step.type) {
       case "crop":
@@ -304,6 +329,17 @@ export class Transformer {
         return img.greyscale(true);
       case "tint":
         return img.tint(step.color);
+      case "modulate": {
+        const inputRangeMax = 100; // Max value the user provides
+        const toRelative = (value: number, min: number, max: number): number =>
+          this.toRelativeValue(value, { min: inputRangeMax * -1, max: inputRangeMax }, { min, max });
+        return img.modulate({
+          hue: step.hue,
+          lightness: step.lightness * (255 / 100), // -255 to +255
+          saturation: toRelative(step.saturation, 0.01, 30),
+          brightness: toRelative(step.brightness, 0.01, 30)
+        });
+      }
       case "flip": {
         switch (step.axis) {
           case "horizontal":
