@@ -282,9 +282,8 @@ export class Transformer {
   /**
    * @param percentage From 1 to 100.
    */
-  private percentageToGaussianSigma(percentage: number): number {
+  private percentageToGaussianSigma(percentage: number, max: number): number {
     const min = 0.3;
-    const max = 1000;
     const range = max - min;
     // This converts the range 1-100 to 0-100. This is because we advertise a minimum blur of 1 (which we want to
     // map to Sharp's minimum blur of 0.3) rather than advertise a minimum blur of 0, which would be confusing as it
@@ -367,7 +366,7 @@ export class Transformer {
           case "fast":
             return img.sharpen();
           case "slow":
-            return img.sharpen(this.percentageToGaussianSigma(step.mode.percentage));
+            return img.sharpen(this.percentageToGaussianSigma(step.mode.percentage, 100)); // 1000 times out.
           default:
             assertUnreachable(step.mode);
         }
@@ -378,7 +377,7 @@ export class Transformer {
           case "fast":
             return img.blur();
           case "slow":
-            return img.blur(this.percentageToGaussianSigma(step.mode.percentage));
+            return img.blur(this.percentageToGaussianSigma(step.mode.percentage, 100)); // 1000 times out (& is far too blurry).
           default:
             assertUnreachable(step.mode);
         }
