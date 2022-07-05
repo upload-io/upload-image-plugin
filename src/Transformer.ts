@@ -202,11 +202,11 @@ export class Transformer {
   ): SupportedOutputFormat | undefined {
     switch (behaviour.outputFormat) {
       case "master":
-        return master.outputFormat ?? undefined;
+        return master.outputFormat;
       case "file":
-        return file.outputFormat ?? undefined;
+        return file.outputFormat;
       case "fileThenMaster":
-        return file.outputFormat ?? master.outputFormat ?? undefined;
+        return file.outputFormat ?? master.outputFormat;
       default:
         assertUnreachable(behaviour.outputFormat);
     }
@@ -336,8 +336,8 @@ export class Transformer {
         return img.modulate({
           hue: step.hue,
           lightness: step.lightness * (255 / 100), // -255 to +255
-          saturation: toRelative(step.saturation, 0.01, 30),
-          brightness: toRelative(step.brightness, 0.01, 30)
+          saturation: toRelative(step.saturation, 0.01, 6),
+          brightness: toRelative(step.brightness, 0.01, 6)
         });
       }
       case "flip": {
@@ -490,7 +490,7 @@ export class Transformer {
     output: TransformationArtifactPath,
     setMetadata: FileMetadataSetter
   ): Promise<void> {
-    const outputFormat = input.pipeline.outputFormat ?? undefined;
+    const outputFormat = input.pipeline.outputFormat;
     const mimeType = outputFormat === undefined ? input.contentType : mime.getType(outputFormat);
     await setMetadata(output, { contentType: mimeType ?? undefined });
   }

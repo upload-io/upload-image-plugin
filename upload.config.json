@@ -854,27 +854,27 @@
       },
       "transformation": {
         "description": {
-          "ref": "[{if: outputImage.format != 'original' && (outputImage.width != null || outputImage.height != null), then: join('', ['Converts images to \"', to_string(outputImage.format), '\" and resizes to ', to_string(outputImage.width || 'ANY'), 'x', to_string(outputImage.height || 'ANY'), '.'])}, {if: outputImage.format != 'original', then: join('', ['Converts images to \"', to_string(outputImage.format), '\".'])}, {if: outputImage.width != null || outputImage.height != null, then: join('', ['Resizes images to ', to_string(outputImage.width || 'ANY'), 'x', to_string(outputImage.height || 'ANY'), '.'])}, {if: `true`, then: join('', ['Returns the original image.'])}][?if]|[0].then"
+          "ref": "join('', ['Outputs images as ', to_string(outputImage.width || 'ANY'), 'x', to_string(outputImage.height || 'ANY'), '.'])"
         },
         "scope": {
           "mime": ["*"],
           "tag": ["*"]
         },
         "slug": {
-          "ref": "join('', [{if: `true`, then: outputImage.format}, {if: outputImage.width != null, then: [';w=', to_string(outputImage.width)]}, {if: outputImage.height != null, then: [';h=', to_string(outputImage.height)]}][?if].then[])"
+          "ref": "[{if: (transformationSteps || `[]`) != `[]`, then: join(';', (transformationSteps || `[]`)[*].type)}, {if: `true`, then: join('', [{if: `true`, then: outputImage.format}, {if: outputImage.width != null, then: [';w=', to_string(outputImage.width)]}, {if: outputImage.height != null, then: [';h=', to_string(outputImage.height)]}][?if].then[])}][?if]|[0].then"
         },
         "steps": [
           {
             "plugin": {
               "packageName": "upload-image-plugin",
-              "packageVersion": "2.5.4-alpha.25"
+              "packageVersion": "2.6.0"
             },
             "params": {
               "input": "/",
               "output": "/",
               "pipeline": {
                 "outputFormat": {
-                  "ref": "[{if: outputImage.format != 'original', then: outputImage.format}, {if: `true`, then: null}][?if]|[0].then"
+                  "ref": "outputImage.format"
                 },
                 "steps": {
                   "ref": "[[{if: outputImage.width == null && outputImage.height == null, then: `[]`}, {if: outputImage.width != null && outputImage.height == null, then: to_array({type:'resize',geometry:{size:{type:'width',width:outputImage.width}}})}, {if: outputImage.width == null && outputImage.height != null, then: to_array({type:'resize',geometry:{size:{type:'xheight',height:outputImage.height}}})}, {if: outputImage.resizeMode=='Maximum', then:to_array({type:'resize',geometry:{size:{type:'widthxheight',width:outputImage.width,height:outputImage.height}}})}, {if: outputImage.resizeMode=='Minimum', then:to_array({type:'resize',geometry:{size:{type:'widthxheight^',width:outputImage.width,height:outputImage.height}}})}, {if: outputImage.resizeMode=='Exact', then:to_array({type:'resize',geometry:{size:{type:'widthxheight!',width:outputImage.width,height:outputImage.height}}})},{if: outputImage.resizeMode=='Crop', then:to_array({type:'resize',geometry:{size:{type:'widthxheightc',width:outputImage.width,height:outputImage.height,cropStrategy:{type: [{if: outputImage.cropStrategy=='Smart (Vibrancy)', then: 'smartAttention'},{if: outputImage.cropStrategy=='Smart (Detail)', then: 'smartEntropy'},{if: outputImage.cropStrategy=='Fixed (Center)', then: 'fixedCenter'},{if: outputImage.cropStrategy=='Fixed (Left)', then: 'fixedLeft'},{if: outputImage.cropStrategy=='Fixed (Right)', then: 'fixedRight'},{if: outputImage.cropStrategy=='Fixed (Top)', then: 'fixedTop'},{if: outputImage.cropStrategy=='Fixed (Bottom)', then: 'fixedBottom'},{if: outputImage.cropStrategy=='Fixed (Top Left)', then: 'fixedTopLeft'},{if: outputImage.cropStrategy=='Fixed (Top Right)', then: 'fixedTopRight'},{if: outputImage.cropStrategy=='Fixed (Bottom Left)', then: 'fixedBottomLeft'},{if: outputImage.cropStrategy=='Fixed (Bottom Right)', then: 'fixedBottomRight'}][?if]|[0].then}}}})}][?if]|[0].then,transformationSteps][]"
@@ -994,7 +994,7 @@
                   "default": "center"
                 },
                 "imageFileId": {
-                  "title": "Image Source",
+                  "title": "Image (File ID)",
                   "type": "string"
                 },
                 "left": {
@@ -1290,7 +1290,7 @@
                 "format": {
                   "title": "Format",
                   "type": "string",
-                  "enum": ["original", "jpg", "png", "webp"],
+                  "enum": ["jpg", "png", "webp"],
                   "default": "jpg"
                 },
                 "resizeMode": {
@@ -1358,9 +1358,6 @@
           "outputImage": {
             "ui:order": ["format", "width", "height", "resizeMode", "cropStrategy"],
             "format": {
-              "original": {
-                "ui:title": "Original Format"
-              },
               "jpg": {
                 "ui:title": "JPG"
               },
