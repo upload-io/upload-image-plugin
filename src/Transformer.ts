@@ -7,7 +7,7 @@ import {
   Logger
 } from "upload-plugin-sdk";
 import { Params } from "upload-image-plugin/params/Params";
-import { ImagePipelineStep } from "upload-image-plugin/params/ImagePipelineStep";
+import { ImagePipelineStep, RotateStep } from "upload-image-plugin/params/ImagePipelineStep";
 import { CropGeometry, ImageSize } from "upload-image-plugin/params/ImageGeometry";
 import { assertUnreachable } from "upload-image-plugin/common/TypeUtils";
 import { reverse, uniqBy } from "ramda";
@@ -262,8 +262,9 @@ export class Transformer {
   ): Promise<void> {
     const inputResolved = input.path;
     const outputResolved = resolvePath(output);
+    const steps = this.addDefaultSteps(input.pipeline.steps);
 
-    const imagePipelinePartial = input.pipeline.steps.reduce(
+    const imagePipelinePartial = steps.reduce(
       (img, step) => this.applyTransformationArg(input, step, img),
       sharp(inputResolved)
     );
@@ -277,6 +278,21 @@ export class Transformer {
     const tempPath = `${outputResolved}.tmp`;
     await imagePipeline.toFile(tempPath);
     await fsAsync.rename(tempPath, outputResolved);
+  }
+
+  private addDefaultSteps(steps: ImagePipelineStep[]): ImagePipelineStep[] {
+    const hasRotation = steps.some(x => x.type === "rotate");
+
+    // Prevents us from inadvertently rotating images by removing the EXIF metadata which included
+    // instructions to rotate the original image.
+    const defaultRotation: RotateStep = {
+      mode: {
+        type: "automatic"
+      },
+      type: "rotate"
+    };
+
+    return hasRotation ? steps : [defaultRotation, ...steps];
   }
 
   /**
