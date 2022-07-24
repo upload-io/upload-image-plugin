@@ -6,7 +6,7 @@ To use this plugin use the following settings in a "Transformation Step" in the 
 
 | Plugin Name           | Plugin Version |
 | --------------------- | -------------- |
-| `upload-image-plugin` | `2.6.3`        |
+| `upload-image-plugin` | `2.6.4`        |
 
 ## Development
 
