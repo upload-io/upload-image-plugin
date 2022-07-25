@@ -1,6 +1,6 @@
 {
   "name": "upload-image-plugin",
-  "version": "2.6.6",
+  "version": "2.7.0",
   "author": "Upload <hello@upload.io> (https://upload.io)",
   "description": "Resizes, crops, and converts images for Upload's Image API.",
   "license": "MIT",
