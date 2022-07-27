@@ -870,7 +870,7 @@
           {
             "plugin": {
               "packageName": "upload-image-plugin",
-              "packageVersion": "2.8.0"
+              "packageVersion": "2.8.1"
             },
             "params": {
               "input": "/",
@@ -1304,7 +1304,7 @@
                   "minimum": 1,
                   "title": "Quality",
                   "type": "integer",
-                  "default": 70
+                  "default": 80
                 },
                 "resizeMode": {
                   "title": "Resize Mode",
