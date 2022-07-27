@@ -1,7 +1,9 @@
 import { ImagePipelineStepType } from "upload-image-plugin/params/ImagePipelineStep";
+import { ScalarMergeBehaviour } from "upload-image-plugin/params/ScalarMergeBehaviour";
 
 export interface ImagePipelineMergeBehaviour {
-  outputFormat: "master" | "file" | "fileThenMaster";
+  outputFormat: ScalarMergeBehaviour;
+  outputQuality: ScalarMergeBehaviour;
   steps:
     | {
         mergeBehaviour: "master";
@@ -24,6 +26,7 @@ export namespace ImagePipelineMergeBehaviour {
    */
   export const defaultValue: ImagePipelineMergeBehaviour = {
     outputFormat: "master",
+    outputQuality: "master",
     steps: {
       fileWhitelist: ["crop"],
       mergeBehaviour: {

@@ -26,6 +26,8 @@ import sharp, { Region, ResizeOptions, Sharp } from "sharp";
 import { ImageCropStrategy } from "upload-image-plugin/params/ImageCropStrategy";
 import { compositeBlendModeMapping } from "upload-image-plugin/common/CompositeBlendModeMapping";
 import * as Path from "path";
+import { OutputQuality } from "upload-image-plugin/params/OutputQuality";
+import { ScalarMergeBehaviour } from "upload-image-plugin/params/ScalarMergeBehaviour";
 
 export class Transformer {
   private readonly memoryEstimateConstantBytes = 1024 * 1024 * 10; // 10MB
@@ -190,25 +192,28 @@ export class Transformer {
   private mergePipelines(file: ParamsFromFile, master: Params): ImagePipeline {
     const behaviour = master.pipelineMergeBehaviour ?? ImagePipelineMergeBehaviour.defaultValue;
     return {
-      outputFormat: this.mergeOutputFormat(file.pipeline, master.pipeline, behaviour),
+      outputFormat: this.mergeScalar(file.pipeline, master.pipeline, behaviour, "outputFormat"),
+      outputQuality: this.mergeScalar(file.pipeline, master.pipeline, behaviour, "outputQuality"),
       steps: this.mergeSteps(file.pipeline, master.pipeline, behaviour)
     };
   }
 
-  private mergeOutputFormat(
+  private mergeScalar<K extends "outputFormat" | "outputQuality">(
     file: ImagePipeline,
     master: ImagePipeline,
-    behaviour: ImagePipelineMergeBehaviour
-  ): SupportedOutputFormat | undefined {
-    switch (behaviour.outputFormat) {
+    behaviour: Record<K, ScalarMergeBehaviour>,
+    key: K
+  ): ImagePipeline[K] | undefined {
+    const b = behaviour[key] as ScalarMergeBehaviour;
+    switch (b) {
       case "master":
-        return master.outputFormat;
+        return master[key];
       case "file":
-        return file.outputFormat;
+        return file[key];
       case "fileThenMaster":
-        return file.outputFormat ?? master.outputFormat;
+        return file[key] ?? master[key];
       default:
-        assertUnreachable(behaviour.outputFormat);
+        assertUnreachable(b);
     }
   }
 
@@ -269,15 +274,57 @@ export class Transformer {
       sharp(inputResolved)
     );
 
-    const { outputFormat } = input.pipeline;
-    const imagePipeline =
-      outputFormat === undefined ? imagePipelinePartial : imagePipelinePartial.toFormat(outputFormat as any);
+    const { outputFormat: outputFormatMaybe } = input.pipeline;
+    const outputFormat = outputFormatMaybe ?? this.inferOutputFormat(input);
+    const imagePipeline = this.setQuality(imagePipelinePartial.toFormat(outputFormat as any), outputFormat, input);
 
     // Buffer to new file, since input file and output file may be the same location, and AFAIK libvips may stream
     // its processing such that the output is written whilst the input is read.
     const tempPath = `${outputResolved}.tmp`;
     await imagePipeline.toFile(tempPath);
     await fsAsync.rename(tempPath, outputResolved);
+  }
+
+  private inferOutputFormat({ contentType: contentTypeFromInput }: TransformationInput): SupportedOutputFormat {
+    if (contentTypeFromInput === undefined) {
+      throw new Error(
+        "Image must have a known 'content-type' header if no output format is defined for the transformation."
+      );
+    }
+
+    const contentTypeLower = contentTypeFromInput.toLowerCase();
+    const outputFormatMaybe = SupportedOutputFormat.contentTypes.find(
+      ([format, contentType]) => contentType === contentTypeLower
+    );
+    if (outputFormatMaybe === undefined) {
+      throw new Error(
+        `Unsupported image content type '${contentTypeLower}': please explicitly specify an output format for the image transformation.`
+      );
+    }
+
+    return outputFormatMaybe[0];
+  }
+
+  private setQuality(img: Sharp, format: SupportedOutputFormat, input: TransformationInput): Sharp {
+    const quality = input.pipeline.outputQuality ?? OutputQuality.defaultValue;
+    switch (format) {
+      case "jpg":
+        return img.jpeg({
+          quality
+        });
+      case "png":
+        return img.png({
+          quality,
+          compressionLevel: 9,
+          dither: 0 // 11% reduction in processing time, 4% reduction in file size, not much visual difference.
+        });
+      case "webp":
+        return img.webp({
+          quality,
+          alphaQuality: quality,
+          reductionEffort: 6
+        });
+    }
   }
 
   private addDefaultSteps(steps: ImagePipelineStep[]): ImagePipelineStep[] {

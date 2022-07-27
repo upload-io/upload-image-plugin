@@ -215,16 +215,13 @@
             "additionalProperties": false,
             "properties": {
               "outputFormat": {
-                "anyOf": [
-                  {
-                    "enum": ["jpg", "png", "webp"],
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ],
-                "title": "Output format"
+                "enum": ["jpg", "png", "webp"],
+                "title": "Output format",
+                "type": "string"
+              },
+              "outputQuality": {
+                "title": "Output quality",
+                "type": "integer"
               },
               "steps": {
                 "items": {
@@ -275,8 +272,10 @@
             "additionalProperties": false,
             "properties": {
               "outputFormat": {
-                "enum": ["file", "fileThenMaster", "master"],
-                "type": "string"
+                "$ref": "#/definitions/ScalarMergeBehaviour"
+              },
+              "outputQuality": {
+                "$ref": "#/definitions/ScalarMergeBehaviour"
               },
               "steps": {
                 "anyOf": [
@@ -342,7 +341,7 @@
                 ]
               }
             },
-            "required": ["outputFormat", "steps"],
+            "required": ["outputFormat", "outputQuality", "steps"],
             "type": "object"
           },
           "ImageSizeHeight": {
@@ -749,6 +748,10 @@
             "required": ["mode", "type"],
             "type": "object"
           },
+          "ScalarMergeBehaviour": {
+            "enum": ["file", "fileThenMaster", "master"],
+            "type": "string"
+          },
           "SharpenModeFast": {
             "additionalProperties": false,
             "properties": {
@@ -875,6 +878,9 @@
               "pipeline": {
                 "outputFormat": {
                   "ref": "outputImage.format"
+                },
+                "outputQuality": {
+                  "ref": "outputImage.quality"
                 },
                 "steps": {
                   "ref": "[[{if: outputImage.width == null && outputImage.height == null, then: `[]`}, {if: outputImage.width != null && outputImage.height == null, then: to_array({type:'resize',geometry:{size:{type:'width',width:outputImage.width}}})}, {if: outputImage.width == null && outputImage.height != null, then: to_array({type:'resize',geometry:{size:{type:'xheight',height:outputImage.height}}})}, {if: outputImage.resizeMode=='Maximum', then:to_array({type:'resize',geometry:{size:{type:'widthxheight',width:outputImage.width,height:outputImage.height}}})}, {if: outputImage.resizeMode=='Minimum', then:to_array({type:'resize',geometry:{size:{type:'widthxheight^',width:outputImage.width,height:outputImage.height}}})}, {if: outputImage.resizeMode=='Exact', then:to_array({type:'resize',geometry:{size:{type:'widthxheight!',width:outputImage.width,height:outputImage.height}}})},{if: outputImage.resizeMode=='Crop', then:to_array({type:'resize',geometry:{size:{type:'widthxheightc',width:outputImage.width,height:outputImage.height,cropStrategy:{type: [{if: outputImage.cropStrategy=='Smart (Vibrancy)', then: 'smartAttention'},{if: outputImage.cropStrategy=='Smart (Detail)', then: 'smartEntropy'},{if: outputImage.cropStrategy=='Fixed (Center)', then: 'fixedCenter'},{if: outputImage.cropStrategy=='Fixed (Left)', then: 'fixedLeft'},{if: outputImage.cropStrategy=='Fixed (Right)', then: 'fixedRight'},{if: outputImage.cropStrategy=='Fixed (Top)', then: 'fixedTop'},{if: outputImage.cropStrategy=='Fixed (Bottom)', then: 'fixedBottom'},{if: outputImage.cropStrategy=='Fixed (Top Left)', then: 'fixedTopLeft'},{if: outputImage.cropStrategy=='Fixed (Top Right)', then: 'fixedTopRight'},{if: outputImage.cropStrategy=='Fixed (Bottom Left)', then: 'fixedBottomLeft'},{if: outputImage.cropStrategy=='Fixed (Bottom Right)', then: 'fixedBottomRight'}][?if]|[0].then}}}})}][?if]|[0].then,transformationSteps][]"
@@ -1246,7 +1252,7 @@
             "outputImage": {
               "type": "object",
               "title": "Output Image",
-              "required": ["resizeMode", "format"],
+              "required": ["resizeMode", "format", "quality"],
               "dependencies": {
                 "resizeMode": {
                   "oneOf": [
@@ -1292,6 +1298,13 @@
                   "type": "string",
                   "enum": ["jpg", "png", "webp"],
                   "default": "jpg"
+                },
+                "quality": {
+                  "maximum": 100,
+                  "minimum": 1,
+                  "title": "Quality",
+                  "type": "integer",
+                  "default": 70
                 },
                 "resizeMode": {
                   "title": "Resize Mode",
@@ -1356,7 +1369,7 @@
         "ui": {
           "ui:order": ["outputImage", "transformationSteps"],
           "outputImage": {
-            "ui:order": ["format", "width", "height", "resizeMode", "cropStrategy"],
+            "ui:order": ["format", "quality", "width", "height", "resizeMode", "cropStrategy"],
             "format": {
               "jpg": {
                 "ui:title": "JPG"
@@ -1367,6 +1380,9 @@
               "webp": {
                 "ui:title": "WebP"
               }
+            },
+            "quality": {
+              "ui:widget": "range"
             }
           },
           "transformationSteps": {

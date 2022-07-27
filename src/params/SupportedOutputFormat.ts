@@ -1,7 +1,9 @@
 /**
  * Supported output image format.
  *
- * Important: ensure each of these work when transcoding large images (6000x4000) without downsizing.
+ * Important:
+ * 1) Ensure each of these work when transcoding large images (6000x4000) without downsizing.
+ * 2) Ensure they work with sharp.toFormat(xxx)
  */
 export type SupportedOutputFormat =
   // | "avif" -- times out on larger images
@@ -17,3 +19,16 @@ export type SupportedOutputFormat =
   // | "raw" -- unsupported output format
   // | "tif" -- odd one to support, given we're not supporting so many others. Works without issue, though.
   | "webp";
+
+export namespace SupportedOutputFormat {
+  /**
+   * Keyed by format, to make sure the compiler ensures we specify a mime type for all supported formats.
+   */
+  const contentTypeReverseMap: Record<SupportedOutputFormat, string> = {
+    jpg: "image/jpeg",
+    png: "image/png",
+    webp: "image/webp"
+  };
+
+  export const contentTypes = Object.entries(contentTypeReverseMap) as Array<[SupportedOutputFormat, string]>;
+}
